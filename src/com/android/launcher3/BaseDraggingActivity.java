@@ -162,6 +162,7 @@ public abstract class BaseDraggingActivity extends BaseActivity
         }
 
         Bundle optsBundle = (v != null) ? getActivityLaunchOptionsAsBundle(v) : null;
+        optsBundle = null;
         UserHandle user = item == null ? null : item.user;
 
         // Prepare intent
