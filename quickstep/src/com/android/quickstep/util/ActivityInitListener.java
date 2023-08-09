@@ -84,7 +84,7 @@ public class ActivityInitListener<T extends BaseActivity> implements SchedulerCa
             Context context, Handler handler, long duration) {
         mIsRegistered = true;
 
-        Bundle options = animProvider.toActivityOptions(handler, duration, context).toBundle();
-        context.startActivity(addToIntent(new Intent(intent)), options);
+        // Bundle options = animProvider.toActivityOptions(handler, duration, context).toBundle();
+        context.startActivity(addToIntent(new Intent(intent)), null ); //options);
     }
 }

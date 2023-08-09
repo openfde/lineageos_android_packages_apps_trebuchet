@@ -29,6 +29,8 @@ import android.view.ViewConfiguration;
 
 import androidx.annotation.BinderThread;
 
+import com.android.launcher3.Launcher;
+import com.android.launcher3.R;
 import com.android.launcher3.appprediction.PredictionUiStateManager;
 import com.android.launcher3.logging.UserEventDispatcher;
 import com.android.launcher3.statemanager.StatefulActivity;
@@ -40,6 +42,9 @@ import com.android.quickstep.views.TaskView;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.LatencyTrackerCompat;
 import com.android.systemui.shared.system.RemoteAnimationTargetCompat;
+import com.android.systemui.shared.recents.model.Task;
+import android.util.Log;
+import java.util.ArrayList;
 
 /**
  * Helper class to handle various atomic commands for switching between Overview.
@@ -54,13 +59,16 @@ public class OverviewCommandHelper {
 
     private long mLastToggleTime;
 
+    RecentDialog dialog;
+
     public OverviewCommandHelper(Context context, RecentsAnimationDeviceState deviceState,
-            OverviewComponentObserver observer) {
+                                 OverviewComponentObserver observer) {
         mContext = context;
         mDeviceState = deviceState;
         mRecentsModel = RecentsModel.INSTANCE.get(mContext);
         mOverviewComponentObserver = observer;
     }
+
 
     @BinderThread
     public void onOverviewToggle() {
@@ -68,10 +76,10 @@ public class OverviewCommandHelper {
         if (mDeviceState.isScreenPinningActive()) {
             return;
         }
-
         ActivityManagerWrapper.getInstance()
                 .closeSystemWindows(CLOSE_SYSTEM_WINDOWS_REASON_RECENTS);
-        MAIN_EXECUTOR.execute(new RecentsActivityCommand<>());
+    //    MAIN_EXECUTOR.execute(new RecentsActivityCommand<>());
+            MAIN_EXECUTOR.execute(new RecentsDialogCommand<>());
     }
 
     @BinderThread
@@ -229,13 +237,13 @@ public class OverviewCommandHelper {
             }
 
             // Switch prediction client to overview
-            PredictionUiStateManager.INSTANCE.get(activity).switchClient(
-                    PredictionUiStateManager.Client.OVERVIEW);
-            return mAnimationProvider.onActivityReady(activity, wasVisible);
+//            PredictionUiStateManager.INSTANCE.get(activity).switchClient(
+//                    PredictionUiStateManager.Client.OVERVIEW);
+            return false ; // mAnimationProvider.onActivityReady(activity, wasVisible);
         }
 
         private AnimatorSet createWindowAnimation(RemoteAnimationTargetCompat[] appTargets,
-                RemoteAnimationTargetCompat[] wallpaperTargets) {
+                                                  RemoteAnimationTargetCompat[] wallpaperTargets) {
             if (LatencyTrackerCompat.isEnabled(mContext)) {
                 LatencyTrackerCompat.logToggleRecents(
                         (int) (SystemClock.uptimeMillis() - mToggleClickedTime));
@@ -255,5 +263,97 @@ public class OverviewCommandHelper {
         }
 
         protected void onTransitionComplete() { }
+    }
+
+    private class RecentsDialogCommand<T extends StatefulActivity<?>> implements Runnable{
+
+        protected final BaseActivityInterface<?, T> mActivityInterface;
+        private final long mCreateTime;
+        private final AppToOverviewAnimationProvider<T> mAnimationProvider;
+
+        private final long mToggleClickedTime = SystemClock.uptimeMillis();
+        private boolean mUserEventLogged;
+        private ActivityInitListener mListener;
+
+        public RecentsDialogCommand(){
+            mActivityInterface = mOverviewComponentObserver.getActivityInterface();
+            mCreateTime = SystemClock.elapsedRealtime();
+            mAnimationProvider = new AppToOverviewAnimationProvider<>(mActivityInterface,
+                    ActivityManagerWrapper.getInstance().getRunningTask(), mDeviceState);
+            // Preload the plan
+            // mRecentsModel.getTasks(null);
+        }
+
+        @Override
+        public void run() {
+            long elapsedTime = mCreateTime - mLastToggleTime;
+            mLastToggleTime = mCreateTime;
+            handleCommand(elapsedTime);
+        }
+
+        private void handleCommand(long elapsedTime) {
+            final T activity = mActivityInterface.getCreatedActivity();
+            // Switch prediction client to overview
+            Launcher visibleLauncher = ((LauncherActivityInterface) mActivityInterface).getVisibleLauncher();
+            if (visibleLauncher == null) {
+                mListener = mActivityInterface.createActivityInitListener(this::onActivityReady);
+                mListener.registerAndStartActivity(mOverviewComponentObserver.getOverviewIntent(),
+                        new RemoteAnimationProvider() {
+                            @Override
+                            public AnimatorSet createWindowAnimation(
+                                    RemoteAnimationTargetCompat[] appTargets,
+                                    RemoteAnimationTargetCompat[] wallpaperTargets) {
+                                return RecentsDialogCommand.this.createWindowAnimation(appTargets,
+                                        wallpaperTargets);
+                            }
+                        }, mContext, MAIN_EXECUTOR.getHandler(),
+                        mAnimationProvider.getRecentsLaunchDuration());
+            }
+            mRecentsModel.getTasks(this::updateRecentsTask);
+        }
+
+        private AnimatorSet createWindowAnimation(RemoteAnimationTargetCompat[] appTargets,
+                                                  RemoteAnimationTargetCompat[] wallpaperTargets) {
+            if (LatencyTrackerCompat.isEnabled(mContext)) {
+                LatencyTrackerCompat.logToggleRecents(
+                        (int) (SystemClock.uptimeMillis() - mToggleClickedTime));
+            }
+
+            mListener.unregister();
+
+            AnimatorSet animatorSet = mAnimationProvider.createWindowAnimation(appTargets,
+                    wallpaperTargets);
+            animatorSet.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    onTransitionComplete();
+                }
+            });
+            return animatorSet;
+        }
+        protected void onTransitionComplete() { }
+
+        private boolean onActivityReady(Boolean wasVisible) {
+            final T activity = mActivityInterface.getCreatedActivity();
+            // Switch prediction client to overview
+//            PredictionUiStateManager.INSTANCE.get(activity).switchClient(
+//                    PredictionUiStateManager.Client.OVERVIEW);
+            return false;//mAnimationProvider.onActivityReady(activity, wasVisible);
+        }
+
+        private void updateRecentsTask(ArrayList<Task> tasks) {
+            Log.d("huyang", "updateRecentsTask() called with: tasks = [" + tasks + "] ");
+            Context context = mActivityInterface.getCreatedActivity();
+            if (dialog == null) {
+                dialog = new RecentDialog(context, R.style.NormalDialogStyle, tasks);
+            }
+
+            dialog.setRecentTasks(tasks);
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            } else {
+                dialog.show();
+            }
+        }
     }
 }

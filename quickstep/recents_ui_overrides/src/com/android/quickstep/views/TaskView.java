@@ -1135,8 +1135,8 @@ public class TaskView extends FrameLayout implements PageCallbacks, Reusable {
             setIconScaleAndDim(progress, true /* invert */);
         }
 
-        thumbnail.setFullscreenParams(mCurrentFullscreenParams);
-        mOutlineProvider.setFullscreenParams(mCurrentFullscreenParams);
+        // thumbnail.setFullscreenParams(mCurrentFullscreenParams);
+        // mOutlineProvider.setFullscreenParams(mCurrentFullscreenParams);
         invalidateOutline();
     }
 

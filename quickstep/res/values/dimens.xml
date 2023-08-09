@@ -98,4 +98,7 @@
     <dimen name="swipe_edu_circle_size">64dp</dimen>
     <dimen name="swipe_edu_width">80dp</dimen>
     <dimen name="swipe_edu_max_height">184dp</dimen>
+
+
+    <dimen name="thumbnail_size">320dp</dimen>
 </resources>

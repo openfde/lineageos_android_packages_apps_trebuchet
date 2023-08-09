@@ -73,6 +73,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
@@ -763,6 +764,7 @@ public abstract class RecentsView<T extends StatefulActivity> extends PagedView 
     }
 
     protected void applyLoadPlan(ArrayList<Task> tasks) {
+        Log.d("huyang", "updateRecentsTask() called with: tasks = [" + tasks + "] ");
         if (mPendingAnimation != null) {
             mPendingAnimation.addEndListener((endState) -> applyLoadPlan(tasks));
             return;

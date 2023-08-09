@@ -41,7 +41,7 @@ import android.util.FloatProperty;
 import android.util.Property;
 import android.view.Surface;
 import android.view.View;
-
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 
 import com.android.launcher3.BaseActivity;
@@ -132,7 +132,9 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
      * @param task
      */
     public void bind(Task task) {
-        getTaskOverlay().reset();
+        if(getParent() instanceof TaskView){
+            getTaskOverlay().reset();
+        }
         mTask = task;
         int color = task == null ? Color.BLACK : task.colorBackground | 0xFF000000;
         mPaint.setColor(color);
@@ -149,12 +151,23 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
      *                   recents animation needs to be finished / cancelled.
      */
     public void setThumbnail(Task task, ThumbnailData thumbnailData, boolean refreshNow) {
+        Log.d("huyang", "setThumbnail() called with: task = [" + task + "], thumbnailData = [" + thumbnailData + "], refreshNow = [" + refreshNow + "] " + printCallStack());
         mTask = task;
         mThumbnailData =
                 (thumbnailData != null && thumbnailData.thumbnail != null) ? thumbnailData : null;
         if (refreshNow) {
             refresh();
         }
+    }
+    public static String printCallStack() {
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        String trace = new String();
+        // 打印调用栈信息
+        for (StackTraceElement element : stackTraceElements) {
+            trace += "\n" + element.getClassName() + "." + element.getMethodName() + " (" +
+                    element.getFileName() + ":" + element.getLineNumber() + ")";
+        }
+        return trace;
     }
 
     /** See {@link #setThumbnail(Task, ThumbnailData, boolean)} */
@@ -169,16 +182,16 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
             bm.prepareToDraw();
             mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             mPaint.setShader(mBitmapShader);
-            updateThumbnailMatrix();
+           updateThumbnailMatrix();
         } else {
             mBitmapShader = null;
             mThumbnailData = null;
             mPaint.setShader(null);
-            getTaskOverlay().reset();
+//            getTaskOverlay().reset();
         }
-        if (mOverviewScreenshotActionsPlugin != null) {
-            mOverviewScreenshotActionsPlugin.setupActions(getTaskView(), getThumbnail(), mActivity);
-        }
+//        if (mOverviewScreenshotActionsPlugin != null) {
+//            mOverviewScreenshotActionsPlugin.setupActions(getTaskView(), getThumbnail(), mActivity);
+//        }
         updateThumbnailPaintFilter();
     }
 
@@ -316,12 +329,12 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
     public void drawOnCanvas(Canvas canvas, float x, float y, float width, float height,
             float cornerRadius) {
         if (ENABLE_QUICKSTEP_LIVE_TILE.get()) {
-            if (mTask != null && getTaskView().isRunningTask() && !getTaskView().showScreenshot()) {
+//            if (mTask != null && getTaskView().isRunningTask() && !getTaskView().showScreenshot()) {
                 canvas.drawRoundRect(x, y, width, height, cornerRadius, cornerRadius, mClearPaint);
                 canvas.drawRoundRect(x, y, width, height, cornerRadius, cornerRadius,
                         mDimmingPaintAfterClearing);
                 return;
-            }
+//            }
         }
 
         // Draw the background in all cases, except when the thumbnail data is opaque
@@ -357,12 +370,12 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
     }
 
     private void updateOverlay() {
-        if (mOverlayEnabled) {
-            getTaskOverlay().initOverlay(mTask, mThumbnailData, mPreviewPositionHelper.mMatrix,
-                    mPreviewPositionHelper.mIsOrientationChanged);
-        } else {
-            getTaskOverlay().reset();
-        }
+        // if (mOverlayEnabled) {
+        //     getTaskOverlay().initOverlay(mTask, mThumbnailData, mPreviewPositionHelper.mMatrix,
+        //             mPreviewPositionHelper.mIsOrientationChanged);
+        // } else {
+        //     getTaskOverlay().reset();
+        // }
     }
 
     private void updateThumbnailPaintFilter() {
@@ -385,16 +398,16 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
         if (mBitmapShader != null && mThumbnailData != null) {
             mPreviewRect.set(0, 0, mThumbnailData.thumbnail.getWidth(),
                     mThumbnailData.thumbnail.getHeight());
-            int currentRotation = getTaskView().getRecentsView().getPagedViewOrientedState()
-                    .getRecentsActivityRotation();
+            // int currentRotation = getTaskView().getRecentsView().getPagedViewOrientedState()
+                    // .getRecentsActivityRotation();
             mPreviewPositionHelper.updateThumbnailMatrix(mPreviewRect, mThumbnailData,
                     getMeasuredWidth(), getMeasuredHeight(), mActivity.getDeviceProfile(),
-                    currentRotation);
+                    0);
 
             mBitmapShader.setLocalMatrix(mPreviewPositionHelper.mMatrix);
             mPaint.setShader(mBitmapShader);
         }
-        getTaskView().updateCurrentFullscreenParams(mPreviewPositionHelper);
+        // getTaskView().updateCurrentFullscreenParams(mPreviewPositionHelper);
         invalidate();
 
         // Update can be called from {@link #onSizeChanged} during layout, post handling of overlay
@@ -405,7 +418,7 @@ public class TaskThumbnailView extends View implements PluginListener<OverviewSc
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        updateThumbnailMatrix();
+       updateThumbnailMatrix();
     }
 
     /**

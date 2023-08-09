@@ -201,7 +201,7 @@ public final class LauncherActivityInterface extends
 
     @Nullable
     @UiThread
-    private Launcher getVisibleLauncher() {
+    public Launcher getVisibleLauncher() {
         Launcher launcher = getCreatedActivity();
         return (launcher != null) && launcher.isStarted() && launcher.hasWindowFocus()
                 ? launcher : null;
