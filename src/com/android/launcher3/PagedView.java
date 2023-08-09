@@ -70,7 +70,7 @@ import java.util.ArrayList;
  */
 public abstract class PagedView<T extends View & PageIndicator> extends ViewGroup {
     private static final String TAG = "PagedView";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     public static final boolean DEBUG_FAILED_QUICKSWITCH = false;
 
     public static final int ACTION_MOVE_ALLOW_EASY_FLING = MotionEvent.ACTION_MASK - 1;
