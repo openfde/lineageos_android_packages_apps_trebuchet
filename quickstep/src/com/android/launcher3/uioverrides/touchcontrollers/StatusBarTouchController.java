@@ -108,8 +108,8 @@ public class StatusBarTouchController implements TouchController {
             // when there is single touch event. (context: InputDispatcher.cpp line 1445)
             if (dy > mTouchSlop && dy > Math.abs(dx) && ev.getPointerCount() == 1) {
                 ev.setAction(ACTION_DOWN);
-                dispatchTouchEvent(ev);
-                setWindowSlippery(true);
+                //dispatchTouchEvent(ev);
+                //setWindowSlippery(true);
                 return true;
             }
             if (Math.abs(dx) > mTouchSlop) {
