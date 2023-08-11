@@ -1147,7 +1147,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mOverviewPanel = findViewById(R.id.overview_panel);
         mHotseat = findViewById(R.id.hotseat);
         mHotseat.setWorkspace(mWorkspace);
-
+        mHotseat.setVisibility(View.GONE);
         // Setup the drag layer
         mDragLayer.setup(mDragController, mWorkspace);
 
@@ -1169,6 +1169,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
         // Setup the drag controller (drop targets have to be added in reverse order in priority)
         mDropTargetBar.setup(mDragController);
+        mDropTargetBar.setVisibility(View.GONE);
 
         mAllAppsController.setupViews(mAppsView, mScrimView);
     }

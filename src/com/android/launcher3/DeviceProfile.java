@@ -398,15 +398,16 @@ public class DeviceProfile {
             hotseatBarSizePx = iconSizePx + hotseatBarSidePaddingStartPx
                     + hotseatBarSidePaddingEndPx;
         }
+        hotseatBarSizePx = 0;
         hotseatCellHeightPx = iconSizePx;
 
         if (!isVerticalLayout) {
             int expectedWorkspaceHeight = availableHeightPx - hotseatBarSizePx
                     - workspacePageIndicatorHeight - edgeMarginPx;
             float minRequiredHeight = dropTargetBarSizePx + workspaceSpringLoadedBottomSpace;
-            workspaceSpringLoadShrinkFactor = Math.min(
-                    res.getInteger(R.integer.config_workspaceSpringLoadShrinkPercentage) / 100.0f,
-                    1 - (minRequiredHeight / expectedWorkspaceHeight));
+            workspaceSpringLoadShrinkFactor = 1 ; // Math.min(
+                   // res.getInteger(R.integer.config_workspaceSpringLoadShrinkPercentage) / 100.0f,
+                   // 1 - (minRequiredHeight / expectedWorkspaceHeight));
         } else {
             workspaceSpringLoadShrinkFactor =
                     res.getInteger(R.integer.config_workspaceSpringLoadShrinkPercentage) / 100.0f;

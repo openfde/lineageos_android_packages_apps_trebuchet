@@ -17,7 +17,7 @@ package com.android.launcher3.states;
 
 import android.content.Context;
 import android.graphics.Rect;
-
+import android.util.Log;
 import com.android.launcher3.DeviceProfile;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.LauncherState;
@@ -58,7 +58,7 @@ public class SpringLoadedState extends LauncherState {
 
         float scale = grid.workspaceSpringLoadShrinkFactor;
         Rect insets = launcher.getDragLayer().getInsets();
-
+        Log.d("huyang", "getWorkspaceScaleAndTranslation() called with: scale = [" + scale + "]");
         float scaledHeight = scale * ws.getNormalChildHeight();
         float shrunkTop = insets.top + grid.dropTargetBarSizePx;
         float shrunkBottom = ws.getMeasuredHeight() - insets.bottom

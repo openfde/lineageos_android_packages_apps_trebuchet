@@ -269,7 +269,7 @@ public class LauncherPreviewRenderer {
 
             mHotseat = mRootView.findViewById(R.id.hotseat);
             mHotseat.resetLayout(false);
-
+            mHotseat.setVisibility(View.GONE);
             mWorkspace = mRootView.findViewById(R.id.workspace);
             mWorkspace.setPadding(mDp.workspacePadding.left + mDp.cellLayoutPaddingLeftRightPx,
                     mDp.workspacePadding.top,

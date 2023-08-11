@@ -205,25 +205,25 @@ public class DropTargetBar extends FrameLayout
     }
 
     public void animateToVisibility(boolean isVisible) {
-        if (mVisible != isVisible) {
-            mVisible = isVisible;
+        // if (mVisible != isVisible) {
+        //     mVisible = isVisible;
 
-            // Cancel any existing animation
-            if (mCurrentAnimation != null) {
-                mCurrentAnimation.cancel();
-                mCurrentAnimation = null;
-            }
+        //     // Cancel any existing animation
+        //     if (mCurrentAnimation != null) {
+        //         mCurrentAnimation.cancel();
+        //         mCurrentAnimation = null;
+        //     }
 
-            float finalAlpha = mVisible ? 1 : 0;
-            if (Float.compare(getAlpha(), finalAlpha) != 0) {
-                setVisibility(View.VISIBLE);
-                mCurrentAnimation = animate().alpha(finalAlpha)
-                        .setInterpolator(DEFAULT_INTERPOLATOR)
-                        .setDuration(DEFAULT_DRAG_FADE_DURATION)
-                        .withEndAction(mFadeAnimationEndRunnable);
-            }
+        //     float finalAlpha = mVisible ? 1 : 0;
+        //     if (Float.compare(getAlpha(), finalAlpha) != 0) {
+        //         setVisibility(View.VISIBLE);
+        //         mCurrentAnimation = animate().alpha(finalAlpha)
+        //                 .setInterpolator(DEFAULT_INTERPOLATOR)
+        //                 .setDuration(DEFAULT_DRAG_FADE_DURATION)
+        //                 .withEndAction(mFadeAnimationEndRunnable);
+        //     }
 
-        }
+        // }
     }
 
     /*
