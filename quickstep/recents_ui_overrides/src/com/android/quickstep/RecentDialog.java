@@ -159,7 +159,8 @@ public class RecentDialog extends Dialog {
 
     public RecentDialog(Context context, int normalDialogStyle, ArrayList<Task> tasks) {
         super(context);
-        this.mRecentApps = tasks;
+        this.mRecentApps.clear();
+        this.mRecentApps.addAll(tasks);
         initDialog(context);
         initData();
     }
