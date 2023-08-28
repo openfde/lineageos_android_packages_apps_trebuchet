@@ -143,7 +143,11 @@ public class RecentDialog extends Dialog {
             mImageEmpty.setVisibility(View.GONE);
             mTvEmpty.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
-            mRecentApp = mRecentApps.get(0);
+            if(mRecentApps.size() > 1){
+                mRecentApp = mRecentApps.get(mRecentApps.size()-2);
+            }else{
+                mRecentApp = mRecentApps.get(mRecentApps.size()-1);
+            } 
         }
     }
 
