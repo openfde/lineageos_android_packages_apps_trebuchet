@@ -967,7 +967,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
     }
 
     protected void determineScrollingStart(MotionEvent ev) {
-        determineScrollingStart(ev, 1.0f);
+        // determineScrollingStart(ev, 1.0f);
     }
 
     /*
@@ -1352,47 +1352,48 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
     protected void onScrollInteractionEnd() {
     }
 
-    @Override
-    public boolean onGenericMotionEvent(MotionEvent event) {
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL: {
-                    // Handle mouse (or ext. device) by shifting the page depending on the scroll
-                    final float vscroll;
-                    final float hscroll;
-                    if ((event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0) {
-                        vscroll = 0;
-                        hscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-                    } else {
-                        vscroll = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-                        hscroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
-                    }
-                    if (!canScroll(Math.abs(vscroll), Math.abs(hscroll))) {
-                        return false;
-                    }
-                    if (hscroll != 0 || vscroll != 0) {
-                        boolean isForwardScroll = mIsRtl ? (hscroll < 0 || vscroll < 0)
-                                                         : (hscroll > 0 || vscroll > 0);
-                        if (isForwardScroll) {
-                            scrollRight();
-                        } else {
-                            scrollLeft();
-                        }
-                        return true;
-                    }
-                }
-            }
-        }
-        return super.onGenericMotionEvent(event);
-    }
+    // @Override
+    // public boolean onGenericMotionEvent(MotionEvent event) {
+    //     if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+    //         switch (event.getAction()) {
+    //             case MotionEvent.ACTION_SCROLL: {
+    //                 // Handle mouse (or ext. device) by shifting the page depending on the scroll
+    //                 final float vscroll;
+    //                 final float hscroll;
+    //                 if ((event.getMetaState() & KeyEvent.META_SHIFT_ON) != 0) {
+    //                     vscroll = 0;
+    //                     hscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+    //                 } else {
+    //                     vscroll = -event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+    //                     hscroll = event.getAxisValue(MotionEvent.AXIS_HSCROLL);
+    //                 }
+    //                 if (!canScroll(Math.abs(vscroll), Math.abs(hscroll))) {
+    //                     return false;
+    //                 }
+    //                 if (hscroll != 0 || vscroll != 0) {
+    //                     boolean isForwardScroll = mIsRtl ? (hscroll < 0 || vscroll < 0)
+    //                                                      : (hscroll > 0 || vscroll > 0);
+    //                     if (isForwardScroll) {
+    //                         scrollRight();
+    //                     } else {
+    //                         scrollLeft();
+    //                     }
+    //                     return true;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return super.onGenericMotionEvent(event);
+    // }
 
     /**
      * Returns true if the paged view can scroll for the provided vertical and horizontal
      * scroll values
      */
     protected boolean canScroll(float absVScroll, float absHScroll) {
-        ActivityContext ac = ActivityContext.lookupContext(getContext());
-        return (ac == null || AbstractFloatingView.getTopOpenView(ac) == null);
+        return false;
+        // ActivityContext ac = ActivityContext.lookupContext(getContext());
+        // return (ac == null || AbstractFloatingView.getTopOpenView(ac) == null);
     }
 
     private void acquireVelocityTrackerAndAddMovement(MotionEvent ev) {
