@@ -167,7 +167,7 @@ public class PortraitStatesTouchController extends AbstractStateChangeTouchContr
             int stateFlags = SystemUiProxy.INSTANCE.get(mLauncher).getLastSystemUiStateFlags();
             return mAllowDragToOverview && TouchInteractionService.isConnected()
                     && (stateFlags & SYSUI_STATE_OVERVIEW_DISABLED) == 0
-                    ? OVERVIEW : ALL_APPS;
+                    ? OVERVIEW : NORMAL;
         }
         return fromState;
     }
