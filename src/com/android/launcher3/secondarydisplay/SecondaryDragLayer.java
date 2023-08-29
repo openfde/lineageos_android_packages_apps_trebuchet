@@ -188,7 +188,7 @@ public class SecondaryDragLayer extends BaseDragLayer<SecondaryDisplayLauncher> 
                 mActivity.getPopupDataProvider().getShortcutCountForItem(item),
                 Collections.emptyList(),
                 Arrays.asList(mPinnedAppsAdapter.getSystemShortcut(item),
-                        APP_INFO.getShortcut(mActivity, item)));
+                        APP_INFO.getShortcut(mActivity, item, null)));
         v.getParent().requestDisallowInterceptTouchEvent(true);
         return true;
     }

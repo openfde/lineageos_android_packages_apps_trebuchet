@@ -16,12 +16,14 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BaseDraggingActivity;
+import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.model.WidgetItem;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.touch.ItemClickHandler;
 import com.android.launcher3.userevent.nano.LauncherLogProto.Action;
 import com.android.launcher3.userevent.nano.LauncherLogProto.ControlType;
 import com.android.launcher3.util.InstantAppResolver;
@@ -30,6 +32,7 @@ import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.widget.WidgetsBottomSheet;
 
 import java.util.List;
+import android.util.Log;
 
 /**
  * Represents a system shortcut for a given app. The shortcut should have a label and icon, and an
@@ -44,9 +47,19 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
     private final int mIconResId;
     private final int mLabelResId;
     private final int mAccessibilityActionId;
-
+    private static final String TAG = "AppOpen";
     protected final T mTarget;
     protected final ItemInfo mItemInfo;
+    protected BubbleTextView icon;
+
+    public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+        mIconResId = iconResId;
+        mLabelResId = labelResId;
+        mAccessibilityActionId = labelResId;
+        mTarget = target;
+        mItemInfo = itemInfo;
+        icon = bubbleTextView;
+    }
 
     public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo) {
         mIconResId = iconResId;
@@ -62,6 +75,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         mAccessibilityActionId = other.mAccessibilityActionId;
         mTarget = other.mTarget;
         mItemInfo = other.mItemInfo;
+        icon = other.icon;
     }
 
     /**
@@ -92,10 +106,12 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
     public interface Factory<T extends BaseDraggingActivity> {
 
-        @Nullable SystemShortcut<T> getShortcut(T activity, ItemInfo itemInfo);
+//        @Nullable SystemShortcut<T> getShortcut(T activity, ItemInfo itemInfo);
+
+        @Nullable SystemShortcut<T> getShortcut(T activity, ItemInfo itemInfo, BubbleTextView icon);
     }
 
-    public static final Factory<Launcher> WIDGETS = (launcher, itemInfo) -> {
+    public static final Factory<Launcher> WIDGETS = (launcher, itemInfo, bubbleTextView) -> {
         if (itemInfo.getTargetComponent() == null) return null;
         final List<WidgetItem> widgets =
                 launcher.getPopupDataProvider().getWidgetsForPackageUser(new PackageUserKey(
@@ -103,12 +119,12 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         if (widgets == null) {
             return null;
         }
-        return new Widgets(launcher, itemInfo);
+        return new Widgets(launcher, itemInfo, null);
     };
 
     public static class Widgets extends SystemShortcut<Launcher> {
-        public Widgets(Launcher target, ItemInfo itemInfo) {
-            super(R.drawable.ic_widget, R.string.widget_button_text, target, itemInfo);
+        public Widgets(Launcher target, ItemInfo itemInfo, BubbleTextView icon) {
+            super(R.drawable.ic_widget, R.string.widget_button_text, target, itemInfo, null);
         }
 
         @Override
@@ -127,8 +143,15 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
     }
 
     public static final Factory<BaseDraggingActivity> APP_INFO = AppInfo::new;
+    public static final Factory<BaseDraggingActivity> APP_OPEN = AppOpen::new;
+    public static final Factory<BaseDraggingActivity> APP_REMOVE = AppRemove::new;
 
     public static class AppInfo extends SystemShortcut {
+
+        public AppInfo(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView icon) {
+            super(R.drawable.ic_info_no_shadow, R.string.app_info_drop_target_label, target,
+                    itemInfo, icon);
+        }
 
         public AppInfo(BaseDraggingActivity target, ItemInfo itemInfo) {
             super(R.drawable.ic_info_no_shadow, R.string.app_info_drop_target_label, target,
@@ -148,7 +171,36 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         }
     }
 
-    public static final Factory<BaseDraggingActivity> INSTALL = (activity, itemInfo) -> {
+    public static class AppOpen extends SystemShortcut {
+
+        public AppOpen(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+            super(R.drawable.ic_open_no_shadow, R.string.app_open_drop_target_label, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+           dismissTaskMenuView(mTarget);
+           ItemClickHandler.startAppShortcutOrInfoActivity(view, mItemInfo, Launcher.getLauncher(view.getContext()), null);
+        }
+    }
+
+    public static class AppRemove extends SystemShortcut {
+
+        public AppRemove(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+            super(R.drawable.ic_remove_no_shadow, R.string.remove_drop_target, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            dismissTaskMenuView(mTarget);
+            Launcher launcher = Launcher.getLauncher(view.getContext());
+            launcher.removeItem(icon, mItemInfo,true);
+        }
+    }
+
+    public static final Factory<BaseDraggingActivity> INSTALL = (activity, itemInfo, bubbleTextView) -> {
         boolean supportsWebUI = (itemInfo instanceof WorkspaceItemInfo)
                 && ((WorkspaceItemInfo) itemInfo).hasStatusFlag(
                         WorkspaceItemInfo.FLAG_SUPPORTS_WEB_UI);
@@ -162,10 +214,15 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         if (!enabled) {
             return null;
         }
-        return new Install(activity, itemInfo);
+        return new Install(activity, itemInfo, null);
     };
 
     public static class Install extends SystemShortcut {
+
+        public Install(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+            super(R.drawable.ic_install_no_shadow, R.string.install_drop_target_label,
+                    target, itemInfo, bubbleTextView);
+        }
 
         public Install(BaseDraggingActivity target, ItemInfo itemInfo) {
             super(R.drawable.ic_install_no_shadow, R.string.install_drop_target_label,

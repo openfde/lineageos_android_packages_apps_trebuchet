@@ -24,15 +24,23 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.TextView;
-
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import com.android.launcher3.BubbleTextView;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.R;
+import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.popup.PopupContainerWithArrow;
+import com.android.launcher3.popup.PopupDataProvider;
+import com.android.launcher3.util.PackageUserKey;
 
 /**
  * Extension of {@link BubbleTextView} which draws two shadows on the text (ambient and key shadows}
  */
 public class DoubleShadowBubbleTextView extends BubbleTextView {
 
+    private static final String TAG = "DoubleShadowBubbleTextView";
     private final ShadowInfo mShadowInfo;
 
     public DoubleShadowBubbleTextView(Context context) {
@@ -41,12 +49,43 @@ public class DoubleShadowBubbleTextView extends BubbleTextView {
 
     public DoubleShadowBubbleTextView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        setRightClickListener(new RightClickListener() {
+            @java.lang.Override
+            public void onRightClick(boolean isRight, View v) {
+                if(isRight){
+                    PopupContainerWithArrow.showForIcon(DoubleShadowBubbleTextView.this);
+                }
+            }
+        });
+    }
+
+
+    private RightClickListener listener;
+
+    public void setRightClickListener(RightClickListener listener){
+        this.listener = listener;
+        if(listener != null){
+            setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getButtonState() == MotionEvent.BUTTON_SECONDARY){
+                        listener.onRightClick(true, v);
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     public DoubleShadowBubbleTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mShadowInfo = new ShadowInfo(context, attrs, defStyle);
         setShadowLayer(mShadowInfo.ambientShadowBlur, 0, 0, mShadowInfo.ambientShadowColor);
+    }
+
+    public interface RightClickListener {
+        void onRightClick(boolean isRight, View v);
     }
 
     @Override

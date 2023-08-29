@@ -254,7 +254,7 @@ public class ItemClickHandler {
         startAppShortcutOrInfoActivity(v, shortcut, launcher, sourceContainer);
     }
 
-    private static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher,
+    public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher,
             @Nullable String sourceContainer) {
         TestLogging.recordEvent(
                 TestProtocol.SEQUENCE_MAIN, "start: startAppShortcutOrInfoActivity");

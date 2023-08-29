@@ -43,7 +43,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
+import android.util.Log;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.BaseDraggingActivity;
 import com.android.launcher3.BubbleTextView;
@@ -102,6 +102,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
 
     protected PopupItemDragHandler mPopupItemDragHandler;
     protected LauncherAccessibilityDelegate mAccessibilityDelegate;
+    private static final  String TAG = "PopupContainerWithArrow";
 
     public PopupContainerWithArrow(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -220,7 +221,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
                 popupDataProvider.getShortcutCountForItem(item),
                 popupDataProvider.getNotificationKeysForItem(item),
                 launcher.getSupportedShortcuts()
-                        .map(s -> s.getShortcut(launcher, item))
+                        .map(s -> s.getShortcut(launcher, item, icon))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
         launcher.refreshAndBindWidgetsForPackageUser(PackageUserKey.fromItemInfo(item));
@@ -258,6 +259,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
     @TargetApi(Build.VERSION_CODES.P)
     public void populateAndShow(final BubbleTextView originalIcon, int shortcutCount,
             final List<NotificationKeyData> notificationKeys, List<SystemShortcut> systemShortcuts) {
+        Log.d(TAG, "populateAndShow() called with: originalIcon = [" + originalIcon + "], shortcutCount = [" + shortcutCount + "], notificationKeys = [" + notificationKeys + "], systemShortcuts = [" + systemShortcuts + "]");
         mNumNotifications = notificationKeys.size();
         mOriginalIcon = originalIcon;
 
@@ -560,7 +562,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         @Override
         public void onWidgetsBound() {
             ItemInfo itemInfo = (ItemInfo) mOriginalIcon.getTag();
-            SystemShortcut widgetInfo = SystemShortcut.WIDGETS.getShortcut(mLauncher, itemInfo);
+            SystemShortcut widgetInfo = SystemShortcut.WIDGETS.getShortcut(mLauncher, itemInfo, null);
             View widgetsView = null;
             int count = mSystemShortcutContainer.getChildCount();
             for (int i = 0; i < count; i++) {

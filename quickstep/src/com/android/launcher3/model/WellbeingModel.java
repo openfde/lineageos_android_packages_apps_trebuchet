@@ -412,7 +412,7 @@ public final class WellbeingModel {
      * Shortcut factory for generating wellbeing action
      */
     public static final SystemShortcut.Factory SHORTCUT_FACTORY =
-            (activity, info) -> (info.getTargetComponent() == null) ? null : INSTANCE.get(activity)
+            (activity, info, icon) -> (info.getTargetComponent() == null) ? null : INSTANCE.get(activity)
                     .getShortcutForApp(
                             info.getTargetComponent().getPackageName(), info.user.getIdentifier(),
                             activity, info);

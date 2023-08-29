@@ -308,7 +308,7 @@ public interface TaskShortcutFactory {
                     ? new SystemShortcut.Install(activity, view.getItemInfo()) : null;
 
     TaskShortcutFactory WELLBEING = (activity, view) ->
-            WellbeingModel.SHORTCUT_FACTORY.getShortcut(activity, view.getItemInfo());
+            WellbeingModel.SHORTCUT_FACTORY.getShortcut(activity, view.getItemInfo(),null);
 
     TaskShortcutFactory SCREENSHOT = (activity, tv) -> {
         if (ENABLE_OVERVIEW_ACTIONS.get()) {

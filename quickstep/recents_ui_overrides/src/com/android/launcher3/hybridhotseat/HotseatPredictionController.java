@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.launcher3.BubbleTextView;
 import com.android.launcher3.DragSource;
 import com.android.launcher3.DropTarget;
 import com.android.launcher3.Hotseat;
@@ -575,10 +576,19 @@ public class HotseatPredictionController implements DragController.DragListener,
     }
 
 
+//    @Nullable
+//    @Override
+//    public SystemShortcut<QuickstepLauncher> getShortcut(QuickstepLauncher activity,
+//            ItemInfo itemInfo) {
+//        if (itemInfo.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION) {
+//            return null;
+//        }
+//        return new PinPrediction(activity, itemInfo);
+//    }
+
     @Nullable
     @Override
-    public SystemShortcut<QuickstepLauncher> getShortcut(QuickstepLauncher activity,
-            ItemInfo itemInfo) {
+    public SystemShortcut<QuickstepLauncher> getShortcut(QuickstepLauncher activity, ItemInfo itemInfo, BubbleTextView icon) {
         if (itemInfo.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION) {
             return null;
         }
@@ -681,7 +691,7 @@ public class HotseatPredictionController implements DragController.DragListener,
 
         private PinPrediction(QuickstepLauncher target, ItemInfo itemInfo) {
             super(R.drawable.ic_pin, R.string.pin_prediction, target,
-                    itemInfo);
+                    itemInfo, null);
         }
 
         @Override

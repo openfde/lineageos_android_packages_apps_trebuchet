@@ -103,8 +103,10 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
             if (handleLongPress) {
                 mLongPressState = STATE_REQUESTED;
                 mTouchDownPoint.set(ev.getX(), ev.getY());
+                if (ev.getButtonState() == MotionEvent.BUTTON_SECONDARY){
+                    OptionsPopupView.showDefaultOptions(mLauncher, mTouchDownPoint.x, mTouchDownPoint.y);
+                }
             }
-
             mWorkspace.onTouchEvent(ev);
             // Return true to keep receiving touch events
             return true;

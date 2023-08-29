@@ -107,7 +107,8 @@
     <!-- Label for pinning predicted app. -->
     <string name="pin_prediction">Pin Prediction</string>
 
-
+    <string name="app_open_drop_target_label" >open</string>
+    <string name="remove_drop_target">removte</string>
     <!-- Permissions: -->
     <skip />
     <!-- Permission short label -->

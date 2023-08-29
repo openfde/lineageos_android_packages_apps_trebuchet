@@ -74,6 +74,7 @@
     <application
         android:backupAgent="com.android.launcher3.LauncherBackupAgent"
         android:fullBackupOnly="true"
+        android:debuggable="true"
         android:backupInForeground="true"
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"

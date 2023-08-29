@@ -217,7 +217,7 @@ public class PinnedAppsAdapter extends BaseAdapter implements OnSharedPreference
         PinUnPinShortcut(SecondaryDisplayLauncher target, ItemInfo info, boolean isPinned) {
             super(isPinned ? R.drawable.ic_remove_no_shadow : R.drawable.ic_pin,
                     isPinned ? R.string.remove_drop_target_label : R.string.action_add_to_workspace,
-                    target, info);
+                    target, info,null);
             mIsPinned = isPinned;
         }
 

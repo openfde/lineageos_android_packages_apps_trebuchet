@@ -245,7 +245,7 @@ public class TaskOverlayFactory implements ResourceBasedOverride {
             private final BaseDraggingActivity mActivity;
 
             ScreenshotSystemShortcut(BaseDraggingActivity activity, ItemInfo itemInfo) {
-                super(R.drawable.ic_screenshot, R.string.action_screenshot, activity, itemInfo);
+                super(R.drawable.ic_screenshot, R.string.action_screenshot, activity, itemInfo, null);
                 mActivity = activity;
             }
 
