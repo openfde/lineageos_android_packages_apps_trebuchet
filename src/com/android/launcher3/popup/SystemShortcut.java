@@ -219,7 +219,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
     public static class Install extends SystemShortcut {
 
-        public Install(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+        public Install(BaseDraggingActivity target, ItemInfo itemInfo, View bubbleTextView) {
             super(R.drawable.ic_install_no_shadow, R.string.install_drop_target_label,
                     target, itemInfo, bubbleTextView);
         }

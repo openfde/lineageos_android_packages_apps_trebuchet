@@ -102,9 +102,9 @@ public abstract class BaseModelUpdateTask implements ModelUpdateTask {
     }
 
     public void bindUpdatedWidgets(BgDataModel dataModel) {
-        final ArrayList<WidgetListRowEntry> widgets =
-                dataModel.widgetsModel.getWidgetsList(mApp.getContext());
-        scheduleCallbackTask(c -> c.bindAllWidgets(widgets));
+        // final ArrayList<WidgetListRowEntry> widgets =
+                // dataModel.widgetsModel.getWidgetsList(mApp.getContext());
+        // scheduleCallbackTask(c -> c.bindAllWidgets(widgets));
     }
 
     public void deleteAndBindComponentsRemoved(final ItemInfoMatcher matcher) {

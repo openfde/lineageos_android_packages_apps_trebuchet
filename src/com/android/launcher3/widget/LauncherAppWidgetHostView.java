@@ -88,11 +88,21 @@ public class LauncherAppWidgetHostView extends NavigableAppWidgetHostView
         if (Utilities.ATLEAST_Q && Themes.getAttrBoolean(mLauncher, R.attr.isWorkspaceDarkText)) {
             setOnLightBackground(true);
         }
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getButtonState() == MotionEvent.BUTTON_SECONDARY){
+                    PopupContainerWithArrow.showForIcon(LauncherAppWidgetHostView.this);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
     public boolean onLongClick(View view) {
-        PopupContainerWithArrow.showForIcon(this);
+        // PopupContainerWithArrow.showForIcon(this);
         if (!Utilities.isWorkspaceEditAllowed(mLauncher.getApplicationContext())) return true;
         if (mIsScrollable) {
             DragLayer dragLayer = Launcher.getLauncher(getContext()).getDragLayer();
@@ -143,6 +153,10 @@ public class LauncherAppWidgetHostView extends NavigableAppWidgetHostView
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (ev.getButtonState() == MotionEvent.BUTTON_SECONDARY){
+            PopupContainerWithArrow.showForIcon(this);
+            return true;
+        }
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             DragLayer dragLayer = Launcher.getLauncher(getContext()).getDragLayer();
             if (mIsScrollable) {

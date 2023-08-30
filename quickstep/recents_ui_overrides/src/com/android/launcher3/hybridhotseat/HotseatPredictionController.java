@@ -588,7 +588,7 @@ public class HotseatPredictionController implements DragController.DragListener,
 
     @Nullable
     @Override
-    public SystemShortcut<QuickstepLauncher> getShortcut(QuickstepLauncher activity, ItemInfo itemInfo, BubbleTextView icon) {
+    public SystemShortcut<QuickstepLauncher> getShortcut(QuickstepLauncher activity, ItemInfo itemInfo, View icon) {
         if (itemInfo.container != LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION) {
             return null;
         }

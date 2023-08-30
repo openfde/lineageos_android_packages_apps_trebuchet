@@ -96,6 +96,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
     private final int mStartDragThreshold;
 
     private BubbleTextView mOriginalIcon;
+    private View mOriginalView;
     private NotificationItemView mNotificationItemView;
     private int mNumNotifications;
 
@@ -229,7 +230,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         return container;
     }
 
-    public static PopupContainerWithArrow showForIcon(LauncherAppWidgetHostView icon) {
+    public static PopupContainerWithArrow showForIcon(View icon) {
         Launcher launcher = Launcher.getLauncher(icon.getContext());
         if (getOpen(launcher) != null) {
             // There is already an items container open, so don't open this one.
@@ -364,11 +365,11 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
     }
 
     @TargetApi(Build.VERSION_CODES.P)
-    public void populateAndShow(final LauncherAppWidgetHostView originalIcon, int shortcutCount,
+    public void populateAndShow(final View originalIcon, int shortcutCount,
                                 final List<NotificationKeyData> notificationKeys, List<SystemShortcut> systemShortcuts) {
         Log.d(TAG, "populateAndShow() called with: originalIcon = [" + originalIcon + "], shortcutCount = [" + shortcutCount + "], notificationKeys = [" + notificationKeys + "], systemShortcuts = [" + systemShortcuts + "]");
         mNumNotifications = notificationKeys.size();
-//        mOriginalIcon = originalIcon;
+        mOriginalView = originalIcon;
 
         boolean hasDeepShortcuts = shortcutCount > 0;
         int containerWidth = (int) getResources().getDimension(R.dimen.bg_popup_item_width);
@@ -450,13 +451,21 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
 
     @Override
     protected void getTargetObjectLocation(Rect outPos) {
-        getPopupContainer().getDescendantRectRelativeToSelf(mOriginalIcon, outPos);
-        outPos.top += mOriginalIcon.getPaddingTop();
-        outPos.left += mOriginalIcon.getPaddingLeft();
-        outPos.right -= mOriginalIcon.getPaddingRight();
-        outPos.bottom = outPos.top + (mOriginalIcon.getIcon() != null
-                ? mOriginalIcon.getIcon().getBounds().height()
-                : mOriginalIcon.getHeight());
+        if( mOriginalIcon != null){
+            getPopupContainer().getDescendantRectRelativeToSelf(mOriginalIcon, outPos);
+            outPos.top += mOriginalIcon.getPaddingTop();
+            outPos.left += mOriginalIcon.getPaddingLeft();
+            outPos.right -= mOriginalIcon.getPaddingRight();
+            outPos.bottom = outPos.top + (mOriginalIcon.getIcon() != null
+                    ? mOriginalIcon.getIcon().getBounds().height()
+                    : mOriginalIcon.getHeight());
+        } else if(mOriginalView != null){
+            getPopupContainer().getDescendantRectRelativeToSelf(mOriginalView, outPos);
+            outPos.top += mOriginalView.getPaddingTop();
+            outPos.left += mOriginalView.getPaddingLeft();
+            outPos.right -= mOriginalView.getPaddingRight();
+            outPos.bottom = outPos.top + mOriginalView.getHeight();
+        }
     }
 
     public void applyNotificationInfos(List<NotificationInfo> notificationInfos) {
@@ -622,14 +631,16 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
     @Override
     protected void onCreateCloseAnimation(AnimatorSet anim) {
         // Animate original icon's text back in.
-        anim.play(mOriginalIcon.createTextAlphaAnimator(true /* fadeIn */));
-        mOriginalIcon.setForceHideDot(false);
+        if(mOriginalIcon != null){
+            anim.play(mOriginalIcon.createTextAlphaAnimator(true /* fadeIn */));
+            mOriginalIcon.setForceHideDot(false);
+        }
     }
 
     @Override
     protected void closeComplete() {
         PopupContainerWithArrow openPopup = getOpen(mLauncher);
-        if (openPopup == null || openPopup.mOriginalIcon != mOriginalIcon) {
+        if (mOriginalIcon!= null && (openPopup == null || openPopup.mOriginalIcon != mOriginalIcon)) {
             mOriginalIcon.setTextVisibility(mOriginalIcon.shouldTextBeVisible());
             mOriginalIcon.setForceHideDot(false);
         }
