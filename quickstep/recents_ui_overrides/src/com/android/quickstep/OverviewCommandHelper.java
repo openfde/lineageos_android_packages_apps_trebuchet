@@ -26,7 +26,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.SystemClock;
 import android.view.ViewConfiguration;
-
+import java.util.stream.Collectors;
 import androidx.annotation.BinderThread;
 
 import com.android.launcher3.Launcher;
@@ -58,6 +58,7 @@ public class OverviewCommandHelper {
     private final OverviewComponentObserver mOverviewComponentObserver;
 
     private long mLastToggleTime;
+    public static final int FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS = 0x00800000;
 
     RecentDialog dialog;
 
@@ -344,10 +345,12 @@ public class OverviewCommandHelper {
         private void updateRecentsTask(ArrayList<Task> tasks) {
             Log.d("huyang", "updateRecentsTask() called with: tasks = [" + tasks + "] ");
             Context context = mActivityInterface.getCreatedActivity();
+            tasks.stream().filter(task ->
+                    (task.key.baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).collect(Collectors.toList());
+
             if (dialog == null) {
                 dialog = new RecentDialog(context, R.style.NormalDialogStyle, tasks);
             }
-
             dialog.setRecentTasks(tasks);
             if (dialog.isShowing()) {
                 dialog.dismiss();
