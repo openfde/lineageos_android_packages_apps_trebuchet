@@ -2741,6 +2741,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
     }
 
+    public Stream<SystemShortcut.Factory> getWidgetSupportedShortcuts() {
+        return Stream.of(APP_REMOVE, WIDGETS, INSTALL);
+    }
 
     /**
      * @see LauncherState#getOverviewScaleAndOffset(Launcher)

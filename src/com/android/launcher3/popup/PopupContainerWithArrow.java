@@ -230,6 +230,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         return container;
     }
 
+    //for app widget
     public static PopupContainerWithArrow showForIcon(View icon) {
         Launcher launcher = Launcher.getLauncher(icon.getContext());
         if (getOpen(launcher) != null) {
@@ -248,7 +249,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         container.populateAndShow(icon,
                 popupDataProvider.getShortcutCountForItem(item),
                 popupDataProvider.getNotificationKeysForItem(item),
-                launcher.getSupportedShortcuts()
+                launcher.getWidgetSupportedShortcuts()
                         .map(s -> s.getShortcut(launcher, item, icon))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
