@@ -73,6 +73,7 @@ import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.util.PackageUserKey;
 import com.android.launcher3.util.ShortcutUtil;
 import com.android.launcher3.views.BaseDragLayer;
+import com.android.launcher3.widget.LauncherAppWidgetHostView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -228,6 +229,33 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         return container;
     }
 
+    public static PopupContainerWithArrow showForIcon(LauncherAppWidgetHostView icon) {
+        Launcher launcher = Launcher.getLauncher(icon.getContext());
+        if (getOpen(launcher) != null) {
+            // There is already an items container open, so don't open this one.
+            icon.clearFocus();
+            return null;
+        }
+        ItemInfo item = (ItemInfo) icon.getTag();
+
+        final PopupContainerWithArrow container =
+                (PopupContainerWithArrow) launcher.getLayoutInflater().inflate(
+                        R.layout.popup_container, launcher.getDragLayer(), false);
+        container.configureForLauncher(launcher);
+
+        PopupDataProvider popupDataProvider = launcher.getPopupDataProvider();
+        container.populateAndShow(icon,
+                popupDataProvider.getShortcutCountForItem(item),
+                popupDataProvider.getNotificationKeysForItem(item),
+                launcher.getSupportedShortcuts()
+                        .map(s -> s.getShortcut(launcher, item, icon))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
+        launcher.refreshAndBindWidgetsForPackageUser(PackageUserKey.fromItemInfo(item));
+        return container;
+    }
+
+
     private void configureForLauncher(Launcher launcher) {
         addOnAttachStateChangeListener(new LiveUpdateHandler(launcher));
         mPopupItemDragHandler = new LauncherPopupItemDragHandler(launcher, this);
@@ -325,6 +353,85 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         }
 
         mOriginalIcon.setForceHideDot(true);
+
+        // All views are added. Animate layout from now on.
+        setLayoutTransition(new LayoutTransition());
+
+        // Load the shortcuts on a background thread and update the container as it animates.
+        MODEL_EXECUTOR.getHandler().postAtFrontOfQueue(PopupPopulator.createUpdateRunnable(
+                mLauncher, originalItemInfo, new Handler(Looper.getMainLooper()),
+                this, mShortcuts, notificationKeys));
+    }
+
+    @TargetApi(Build.VERSION_CODES.P)
+    public void populateAndShow(final LauncherAppWidgetHostView originalIcon, int shortcutCount,
+                                final List<NotificationKeyData> notificationKeys, List<SystemShortcut> systemShortcuts) {
+        Log.d(TAG, "populateAndShow() called with: originalIcon = [" + originalIcon + "], shortcutCount = [" + shortcutCount + "], notificationKeys = [" + notificationKeys + "], systemShortcuts = [" + systemShortcuts + "]");
+        mNumNotifications = notificationKeys.size();
+//        mOriginalIcon = originalIcon;
+
+        boolean hasDeepShortcuts = shortcutCount > 0;
+        int containerWidth = (int) getResources().getDimension(R.dimen.bg_popup_item_width);
+
+        // if there are deep shortcuts, we might want to increase the width of shortcuts to fit
+        // horizontally laid out system shortcuts.
+        if (hasDeepShortcuts) {
+            containerWidth = (int) Math.max(containerWidth,
+                    systemShortcuts.size() * getResources().getDimension(
+                            R.dimen.system_shortcut_header_icon_touch_size));
+        }
+        // Add views
+        if (mNumNotifications > 0) {
+            // Add notification entries
+            View.inflate(getContext(), R.layout.notification_content, this);
+            mNotificationItemView = new NotificationItemView(this);
+            if (mNumNotifications == 1) {
+                mNotificationItemView.removeFooter();
+            }
+            else {
+                mNotificationItemView.setFooterWidth(containerWidth);
+            }
+            updateNotificationHeader();
+        }
+        int viewsToFlip = getChildCount();
+        mSystemShortcutContainer = this;
+        if (hasDeepShortcuts) {
+            if (mNotificationItemView != null) {
+                mNotificationItemView.addGutter();
+            }
+
+            for (int i = shortcutCount; i > 0; i--) {
+                DeepShortcutView v = inflateAndAdd(R.layout.deep_shortcut, this);
+                v.getLayoutParams().width = containerWidth;
+                mShortcuts.add(v);
+            }
+            updateHiddenShortcuts();
+
+            if (!systemShortcuts.isEmpty()) {
+                mSystemShortcutContainer = inflateAndAdd(R.layout.system_shortcut_icons, this);
+                for (SystemShortcut shortcut : systemShortcuts) {
+                    initializeSystemShortcut(
+                            R.layout.system_shortcut_icon_only, mSystemShortcutContainer, shortcut);
+                }
+            }
+        } else if (!systemShortcuts.isEmpty()) {
+            if (mNotificationItemView != null) {
+                mNotificationItemView.addGutter();
+            }
+
+            for (SystemShortcut shortcut : systemShortcuts) {
+                initializeSystemShortcut(R.layout.system_shortcut, this, shortcut);
+            }
+        }
+
+        reorderAndShow(viewsToFlip);
+
+        ItemInfo originalItemInfo = (ItemInfo) originalIcon.getTag();
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            setAccessibilityPaneTitle(getTitleForAccessibility());
+        }
+
+//        mOriginalIcon.setForceHideDot(true);
 
         // All views are added. Animate layout from now on.
         setLayoutTransition(new LayoutTransition());

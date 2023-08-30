@@ -40,9 +40,11 @@ import com.android.launcher3.Utilities;
 import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
+import com.android.launcher3.popup.PopupContainerWithArrow;
 import com.android.launcher3.util.Executors;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.BaseDragLayer.TouchCompleteListener;
+import com.android.launcher3.views.DoubleShadowBubbleTextView;
 
 /**
  * {@inheritDoc}
@@ -90,6 +92,7 @@ public class LauncherAppWidgetHostView extends NavigableAppWidgetHostView
 
     @Override
     public boolean onLongClick(View view) {
+        PopupContainerWithArrow.showForIcon(this);
         if (!Utilities.isWorkspaceEditAllowed(mLauncher.getApplicationContext())) return true;
         if (mIsScrollable) {
             DragLayer dragLayer = Launcher.getLauncher(getContext()).getDragLayer();

@@ -50,9 +50,9 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
     private static final String TAG = "AppOpen";
     protected final T mTarget;
     protected final ItemInfo mItemInfo;
-    protected BubbleTextView icon;
+    protected View icon;
 
-    public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+    public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo, View bubbleTextView) {
         mIconResId = iconResId;
         mLabelResId = labelResId;
         mAccessibilityActionId = labelResId;
@@ -108,7 +108,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
 //        @Nullable SystemShortcut<T> getShortcut(T activity, ItemInfo itemInfo);
 
-        @Nullable SystemShortcut<T> getShortcut(T activity, ItemInfo itemInfo, BubbleTextView icon);
+        @Nullable SystemShortcut<T> getShortcut(T activity, ItemInfo itemInfo, View icon);
     }
 
     public static final Factory<Launcher> WIDGETS = (launcher, itemInfo, bubbleTextView) -> {
@@ -148,7 +148,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
     public static class AppInfo extends SystemShortcut {
 
-        public AppInfo(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView icon) {
+        public AppInfo(BaseDraggingActivity target, ItemInfo itemInfo, View icon) {
             super(R.drawable.ic_info_no_shadow, R.string.app_info_drop_target_label, target,
                     itemInfo, icon);
         }
@@ -173,7 +173,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
     public static class AppOpen extends SystemShortcut {
 
-        public AppOpen(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+        public AppOpen(BaseDraggingActivity target, ItemInfo itemInfo, View bubbleTextView) {
             super(R.drawable.ic_open_no_shadow, R.string.app_open_drop_target_label, target,
                     itemInfo, bubbleTextView);
         }
@@ -187,7 +187,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
     public static class AppRemove extends SystemShortcut {
 
-        public AppRemove(BaseDraggingActivity target, ItemInfo itemInfo, BubbleTextView bubbleTextView) {
+        public AppRemove(BaseDraggingActivity target, ItemInfo itemInfo, View bubbleTextView) {
             super(R.drawable.ic_remove_no_shadow, R.string.remove_drop_target, target,
                     itemInfo, bubbleTextView);
         }
