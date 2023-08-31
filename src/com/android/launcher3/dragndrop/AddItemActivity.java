@@ -231,6 +231,7 @@ public class AddItemActivity extends BaseActivity implements OnLongClickListener
             protected void onPostExecute(WidgetItem item) {
                 mWidgetCell.applyFromCellItem(item, mApp.getWidgetCache());
                 mWidgetCell.ensurePreview();
+                onPlaceAutomaticallyClick(null);
             }
         }.executeOnExecutor(MODEL_EXECUTOR);
         // TODO: Create a worker looper executor and reuse that everywhere.
