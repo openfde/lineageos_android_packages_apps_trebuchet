@@ -15,12 +15,15 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.app.ActivityManager;
 import androidx.annotation.NonNull;
+import com.android.systemui.shared.system.ActivityOptionsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.widget.TextView;
-
+import java.util.HashSet;
+import android.graphics.Rect;
+import android.app.ActivityOptions;
 import com.android.launcher3.R;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.TestProtocol;
@@ -44,6 +47,8 @@ public class RecentDialog extends Dialog {
     private TextView mTvEmpty;
     private ArrayList<Task> mRecentApps = new ArrayList<>();
     private Task mRecentApp;
+
+    private HashSet<String> packages = new HashSet<>();
 
     private void initDialog(Context context) {
         mContext  = context;
@@ -149,8 +154,17 @@ public class RecentDialog extends Dialog {
 
     private void gotoTask(Task mTask) {
         if (mTask != null) {
+            String packageName  = mTask.key.sourceComponent.getPackageName();
+            ActivityOptions activityOptions = null;
+            if(!packages.contains(packageName)){
+                activityOptions = ActivityOptionsCompat.makeFreeformOptions();
+                Rect r = new Rect(50, 50, 200, 200);
+                activityOptions.setLaunchBounds(r);
+                packages.add(packageName);
+            }
+            // Arbitrary bounds only because freeform is in dev mode right now
             ActivityManagerWrapper.getInstance().startActivityFromRecents(mTask.key.id,
-                    null);
+                    activityOptions);
             mRecentApp = null;
         }
     }
