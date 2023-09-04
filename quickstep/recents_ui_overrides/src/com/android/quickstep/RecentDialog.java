@@ -158,7 +158,7 @@ public class RecentDialog extends Dialog {
             ActivityOptions activityOptions = null;
             if(!packages.contains(packageName)){
                 activityOptions = ActivityOptionsCompat.makeFreeformOptions();
-                Rect r = new Rect(50, 50, 200, 200);
+                Rect r = new Rect(50, 50, 514, 874);
                 activityOptions.setLaunchBounds(r);
                 packages.add(packageName);
             }
