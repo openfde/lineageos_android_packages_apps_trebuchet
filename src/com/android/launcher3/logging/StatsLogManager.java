@@ -322,8 +322,11 @@ public class StatsLogManager implements ResourceBasedOverride {
         LAUNCHER_SELECT_MODE_IMAGE(627),
 
         @UiEvent(doc = "User swiped down on workspace (triggering noti shade to open).")
-        LAUNCHER_SWIPE_DOWN_WORKSPACE_NOTISHADE_OPEN(651);
+        LAUNCHER_SWIPE_DOWN_WORKSPACE_NOTISHADE_OPEN(651),
         // ADD MORE
+
+        @UiEvent(doc = "User rearray icon.(rearray).")
+        LAUNCHER_DESKTOP_ICON_TAP_REARRAY(652);
 
         private final int mId;
 

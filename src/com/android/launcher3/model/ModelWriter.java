@@ -192,6 +192,7 @@ public class ModelWriter {
      */
     public void modifyItemInDatabase(final ItemInfo item,
             int container, int screenId, int cellX, int cellY, int spanX, int spanY) {
+        Log.d(TAG, "modifyItemInDatabase() called with: item = [" + item + "], container = [" + container + "], screenId = [" + screenId + "], cellX = [" + cellX + "], cellY = [" + cellY + "], spanX = [" + spanX + "], spanY = [" + spanY + "]");
         updateItemInfoProps(item, container, screenId, cellX, cellY);
         item.spanX = spanX;
         item.spanY = spanY;

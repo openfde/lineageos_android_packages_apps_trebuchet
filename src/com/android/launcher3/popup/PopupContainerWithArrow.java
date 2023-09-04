@@ -680,7 +680,12 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
 
         @Override
         public void onWidgetsBound() {
-            ItemInfo itemInfo = (ItemInfo) mOriginalIcon.getTag();
+            ItemInfo itemInfo = null;
+            if( mOriginalIcon != null){
+                itemInfo = (ItemInfo) mOriginalIcon.getTag();
+            } else if(mOriginalView != null){
+                itemInfo = (ItemInfo) mOriginalView.getTag();
+            }
             SystemShortcut widgetInfo = SystemShortcut.WIDGETS.getShortcut(mLauncher, itemInfo, null);
             View widgetsView = null;
             int count = mSystemShortcutContainer.getChildCount();

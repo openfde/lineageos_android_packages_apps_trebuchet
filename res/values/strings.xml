@@ -54,7 +54,7 @@
     <string name="add_item_request_drag_hint">Touch &amp; hold to place manually</string>
     <!-- Button label to automatically add icon on home screen [CHAR_LIMIT=50] -->
     <string name="place_automatically">Add automatically</string>
-
+    <string name="desktop_icon_rearray">Icon Rearry</string>
     <!-- All Apps -->
     <!-- Search bar text in the apps view. [CHAR_LIMIT=50] -->
     <string name="all_apps_search_bar_hint">Search apps</string>

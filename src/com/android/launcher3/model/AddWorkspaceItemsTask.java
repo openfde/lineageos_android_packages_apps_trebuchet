@@ -276,7 +276,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
         int screenCount = workspaceScreens.size();
         // First check the preferred screen.
-        int preferredScreenIndex = workspaceScreens.isEmpty() ? 0 : 1;
+        int preferredScreenIndex =  0 ;// workspaceScreens.isEmpty() ? 0 : 1;
         if (preferredScreenIndex < screenCount) {
             screenId = workspaceScreens.get(preferredScreenIndex);
             found = findNextAvailableIconSpaceInScreen(
@@ -326,7 +326,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 occupied.markCells(r, true);
             }
         }
-        return occupied.findVacantCell(xy, spanX, spanY);
+        return occupied.findVacantCellVertical(xy, spanX, spanY);
     }
 
 }

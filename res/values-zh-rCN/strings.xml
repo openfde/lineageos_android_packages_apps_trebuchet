@@ -146,4 +146,5 @@
     <string name="work_apps_paused_content_description" msgid="7553586952985486433">"工作资料已被暂停。现在，工作应用无法向您发送通知、不能耗用电池电量，也无法获取您的位置信息"</string>
     <string name="work_switch_tip" msgid="808075064383839144">"暂停工作应用及其通知"</string>
     <string name="remote_action_failed" msgid="1383965239183576790">"失败：<xliff:g id="WHAT">%1$s</xliff:g>"</string>
+    <string name="desktop_icon_rearray">"自动排列"</string>
 </resources>

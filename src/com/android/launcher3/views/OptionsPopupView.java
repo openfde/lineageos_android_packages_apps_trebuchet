@@ -18,6 +18,7 @@ package com.android.launcher3.views;
 import static com.android.launcher3.Utilities.EXTRA_WALLPAPER_FLAVOR;
 import static com.android.launcher3.Utilities.EXTRA_WALLPAPER_OFFSET;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_REARRAY;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS;
 
@@ -171,7 +172,18 @@ public class OptionsPopupView extends ArrowPopup
                 LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
                 OptionsPopupView::startSettings));
 
+        options.add(new OptionItem(R.string.desktop_icon_rearray, R.drawable.ic_apps,
+                LAUNCHER_DESKTOP_ICON_TAP_REARRAY,
+                OptionsPopupView::startRearray));
+
         show(launcher, target, options);
+    }
+
+    public static boolean startRearray(View view) {
+        TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "start: rearray");
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.getModel().forceReload();
+        return true;
     }
 
     public static boolean onWidgetsClicked(View view) {
