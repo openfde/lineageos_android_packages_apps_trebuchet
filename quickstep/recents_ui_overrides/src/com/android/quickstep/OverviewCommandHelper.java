@@ -45,6 +45,8 @@ import com.android.systemui.shared.system.RemoteAnimationTargetCompat;
 import com.android.systemui.shared.recents.model.Task;
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Helper class to handle various atomic commands for switching between Overview.
@@ -271,6 +273,9 @@ public class OverviewCommandHelper {
         protected final BaseActivityInterface<?, T> mActivityInterface;
         private final long mCreateTime;
         private final AppToOverviewAnimationProvider<T> mAnimationProvider;
+        // Comparator to sort by last active time (descending)
+        private final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
+            (o1, o2) -> Long.signum(o1.key.lastActiveTime - o2.key.lastActiveTime);
 
         private final long mToggleClickedTime = SystemClock.uptimeMillis();
         private boolean mUserEventLogged;
@@ -344,6 +349,9 @@ public class OverviewCommandHelper {
 
         private void updateRecentsTask(ArrayList<Task> tasks) {
             Log.d("huyang", "updateRecentsTask() called with: tasks = [" + tasks + "] ");
+            Collections.sort(tasks, LAST_ACTIVE_TIME_COMPARATOR);
+            Log.d("ptg_iby", "updateRecentsTask() called with: newSortedTasks = [" + tasks + "] ");
+
             Context context = mActivityInterface.getCreatedActivity();
             tasks.stream().filter(task ->
                     (task.key.baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS).collect(Collectors.toList());
