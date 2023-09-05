@@ -420,9 +420,9 @@ public class ScrimView<T extends Launcher> extends View implements Insettable, O
         boolean wasVisible = mDragHandle != null;
         if (visible != wasVisible) {
             if (visible) {
-                mDragHandle = recycle != null ? recycle :
-                        mLauncher.getDrawable(R.drawable.drag_handle_indicator_shadow);
-                mDragHandle.setBounds(mDragHandleBounds);
+//                mDragHandle = recycle != null ? recycle :
+//                        mLauncher.getDrawable(R.drawable.drag_handle_indicator_shadow);
+//                mDragHandle.setBounds(mDragHandleBounds);
 
                 updateDragHandleAlpha();
             } else {
