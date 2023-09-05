@@ -2106,6 +2106,20 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mWorkspace.removeExtraEmptyScreen(false);
     }
 
+    public void rearray(View v){
+        List<ItemInfo> rearray = getModel().rearray(v.getContext());
+        for (int i = 0 ; i < rearray.size() ; i++){
+            ItemInfo info = rearray.get(i);
+            getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
+                    info.cellX, info.cellY, info.spanX, info.spanY);
+        }
+        bindItems(rearray, false);
+    }
+
+    public void removeView(int x, int y){
+        mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));
+    }
+
     /**
      * Bind the items start-end from the list.
      *

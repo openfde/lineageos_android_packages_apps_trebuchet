@@ -165,7 +165,7 @@ public class RecentDialog extends Dialog {
             // Arbitrary bounds only because freeform is in dev mode right now
             ActivityManagerWrapper.getInstance().startActivityFromRecents(mTask.key.id,
                     activityOptions);
-            mTask.touchActiveTime();
+            // mTask.touchActiveTime();
             mRecentApp = null;
         }
     }

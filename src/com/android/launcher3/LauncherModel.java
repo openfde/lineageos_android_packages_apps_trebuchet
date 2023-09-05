@@ -315,6 +315,37 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         }
     }
 
+    public List<ItemInfo> rearray(Context context){
+        InstallShortcutReceiver.enableInstallQueue(InstallShortcutReceiver.FLAG_LOADER_RUNNING);
+        synchronized (mLock) {
+            // Don't bother to start the thread if we know it's not going to do anything
+            final Callbacks[] callbacksList = getCallbacks();
+            if (callbacksList.length > 0) {
+                // Clear any pending bind-runnables from the synchronized load process.
+                for (Callbacks cb : callbacksList) {
+                    mMainExecutor.execute(cb::clearPendingBinds);
+                }
+
+                // If there is already one running, tell it to stop.
+                stopLoader();
+//                LoaderResults loaderResults = new LoaderResults(
+//                        mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
+                ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+                InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+                Launcher launcher = Launcher.getLauncher(context);
+                for (int i = 0 ;i < workspaceItems.size(); i++){
+                    ItemInfo info = workspaceItems.get(i);
+                    launcher.removeView(info.cellX , info.cellY);
+                    info.cellX = i/idp.numColumns;
+                    info.cellY = i%idp.numRows;
+                }
+//                startLoaderForResults(loaderResults);
+                return workspaceItems;
+            }
+        }
+        return null;
+    }
+
     /**
      * Starts the loader. Tries to bind {@params synchronousBindPage} synchronously if possible.
      * @return true if the page could be bound synchronously.

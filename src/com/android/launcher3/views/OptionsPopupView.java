@@ -182,7 +182,7 @@ public class OptionsPopupView extends ArrowPopup
     public static boolean startRearray(View view) {
         TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "start: rearray");
         Launcher launcher = Launcher.getLauncher(view.getContext());
-        launcher.getModel().forceReload();
+        launcher.rearray(view);
         return true;
     }
 
