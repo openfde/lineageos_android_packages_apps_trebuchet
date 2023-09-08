@@ -292,9 +292,9 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
     }
 
     static void flushInstallQueue(Context context) {
-        if (sInstallQueueDisabledFlags != 0) {
-            return;
-        }
+        // if (sInstallQueueDisabledFlags != 0) {
+            // return;
+        // }
         MODEL_EXECUTOR.post(() -> flushQueueInBackground(context));
     }
 
