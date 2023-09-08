@@ -158,19 +158,19 @@ public abstract class ArrowPopup<T extends BaseDraggingActivity> extends Abstrac
 
         boolean reverseOrder = mIsAboveIcon;
         if (reverseOrder) {
-            int count = getChildCount();
-            ArrayList<View> allViews = new ArrayList<>(count);
-            for (int i = 0; i < count; i++) {
-                if (i == viewsToFlip) {
-                    Collections.reverse(allViews);
-                }
-                allViews.add(getChildAt(i));
-            }
-            Collections.reverse(allViews);
-            removeAllViews();
-            for (int i = 0; i < count; i++) {
-                addView(allViews.get(i));
-            }
+            // int count = getChildCount();
+            // ArrayList<View> allViews = new ArrayList<>(count);
+            // for (int i = 0; i < count; i++) {
+            //     if (i == viewsToFlip) {
+            //         Collections.reverse(allViews);
+            //     }
+            //     allViews.add(getChildAt(i));
+            // }
+            // Collections.reverse(allViews);
+            // removeAllViews();
+            // for (int i = 0; i < count; i++) {
+            //     addView(allViews.get(i));
+            // }
 
             orientAboutObject();
         }
