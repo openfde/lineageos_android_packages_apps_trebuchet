@@ -27,6 +27,9 @@ import android.util.Log;
 import android.util.MutableInt;
 
 import com.android.launcher3.InstallShortcutReceiver;
+import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.Launcher;
+import com.android.launcher3.LauncherAppState;
 import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.Workspace;
 import com.android.launcher3.config.FeatureFlags;
@@ -224,6 +227,7 @@ public class BgDataModel {
 
     public synchronized void addItem(Context context, ItemInfo item, boolean newItem) {
         itemsIdMap.put(item.id, item);
+        item.screenId = 0;
         switch (item.itemType) {
             case LauncherSettings.Favorites.ITEM_TYPE_FOLDER:
                 folders.put(item.id, (FolderInfo) item);
@@ -267,8 +271,24 @@ public class BgDataModel {
                 break;
             case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
             case LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET:
+                InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+                item.cellX = idp.numColumns - item.spanX;
+                if(appWidgets.size() != 0) {
+                    ItemInfo info = appWidgets.get(appWidgets.size() - 1);
+                    item.cellY = info.spanY + info.cellY;
+                }
                 appWidgets.add((LauncherAppWidgetInfo) item);
                 break;
+        }
+    }
+
+    public static boolean isRectangleOverlap(int[] rect1, int[] rect2) {
+        int x1 = rect1[0], y1 = rect1[1], x2 = rect1[2], y2 = rect1[3];
+        int x3 = rect2[0], y3 = rect2[1], x4 = rect2[2], y4 = rect2[3];
+        if (x1 < x4 && x2 > x3 && y1 < y4 && y2 > y3) {
+            return true;
+        } else {
+            return false;
         }
     }
 
