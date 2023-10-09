@@ -272,10 +272,15 @@ public class BgDataModel {
             case LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET:
             case LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET:
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
-                item.cellX = idp.numColumns - item.spanX;
                 if(appWidgets.size() != 0) {
                     ItemInfo info = appWidgets.get(appWidgets.size() - 1);
-                    item.cellY = info.spanY + info.cellY;
+                    int[] position = {info.cellX, info.cellY, info.cellX + info.spanX, info.cellY + info.spanY};
+                    int[] newPosition = {item.cellX, item.cellY, item.cellX + item.spanX, item.cellY + item.spanY};
+                    boolean overlap = isRectangleOverlap(position, newPosition);
+                    if(overlap){
+                        item.cellX = idp.numColumns - item.spanX;
+                        item.cellY = info.spanY + info.cellY;
+                    }
                 }
                 appWidgets.add((LauncherAppWidgetInfo) item);
                 break;
