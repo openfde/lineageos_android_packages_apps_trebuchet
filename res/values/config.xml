@@ -84,8 +84,8 @@
     <item type="id" name="menu_apply_flags" />
 
     <!-- Popup items -->
-    <integer name="config_popupOpenCloseDuration">150</integer>
-    <integer name="config_popupArrowOpenCloseDuration">40</integer>
+    <integer name="config_popupOpenCloseDuration">50</integer>
+    <integer name="config_popupArrowOpenCloseDuration">20</integer>
     <integer name="config_removeNotificationViewDuration">300</integer>
 
     <!-- Default packages -->
