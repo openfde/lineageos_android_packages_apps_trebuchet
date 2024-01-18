@@ -56,6 +56,7 @@ import com.android.launcher3.util.DefaultDisplay.Info;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.MainThreadInitializedObject;
 import com.android.launcher3.util.Themes;
+import com.android.quickstep.ScreenSizeUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -265,9 +266,16 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
     private void initGrid(
             Context context, DefaultDisplay.Info displayInfo, DisplayOption displayOption) {
+        iconSize = displayOption.iconSize;
         GridOption closestProfile = displayOption.grid;
-        numRows =  8 ; // closestProfile.numRows;
-        numColumns = 20 ; // closestProfile.numColumns;
+        DisplayMetrics metrics = displayInfo.metrics;
+        float density = metrics.density;
+        float iconPixel = iconSize * density;
+        int heightPixels = metrics.heightPixels;
+        int widthPixels = metrics.widthPixels;
+        numRows = (int) ((heightPixels * 0.5) / iconPixel);
+        numColumns = (int) ((widthPixels * 0.5) / iconPixel);
+        Log.e(TAG, "numRows=" + numRows + "  numColumns=" + numColumns);
         numHotseatIcons = closestProfile.numHotseatIcons;
         dbFile = closestProfile.dbFile;
         defaultLayoutId = closestProfile.defaultLayoutId;
@@ -278,7 +286,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
         mExtraAttrs = closestProfile.extraAttrs;
 
-        iconSize = displayOption.iconSize;
+//        iconSize = displayOption.iconSize;
         iconShapePath = getIconShapePath(context);
         iconPack = new IconPackStore(context).getCurrent();
         landscapeIconSize = displayOption.landscapeIconSize;
