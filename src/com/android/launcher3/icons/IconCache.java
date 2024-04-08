@@ -229,12 +229,12 @@ public class IconCache extends BaseIconCache {
             return;
         }
         info.bitmap = bitmapInfo;
-        if (useBadged) {
-            BitmapInfo badgeInfo = getShortcutInfoBadge(si);
-            try (LauncherIcons li = LauncherIcons.obtain(mContext)) {
-                info.bitmap = li.badgeBitmap(info.bitmap.icon, badgeInfo);
-            }
-        }
+        // if (useBadged) {
+            // BitmapInfo badgeInfo = getShortcutInfoBadge(si);
+            // try (LauncherIcons li = LauncherIcons.obtain(mContext)) {
+                // info.bitmap = li.badgeBitmap(info.bitmap.icon, badgeInfo);
+            // }
+        // }
     }
 
     /**
