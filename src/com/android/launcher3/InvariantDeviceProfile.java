@@ -411,6 +411,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
     static ArrayList<DisplayOption> getPredefinedDeviceProfiles(Context context, String gridName) {
         ArrayList<DisplayOption> profiles = new ArrayList<>();
+        Log.d(TAG, "gridName: " + gridName);
         try (XmlResourceParser parser = context.getResources().getXml(R.xml.device_profiles)) {
             final int depth = parser.getDepth();
             int type;
