@@ -585,8 +585,6 @@ public class CellLayout extends ViewGroup {
         if (child instanceof BubbleTextView) {
             BubbleTextView bubbleChild = (BubbleTextView) child;
             bubbleChild.setTextVisibility(mContainerType != HOTSEAT);
-            Log.d(TAG, "addViewToCellLayout 11111111111111" );
-
         }
 
         child.setScaleX(mChildScale);

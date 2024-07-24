@@ -202,6 +202,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
      * @return the container if shown or null.
      */
     public static PopupContainerWithArrow showForIcon(BubbleTextView icon) {
+        Log.d(TAG, ", PopupContainerWithArrow  BubbleTextView.......  ");
         Launcher launcher = Launcher.getLauncher(icon.getContext());
         if (getOpen(launcher) != null) {
             // There is already an items container open, so don't open this one.
@@ -209,7 +210,11 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
             return null;
         }
         ItemInfo item = (ItemInfo) icon.getTag();
+
+        Log.d(TAG, ", PopupContainerWithArrow  BubbleTextView.......item "+item );
+
         if (!canShow(icon, item)) {
+            Log.d(TAG, ", PopupContainerWithArrow  BubbleTextView....is null " );
             return null;
         }
 
@@ -232,6 +237,8 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
 
     //for app widget
     public static PopupContainerWithArrow showForIcon(View icon) {
+        Log.d(TAG, ", PopupContainerWithArrow  View.....");
+
         Launcher launcher = Launcher.getLauncher(icon.getContext());
         if (getOpen(launcher) != null) {
             // There is already an items container open, so don't open this one.

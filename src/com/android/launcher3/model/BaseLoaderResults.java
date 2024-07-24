@@ -226,7 +226,6 @@ public abstract class BaseLoaderResults {
                 mBgDataModel.workspaceItems.addAll(currentWorkspaceItems);
             }
         
-            Log.i(TAG, "Launcher workspaceItems a  workspaceItems "+ mBgDataModel.workspaceItems.size()  + ",currentWorkspaceItems "+currentWorkspaceItems.size());
             mBgDataModel.workspaceItems = mBgDataModel.workspaceItems.stream()
             .collect(Collectors.collectingAndThen(
                     Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(ItemInfo::getTitle))),
@@ -239,8 +238,6 @@ public abstract class BaseLoaderResults {
                     ArrayList::new
             ));
 
-            Log.i(TAG, "Launcher workspaceItems b currentWorkspaceItems "+ mBgDataModel.workspaceItems.size() );
-            Log.i(TAG, "Launcher bind 111111workspaceItems111111111 currentWorkspaceItems "+ mBgDataModel.workspaceItems.toString() );
             bindWorkspaceItems(currentWorkspaceItems, mainExecutor);
             bindAppWidgets(currentAppWidgets, mainExecutor);
 
@@ -257,7 +254,6 @@ public abstract class BaseLoaderResults {
 
             executeCallbacksTask(c -> c.finishFirstPageBind(
                     validFirstPage ? (ViewOnDrawExecutor) deferredExecutor : null), mainExecutor);
-            Log.i(TAG, "Launcher bind 2222222222 otherWorkspaceItems "+otherWorkspaceItems.size() );
 
   
             bindWorkspaceItems(otherWorkspaceItems, deferredExecutor);

@@ -76,6 +76,15 @@ public static boolean startNewDoc() {
     return true;
 }
 
+// public static void deleteFiles(File file) {
+//     if (file.isDirectory()) {
+//         for (File child : file.listFiles()) {
+//             deleteFiles(child);
+//         }
+//     }
+//     file.delete();
+// }
+
 private static String getUniqueFileName(String documentId,String fileName ) {
     String name = fileName ;
     String extension = "" ;

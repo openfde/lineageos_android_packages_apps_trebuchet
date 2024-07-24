@@ -33,6 +33,9 @@ import com.android.launcher3.widget.WidgetsBottomSheet;
 
 import java.util.List;
 import android.util.Log;
+import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.util.FileUtils;
+import java.io.File;
 
 /**
  * Represents a system shortcut for a given app. The shortcut should have a label and icon, and an
@@ -194,8 +197,13 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
         @Override
         public void onClick(View view) {
-            dismissTaskMenuView(mTarget);
             Launcher launcher = Launcher.getLauncher(view.getContext());
+            if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY ){
+                launcher.gotoDocApp("DELETE_FILE",FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+            }else if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                launcher.gotoDocApp("DELETE_FILE",FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+            }
+            dismissTaskMenuView(mTarget);
             launcher.removeItem(icon, mItemInfo,true);
         }
     }
