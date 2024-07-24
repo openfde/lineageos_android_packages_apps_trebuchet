@@ -203,7 +203,22 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import android.content.ComponentName;
+import com.android.launcher3.util.FileUtils;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.io.File;
 
+import android.os.Environment;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import android.net.Uri;
+import androidx.annotation.NonNull;
+import android.provider.Settings;
+import android.Manifest;
+import com.android.documentsui.IDocAidlInterface;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 /**
  * Default launcher application.
  */
@@ -268,6 +283,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     private LauncherAppTransitionManager mAppTransitionManager;
     private Configuration mOldConfig;
+
+    IDocAidlInterface idocAidl;
 
     @Thunk
     Workspace mWorkspace;
@@ -349,8 +366,34 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     private SafeCloseable mUserChangedCallbackCloseable;
 
+    public static final int REQUEST_CODE = 1000;
+
+    public static final int REQUEST_CODE_1 = 1001;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // 如果权限未授予，则请求权限
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE_1);
+        }
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // 如果权限未授予，则请求权限
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            }
+        }
+
+        bindService();
+
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_CREATE_EVT,
                 TraceHelper.FLAG_UI_EVENT);
         if (DEBUG_STRICT_MODE) {
@@ -470,6 +513,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mUserChangedCallbackCloseable = UserCache.INSTANCE.get(this).addUserChangeListener(
                 () -> getStateManager().goToState(NORMAL));
     }
+
 
     protected LauncherOverlayManager getDefaultOverlay() {
         return new LauncherOverlayManager() { };
@@ -645,6 +689,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     private int completeAdd(
             int requestCode, Intent intent, int appWidgetId, PendingRequestArgs info) {
         int screenId = info.screenId;
+        Log.d(TAG, "completeAdd: loading default c.screenId "+screenId  + ",requestCode "+requestCode );
+
         if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
             // When the screen id represents an actual screen (as opposed to a rank) we make sure
             // that the drop page actually exists.
@@ -2088,6 +2134,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void bindAppsAdded(IntArray newScreens, ArrayList<ItemInfo> addNotAnimated,
             ArrayList<ItemInfo> addAnimated) {
+
+        Log.i(TAG, "bindAppsAdded  addNotAnimated: "+addNotAnimated.size() + ",addAnimated: "+addAnimated.size());
+
         // Add the new screens
         if (newScreens != null) {
             bindAddScreens(newScreens);
@@ -2106,8 +2155,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mWorkspace.removeExtraEmptyScreen(false);
     }
 
-    public void rearray(View v){
-        List<ItemInfo> rearray = getModel().rearray(v.getContext());
+    public void rearray(Context context){
+        List<ItemInfo> rearray = getModel().rearray(context);
         for (int i = 0 ; i < rearray.size() ; i++){
             ItemInfo info = rearray.get(i);
             getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
@@ -2116,9 +2165,15 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         bindItems(rearray, false);
     }
 
+    public void bindWorkspace(){
+        getModel().startLoader();
+    }
+
     public void removeView(int x, int y){
         mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));
     }
+
+    
 
     /**
      * Bind the items start-end from the list.
@@ -2128,13 +2183,19 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void bindItems(final List<ItemInfo> items, final boolean forceAnimateIcons) {
         // Get the list of added items and intersect them with the set of items here
+
         final Collection<Animator> bounceAnims = new ArrayList<>();
         final boolean animateIcons = forceAnimateIcons && canRunNewAppsAnimation();
         Workspace workspace = mWorkspace;
         int newItemsScreenId = -1;
+
+        Log.d(TAG, "bindItems: items size  "+items.size() + ",toString "+items.toString());
+        
         int end = items.size();
+
         for (int i = 0; i < end; i++) {
-            final ItemInfo item = items.get(i);
+             ItemInfo item = items.get(i);
+            Log.d(TAG, "bindItems: loading default c.itemType "+item.itemType  + " ,end "+end + " ,title "+item.title + " ,dumpProperties "+item.toString());
 
             // Short circuit if we are loading dock items for a configuration which has no dock
             if (item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
@@ -2146,6 +2207,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             switch (item.itemType) {
                 case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
+                case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
+                case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     WorkspaceItemInfo info = (WorkspaceItemInfo) item;
                     view = createShortcut(info);
@@ -2169,24 +2232,26 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     throw new RuntimeException("Invalid Item Type");
             }
 
+
             /*
              * Remove colliding items.
              */
             if (item.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
-                CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
-                if (cl != null && cl.isOccupied(item.cellX, item.cellY)) {
-                    View v = cl.getChildAt(item.cellX, item.cellY);
-                    Object tag = v.getTag();
-                    String desc = "Collision while binding workspace item: " + item
-                            + ". Collides with " + tag;
-                    if (FeatureFlags.IS_STUDIO_BUILD) {
-                        throw (new RuntimeException(desc));
-                    } else {
-                        Log.d(TAG, desc);
-                        getModelWriter().deleteItemFromDatabase(item);
-                        continue;
-                    }
-                }
+                item = findNextCoordinate(item);
+                // CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
+                // if (cl != null && cl.isOccupied(item.cellX, item.cellY)) {
+                //     View v = cl.getChildAt(item.cellX, item.cellY);
+                //     Object tag = v.getTag();
+                //     String desc = "Collision while binding workspace item: " + item
+                //             + ". Collides with " + tag;
+                //     if (FeatureFlags.IS_STUDIO_BUILD) {
+                //         throw (new RuntimeException(desc));
+                //     } else {
+                //         Log.d(TAG, desc);
+                //         getModelWriter().deleteItemFromDatabase(item);
+                //         continue;
+                //     }
+                // }
             }
             workspace.addInScreenFromBind(view, item);
             if (animateIcons) {
@@ -2227,6 +2292,25 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             }
         }
         workspace.requestLayout();
+    }
+
+    public  ItemInfo findNextCoordinate(ItemInfo item) {
+        int xindex = item.cellX;
+        int yindex = item.cellY ;
+        CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
+        if (cl != null && cl.isOccupied(xindex, yindex)) {
+            if(yindex >= 8 ){
+                yindex = 0;
+                xindex++;
+            }else{
+                yindex++;
+            }
+            item.cellX = xindex;
+            item.cellY = yindex;
+            return findNextCoordinate(item);
+        }else{
+            return item ;
+        }
     }
 
     @Override
@@ -2789,4 +2873,33 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     private static class NonConfigInstance {
         public Configuration config;
     }
+
+    private void bindService(){
+        Intent mIntent = new Intent();
+        mIntent.setComponent(new ComponentName("com.android.documentsui", "com.android.documentsui.IpcService"));
+        boolean bindFlag = bindService(mIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
+            idocAidl = IDocAidlInterface.Stub.asInterface(service);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // ipcAidl = null;
+            idocAidl = null;
+        }
+    };
+
+    public void gotoDocApp(String method,String title){
+        try{
+            idocAidl.basicIpcMethon(method,title);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
 }

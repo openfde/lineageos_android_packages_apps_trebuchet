@@ -180,6 +180,7 @@ public class LauncherProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
+        Log.i(TAG,"bella ..query............. "+selection + " ,sortOrder "+sortOrder);
         createDbIfNotExists();
 
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
@@ -189,6 +190,17 @@ public class LauncherProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor result = qb.query(db, projection, args.where, args.args, null, null, sortOrder);
         result.setNotificationUri(getContext().getContentResolver(), uri);
+
+        // if(initialValues.containsKey(LauncherSettings.Favorites.TITLE)) {
+        //     String title = initialValues.get(LauncherSettings.Favorites.TITLE).toString();
+        //     Log.i(TAG,"bella...insert......title....... "+title);
+        //     if(title.contains("文件")){
+        //         initialValues.put(LauncherSettings.Favorites.TITLE,"共享文件");
+        //     }
+        // }
+        int rowCount = result.getCount();
+
+        Log.i(TAG,"bella ..query.............rowCount "+rowCount );
 
         return result;
     }
@@ -216,6 +228,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
+        Log.i(TAG,"bella...insert............. "+initialValues.toString());
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri);
 
@@ -325,6 +338,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Log.i(TAG,"bella....delete............. "+selection);
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
 

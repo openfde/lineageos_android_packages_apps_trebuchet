@@ -31,6 +31,7 @@ android_library {
     platform_apis: true,
 }
 
+
 java_library_static {
     name: "launcher_log_protos_lite",
     srcs: [
@@ -53,7 +54,8 @@ java_library {
 
     static_libs: ["PluginCoreLib"],
 
-    srcs: ["src_plugins/**/*.java"],
+    srcs: ["src_plugins/**/*.java","src/**/*.aidl"],
+	
 
     sdk_version: "current",
     min_sdk_version: "28",

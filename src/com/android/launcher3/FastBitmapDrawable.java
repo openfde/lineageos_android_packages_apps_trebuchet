@@ -37,6 +37,8 @@ import com.android.launcher3.graphics.PlaceHolderIconDrawable;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.util.Themes;
+import com.android.launcher3.R;
+import android.graphics.BitmapFactory;
 
 
 public class FastBitmapDrawable extends Drawable {
@@ -312,6 +314,19 @@ public class FastBitmapDrawable extends Drawable {
      */
     public static FastBitmapDrawable newIcon(Context context, ItemInfoWithIcon info) {
         FastBitmapDrawable drawable = newIcon(context, info.bitmap);
+        if(info.itemType == 8){
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_dir);
+            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
+            drawable = newIcon(context, bitmapInfo);
+        }else if(info.itemType == 9 ){
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_doc);
+            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,R.color.default_shadow_color_no_alpha);
+            drawable = newIcon(context, bitmapInfo);
+        }else{
+
+        }
+
+        // FastBitmapDrawable drawable = newIcon(context, info.bitmap);
         drawable.setIsDisabled(info.isDisabled());
         return drawable;
     }

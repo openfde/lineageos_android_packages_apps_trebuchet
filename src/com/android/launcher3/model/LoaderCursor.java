@@ -176,6 +176,7 @@ public class LoaderCursor extends CursorWrapper {
      * Loads the icon from the cursor and updates the {@param info} if the icon is an app resource.
      */
     protected boolean loadIcon(WorkspaceItemInfo info) {
+        Log.i(TAG,"loadIcon....Launcher....... "+info.toString());
         try (LauncherIcons li = LauncherIcons.obtain(mContext)) {
             if (itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT) {
                 String packageName = getString(iconPackageIndex);
@@ -207,7 +208,7 @@ public class LoaderCursor extends CursorWrapper {
     /**
      * Returns the title or empty string
      */
-    private String getTitle() {
+    public String getTitle() {
         String title = getString(titleIndex);
         return TextUtils.isEmpty(title) ? "" : Utilities.trim(title);
     }

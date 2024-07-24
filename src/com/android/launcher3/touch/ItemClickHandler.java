@@ -65,6 +65,10 @@ import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.PendingAppWidgetHostView;
 import com.android.launcher3.widget.WidgetAddFlowHandler;
 import com.android.launcher3.widget.WidgetManagerHelper;
+import android.net.Uri;
+import java.io.File;
+import android.content.ComponentName;
+import android.provider.DocumentsContract;
 
 /**
  * Class for handling clicks on workspace and all-apps items
@@ -262,7 +266,23 @@ public class ItemClickHandler {
         if (item instanceof PromiseAppInfo) {
             PromiseAppInfo promiseAppInfo = (PromiseAppInfo) item;
             intent = promiseAppInfo.getMarketIntent(launcher);
-        } else {
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            String title = item.title.toString() ;
+            // String path = "%2fDesktop%2f"+title +"%2f";
+            // String uriPath = "content://com.android.externalstorage.documents/document/primary:" + path;
+            // Uri uri = Uri.parse(uriPath);
+            // Log.i(TAG,"bella Launcher uriPath "+uriPath + " , path "+path);
+            // intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            // intent.addCategory(Intent.CATEGORY_OPENABLE);
+            // intent.setType("*/*");
+            // intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+            launcher.gotoDocApp("OPEN_DIR",title);
+           return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
+            String title = item.title.toString() ;
+            launcher.gotoDocApp("OPEN_DOC",title);
+            return ;
+        }else {
             intent = item.getIntent();
         }
         if (intent == null) {

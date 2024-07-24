@@ -356,4 +356,6 @@
 
     <!-- Failed action error message: e.g. Failed: Pause -->
     <string name="remote_action_failed">Failed: <xliff:g id="what" example="Pause">%1$s</xliff:g></string>
+    <string name="desktop_new_document">"New document"</string>
+    <string name="desktop_new_directory">"New directory"</string>
 </resources>

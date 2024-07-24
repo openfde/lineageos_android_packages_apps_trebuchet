@@ -326,7 +326,13 @@ public class StatsLogManager implements ResourceBasedOverride {
         // ADD MORE
 
         @UiEvent(doc = "User rearray icon.(rearray).")
-        LAUNCHER_DESKTOP_ICON_TAP_REARRAY(652);
+        LAUNCHER_DESKTOP_ICON_TAP_REARRAY(652),
+
+        @UiEvent(doc = "User new dir")
+        LAUNCHER_DESKTOP_ICON_TAP_NEW_DIR(653),
+
+        @UiEvent(doc = "User new doc")
+        LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC(654);
 
         private final int mId;
 

@@ -69,6 +69,10 @@ import com.android.launcher3.views.IconLabelDotView;
 
 import java.text.NumberFormat;
 
+import android.util.Log;
+import com.android.launcher3.graphics.PlaceHolderIconDrawable;
+import com.android.launcher3.R;
+
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -76,6 +80,9 @@ import java.text.NumberFormat;
  */
 public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, OnResumeCallback,
         IconLabelDotView, DraggableView, Reorderable {
+
+    private static final String TAG = "CellLayout.BubbleTextView";
+
 
     private static final int DISPLAY_WORKSPACE = 0;
     private static final int DISPLAY_ALL_APPS = 1;
@@ -172,6 +179,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         SharedPreferences prefs = Utilities.getPrefs(context.getApplicationContext());
 
         mDisplay = a.getInteger(R.styleable.BubbleTextView_iconDisplay, DISPLAY_WORKSPACE);
+        Log.i(TAG, "bella BubbleTextView display "+mDisplay );
+
         final int defaultIconSize;
         if (mDisplay == DISPLAY_WORKSPACE) {
             setTextSize(TypedValue.COMPLEX_UNIT_PX, grid.iconTextSizePx);
@@ -190,7 +199,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         } else {
             // widget_selection or shortcut_popup
-            defaultIconSize = grid.iconSizePx;
+            defaultIconSize = grid.allAppsIconSizePx;
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         }
 
@@ -300,6 +309,22 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     private void applyIconAndLabel(ItemInfoWithIcon info) {
         FastBitmapDrawable iconDrawable = newIcon(getContext(), info);
         mDotParams.color = IconPalette.getMutedColor(info.bitmap.color, 0.54f);
+        Log.i(TAG,"applyIconAndLabel .... info "+info ); 
+
+        // if(icon instanceof PlaceHolderIconDrawable) {
+        //     Log.i(TAG,"PlaceHolderIconDrawable .... icon "+icon );
+        //     icon = getContext().getResources().getDrawable(R.mipmap.icon_dir);
+           
+        // }else{
+        //     //
+        //      Log.i(TAG,"otherDrawable .... icon "+icon );
+        // }
+
+        // if(info.itemType == 8){
+        //     iconDrawable = getContext().getResources().getDrawable(R.mipmap.icon_dir);
+        // }else if(info.itemType == 9 ){
+        //     iconDrawable = getContext().getResources().getDrawable(R.mipmap.icon_dir);
+        // }
 
         setIcon(iconDrawable);
         if (mShouldShowLabel) {
@@ -567,9 +592,12 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
                 } else {
                     preloadDrawable = newPendingIcon(getContext(), info);
                     preloadDrawable.setLevel(progressLevel);
+                    Log.i(TAG,"applyProgressLevel .... info "+info );
                     setIcon(preloadDrawable);
                 }
                 return preloadDrawable;
+            }else{
+
             }
         }
         return null;
@@ -638,7 +666,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         // If we had already set an icon before, disable relayout as the icon size is the
         // same as before.
         mDisableRelayout = mIcon != null;
-
+        Log.i(TAG,"applyCompoundDrawables .... mLayoutHorizontal "+mLayoutHorizontal + " ,mIconSize: "+mIconSize);
+        
         icon.setBounds(0, 0, mIconSize, mIconSize);
         if (mLayoutHorizontal) {
             setCompoundDrawablesRelative(icon, null, null, null);
@@ -752,6 +781,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     }
 
     private int getIconSizeForDisplay(int display) {
+        Log.i(TAG, "bella getIconSizeForDisplay display "+display );
         DeviceProfile grid = mActivity.getDeviceProfile();
         switch (display) {
             case DISPLAY_ALL_APPS:

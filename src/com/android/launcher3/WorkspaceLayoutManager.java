@@ -40,6 +40,7 @@ public interface WorkspaceLayoutManager {
     default void addInScreenFromBind(View child, ItemInfo info) {
         int x = info.cellX;
         int y = info.cellY;
+        Log.i(TAG,"addInScreenFromBind  info "+info);
         if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT
                 || info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION) {
             int screenId = info.screenId;

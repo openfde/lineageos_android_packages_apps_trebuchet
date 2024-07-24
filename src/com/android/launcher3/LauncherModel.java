@@ -72,6 +72,8 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
+import com.android.launcher3.util.FileUtils;
+import java.util.Collections;
 
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
@@ -79,7 +81,7 @@ import java.util.function.Supplier;
  * for the Launcher.
  */
 public class LauncherModel extends LauncherApps.Callback implements InstallSessionTracker.Callback {
-    private static final boolean DEBUG_RECEIVER = false;
+    private static final boolean DEBUG_RECEIVER = true;
 
     static final String TAG = "Launcher.Model";
 
@@ -330,7 +332,11 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 stopLoader();
 //                LoaderResults loaderResults = new LoaderResults(
 //                        mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
-                ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+               ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+
+                // Log.i(TAG, "workspaceItems "+workspaceItems.size());
+               Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
+               
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
                 Launcher launcher = Launcher.getLauncher(context);
                 for (int i = 0 ;i < workspaceItems.size(); i++){

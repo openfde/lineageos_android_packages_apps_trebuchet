@@ -78,7 +78,7 @@ public class BgDataModel {
      * List of all the folders and shortcuts directly on the home screen (no widgets
      * or shortcuts within folders).
      */
-    public final ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
+    public  ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
 
     /**
      * All LauncherAppWidgetInfo created by LauncherModel.
