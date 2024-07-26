@@ -32,58 +32,6 @@ public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
     protected static final String TAG = "FileUtils";
 
-    public static boolean startNewDir() {     
-        String documentId = PATH_ID_DESKTOP; 
-        File folder = new File(documentId);   
-        String newDirName = "NewDir"; 
-        if (!folder.exists()) {
-            boolean result = folder.mkdirs();
-            if (result) {
-                Log.i("bella", "Folder created: " + folder.getAbsolutePath());
-            } else {
-                Log.e("bella", "Failed to create folder");
-            }
-        } else {
-            Log.i("bella", "Folder already exists");
-            newDirName =  getUniqueFileName(documentId,newDirName);
-        }
-        folder = new File(documentId,newDirName);
-        folder.mkdirs();
-    return true;
-}
-
-public static boolean startNewDoc() {      
-    try{
-        String documentId = PATH_ID_DESKTOP;
-        File folder = new File(documentId);  
-        String newDocName = "NewDir.txt";  
-        if (!folder.exists()) {
-            boolean result = folder.mkdirs();
-            if (result) {
-                Log.i("bella", "Folder created: " + folder.getAbsolutePath());
-            } else {
-                Log.e("bella", "Failed to create folder");
-            }
-        } else {
-            Log.i("bella", "Folder already exists");
-            newDocName =  getUniqueFileName(documentId,newDocName);
-        }
-        folder = new File(documentId,newDocName);
-        folder.createNewFile();
-    }catch(Exception e){
-        e.printStackTrace();
-    }
-    return true;
-}
-
-// public static void deleteFiles(File file) {
-//     if (file.isDirectory()) {
-//         for (File child : file.listFiles()) {
-//             deleteFiles(child);
-//         }
-//     }
-//     file.delete();
-// }
 
 private static String getUniqueFileName(String documentId,String fileName ) {
     String name = fileName ;
@@ -213,5 +161,26 @@ public static List<WorkspaceItemInfo> getDesktop(int count){
     return null ;    
 }
 
+/**
+     * get file type
+     * @param filePath
+     * @return
+     */
+    public static String getFileTyle (String filePath){
+        try {
+            File file = new File(filePath);
+            String fileName = file.getName();
+            int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+                String extension = fileName.substring(dotIndex + 1);
+                return  extension;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

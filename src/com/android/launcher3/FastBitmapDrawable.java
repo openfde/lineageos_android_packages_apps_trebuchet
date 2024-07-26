@@ -39,6 +39,8 @@ import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.R;
 import android.graphics.BitmapFactory;
+import android.util.Log;
+import com.android.launcher3.util.FileUtils;
 
 
 public class FastBitmapDrawable extends Drawable {
@@ -319,7 +321,16 @@ public class FastBitmapDrawable extends Drawable {
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
             drawable = newIcon(context, bitmapInfo);
         }else if(info.itemType == 9 ){
-            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_doc);
+            String fileName = info.title.toString() ;
+            int resId =  R.mipmap.icon_doc;
+            String fileType = FileUtils.getFileTyle(fileName);
+            if(fileType !=null){
+                 if(fileType.contains("png") || fileType.contains("jpg")){
+                    resId =  R.mipmap.icon_pic;
+                 }   
+            }
+            Log.i("bella"," newIcon  fileType : "+fileType  + " , info "+info );
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),resId);
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,R.color.default_shadow_color_no_alpha);
             drawable = newIcon(context, bitmapInfo);
         }else{

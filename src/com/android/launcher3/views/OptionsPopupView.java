@@ -202,15 +202,15 @@ public class OptionsPopupView extends ArrowPopup
     }
 
     public static boolean startNewDir(View view) {      
-        FileUtils.startNewDir();    
         Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.gotoDocApp("NEW_DIR","");
         launcher.bindWorkspace();   
         return true;
     }
 
     public static boolean startNewDoc(View view) {      
-        FileUtils.startNewDoc();  
         Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.gotoDocApp("NEW_FILE","");
         launcher.bindWorkspace();    
         return true;
     }
