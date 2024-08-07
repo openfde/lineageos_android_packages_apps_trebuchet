@@ -47,6 +47,9 @@ import static com.android.launcher3.logging.StatsLogManager.containerTypeToAtomS
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 import static com.android.launcher3.popup.SystemShortcut.APP_OPEN;
 import static com.android.launcher3.popup.SystemShortcut.APP_REMOVE;
+import static com.android.launcher3.popup.SystemShortcut.APP_COPY;
+import static com.android.launcher3.popup.SystemShortcut.APP_CUT;
+import static com.android.launcher3.popup.SystemShortcut.APP_RENAME;
 import static com.android.launcher3.popup.SystemShortcut.INSTALL;
 import static com.android.launcher3.popup.SystemShortcut.WIDGETS;
 import static com.android.launcher3.states.RotationHelper.REQUEST_LOCK;
@@ -219,6 +222,11 @@ import android.Manifest;
 import com.android.documentsui.IDocAidlInterface;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Handler;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+
 /**
  * Default launcher application.
  */
@@ -285,6 +293,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     private Configuration mOldConfig;
 
     IDocAidlInterface idocAidl;
+
+    private Handler handler = new Handler();
+
 
     @Thunk
     Workspace mWorkspace;
@@ -374,23 +385,23 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            // 如果权限未授予，则请求权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE_1);
-        }
+        // if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        //     // 如果权限未授予，则请求权限
+        //     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE_1);
+        // }
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            // 如果权限未授予，则请求权限
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-        }
+        // if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        //     // 如果权限未授予，则请求权限
+        //     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+        // }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                intent.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(intent);
-            }
-        }
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        //     if (!Environment.isExternalStorageManager()) {
+        //         Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+        //         intent.setData(Uri.parse("package:" + getPackageName()));
+        //         startActivity(intent);
+        //     }
+        // }
 
         bindService();
 
@@ -2166,7 +2177,12 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     }
 
     public void bindWorkspace(){
-        getModel().startLoader();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getModel().startLoader();
+            }
+        }, 1000);
     }
 
     public void removeView(int x, int y){
@@ -2835,8 +2851,12 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         AbstractFloatingView.closeAllOpenViews(this, animate);
     }
 
-    public Stream<SystemShortcut.Factory> getSupportedShortcuts() {
-        return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
+    public Stream<SystemShortcut.Factory> getSupportedShortcuts(int itemType) {
+        if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+            return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
+        }else{
+            return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
+        }
     }
 
     public Stream<SystemShortcut.Factory> getWidgetSupportedShortcuts() {
@@ -2896,10 +2916,30 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     public void gotoDocApp(String method,String title){
         try{
-            idocAidl.basicIpcMethon(method,title);
+            Log.i(TAG,"bella method  "+method + " , title "+title);
+            String res = idocAidl.basicIpcMethon(method,title);
+            Log.i(TAG,"gotoDocApp res "+res);
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public boolean isShowPasteDlg(){
+        // OptionsPopupView.requestFocus();
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipboard.getPrimaryClip();
+        if (clip == null  ) {
+            Log.i(TAG," showDefaultOptions is null");
+        }else if( clip.getItemCount() < 1){
+        }else{
+            ClipData.Item item = clip.getItemAt(0);
+            if (item.getUri() != null) {
+                return true ;
+            }else{
+                Log.i(TAG," showDefaultOptions uri is null");
+            }
+        }
+       return false ;
     }
 
 }

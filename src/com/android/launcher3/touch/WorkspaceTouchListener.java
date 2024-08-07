@@ -42,6 +42,7 @@ import com.android.launcher3.dragndrop.DragLayer;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.TestProtocol;
 import com.android.launcher3.views.OptionsPopupView;
+import android.util.Log;
 
 /**
  * Helper class to handle touch on empty space in workspace and show options popup on long press
@@ -104,6 +105,7 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
                 mLongPressState = STATE_REQUESTED;
                 mTouchDownPoint.set(ev.getX(), ev.getY());
                 if (ev.getButtonState() == MotionEvent.BUTTON_SECONDARY){
+                    Log.i("bella"," showDefaultOptions aaaaaaaaaaaaaaa ---------");
                     OptionsPopupView.showDefaultOptions(mLauncher, mTouchDownPoint.x, mTouchDownPoint.y);
                 }
             }
@@ -177,6 +179,7 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
                 mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                         HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                 mLauncher.getStatsLogManager().logger().log(LAUNCHER_WORKSPACE_LONGPRESS);
+                Log.i("bella"," showDefaultOptions bbbbbbbbbbbbbbbbbb ---------");
                 OptionsPopupView.showDefaultOptions(mLauncher, mTouchDownPoint.x, mTouchDownPoint.y);
             } else {
                 cancelLongPress();

@@ -69,7 +69,7 @@ import android.net.Uri;
 import java.io.File;
 import android.content.ComponentName;
 import android.provider.DocumentsContract;
-
+import com.android.launcher3.util.FileUtils;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -258,6 +258,30 @@ public class ItemClickHandler {
         startAppShortcutOrInfoActivity(v, shortcut, launcher, sourceContainer);
     }
 
+    public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){
+         if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            launcher.gotoDocApp(FileUtils.COPY_DIR,item.title.toString());
+         }else{
+            launcher.gotoDocApp(FileUtils.COPY_FILE,item.title.toString());
+         }
+    }
+
+    public static void cutFiletoClipboard(Launcher launcher,ItemInfo item){
+        if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+           launcher.gotoDocApp(FileUtils.CUT_DIR,item.title.toString());
+        }else{
+           launcher.gotoDocApp(FileUtils.CUT_FILE,item.title.toString());
+        }
+   }
+
+   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item){
+    if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
+    }else{
+       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
+    }
+}
+
     public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher,
             @Nullable String sourceContainer) {
         TestLogging.recordEvent(
@@ -276,11 +300,11 @@ public class ItemClickHandler {
             // intent.addCategory(Intent.CATEGORY_OPENABLE);
             // intent.setType("*/*");
             // intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
-            launcher.gotoDocApp("OPEN_DIR",title);
-           return ;
+            launcher.gotoDocApp(FileUtils.OPEN_DIR,title);
+            return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
-            String title = item.title.toString() ;
-            launcher.gotoDocApp("OPEN_DOC",title);
+            String  title = item.title.toString() ;
+            launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
             return ;
         }else {
             intent = item.getIntent();

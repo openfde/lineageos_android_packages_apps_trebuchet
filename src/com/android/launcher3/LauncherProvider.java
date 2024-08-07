@@ -200,8 +200,6 @@ public class LauncherProvider extends ContentProvider {
         // }
         int rowCount = result.getCount();
 
-        Log.i(TAG,"bella ..query.............rowCount "+rowCount );
-
         return result;
     }
 

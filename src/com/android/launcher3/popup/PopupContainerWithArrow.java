@@ -227,7 +227,7 @@ public class PopupContainerWithArrow<T extends BaseDraggingActivity> extends Arr
         container.populateAndShow(icon,
                 popupDataProvider.getShortcutCountForItem(item),
                 popupDataProvider.getNotificationKeysForItem(item),
-                launcher.getSupportedShortcuts()
+                launcher.getSupportedShortcuts(item.itemType)
                         .map(s -> s.getShortcut(launcher, item, icon))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));

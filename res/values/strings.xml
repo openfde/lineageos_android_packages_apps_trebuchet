@@ -98,6 +98,7 @@
     <!-- Label for uninstall drop target (from the device).
          May appear next to remove_drop_target_label [CHAR_LIMIT=20]-->
     <string name="uninstall_drop_target_label">Uninstall</string>
+   
     <!-- Label for app info drop target. [CHAR_LIMIT=20] -->
     <string name="app_info_drop_target_label">App info</string>
     <!-- Label for install drop target. [CHAR_LIMIT=20] -->
@@ -108,7 +109,11 @@
     <string name="pin_prediction">Pin Prediction</string>
 
     <string name="app_open_drop_target_label" >open</string>
+    <string name="copy_drop_target">"Copy"</string>
+    <string name="cut_drop_target">"Cut"</string>
+    <string name="rename_drop_target">"Rename"</string>
     <string name="remove_drop_target">removte</string>
+    <string name="delete_drop_target">"delete"</string>
     <!-- Permissions: -->
     <skip />
     <!-- Permission short label -->
@@ -358,4 +363,9 @@
     <string name="remote_action_failed">Failed: <xliff:g id="what" example="Pause">%1$s</xliff:g></string>
     <string name="desktop_new_document">"New document"</string>
     <string name="desktop_new_directory">"New directory"</string>
+    <string name="desktop_new_paste">"paste"</string>
+    <string name="desktop_tips">"Tips"</string>
+    <string name="desktop_delete_tips">"is delete?"</string>
+    <string name="desktop_delete">"delete"</string>
+    <string name="desktop_cancel">"cancel"</string>
 </resources>

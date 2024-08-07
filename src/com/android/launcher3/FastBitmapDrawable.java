@@ -327,7 +327,13 @@ public class FastBitmapDrawable extends Drawable {
             if(fileType !=null){
                  if(fileType.contains("png") || fileType.contains("jpg")){
                     resId =  R.mipmap.icon_pic;
-                 }   
+                 }else if(fileType.contains("txt") || fileType.contains("md") || fileType.contains("xml")  || fileType.contains("java")  || fileType.contains("htm") || fileType.contains("json")  ){
+                    resId =  R.mipmap.icon_doc;
+                 } else{
+                    resId =  R.mipmap.icon_unkown;
+                 } 
+            }else{
+                resId =  R.mipmap.icon_unkown;
             }
             Log.i("bella"," newIcon  fileType : "+fileType  + " , info "+info );
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),resId);

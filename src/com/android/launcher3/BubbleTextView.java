@@ -179,7 +179,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         SharedPreferences prefs = Utilities.getPrefs(context.getApplicationContext());
 
         mDisplay = a.getInteger(R.styleable.BubbleTextView_iconDisplay, DISPLAY_WORKSPACE);
-        Log.i(TAG, "bella BubbleTextView display "+mDisplay );
+        // Log.i(TAG, "bella BubbleTextView display "+mDisplay );
 
         final int defaultIconSize;
         if (mDisplay == DISPLAY_WORKSPACE) {
@@ -310,21 +310,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         FastBitmapDrawable iconDrawable = newIcon(getContext(), info);
         mDotParams.color = IconPalette.getMutedColor(info.bitmap.color, 0.54f);
         Log.i(TAG,"applyIconAndLabel .... info "+info ); 
-
-        // if(icon instanceof PlaceHolderIconDrawable) {
-        //     Log.i(TAG,"PlaceHolderIconDrawable .... icon "+icon );
-        //     icon = getContext().getResources().getDrawable(R.mipmap.icon_dir);
-           
-        // }else{
-        //     //
-        //      Log.i(TAG,"otherDrawable .... icon "+icon );
-        // }
-
-        // if(info.itemType == 8){
-        //     iconDrawable = getContext().getResources().getDrawable(R.mipmap.icon_dir);
-        // }else if(info.itemType == 9 ){
-        //     iconDrawable = getContext().getResources().getDrawable(R.mipmap.icon_dir);
-        // }
 
         setIcon(iconDrawable);
         if (mShouldShowLabel) {
@@ -781,7 +766,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     }
 
     private int getIconSizeForDisplay(int display) {
-        Log.i(TAG, "bella getIconSizeForDisplay display "+display );
+        // Log.i(TAG, "bella getIconSizeForDisplay display "+display );
         DeviceProfile grid = mActivity.getDeviceProfile();
         switch (display) {
             case DISPLAY_ALL_APPS:

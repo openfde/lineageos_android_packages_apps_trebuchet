@@ -32,6 +32,38 @@ public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
     protected static final String TAG = "FileUtils";
 
+    public static final String OPEN_DIR = "OPEN_DIR";
+
+    public static final String OPEN_FILE = "OPEN_FILE";
+
+    public static final String DELETE_DIR = "DELETE_DIR";
+
+    public static final String DELETE_FILE = "DELETE_FILE";
+
+    public static final String NEW_DIR = "NEW_DIR";
+
+    public static final String NEW_FILE = "NEW_FILE";
+
+    public static final String COPY_DIR = "COPY_DIR";
+
+    public static final String COPY_FILE = "COPY_FILE";
+
+    public static final String CUT_DIR = "CUT_DIR";
+
+    public static final String CUT_FILE = "CUT_FILE";
+
+    public static final String PASTE_DIR = "PASTE_DIR";
+
+    public static final String PASTE_FILE = "PASTE_FILE";
+
+    public static final String RENAME_DIR = "RENAME_DIR";
+
+    public static final String RENAME_FILE = "RENAME_FILE";
+
+    public static final String DIR_INFO = "DIR_INFO";
+
+    public static final String FILE_INFO = "FILE_INFO";
+
 
 private static String getUniqueFileName(String documentId,String fileName ) {
     String name = fileName ;
