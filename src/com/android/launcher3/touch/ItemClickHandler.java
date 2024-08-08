@@ -274,12 +274,13 @@ public class ItemClickHandler {
         }
    }
 
-   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item){
+   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item,String newFileName){
     if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
-       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
+       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString()+"###"+newFileName);
     }else{
-       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
+       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString()+"###"+newFileName);
     }
+    launcher.bindWorkspace();  
 }
 
     public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher,

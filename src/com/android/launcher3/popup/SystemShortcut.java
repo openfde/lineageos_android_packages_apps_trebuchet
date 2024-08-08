@@ -11,6 +11,12 @@ import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView.OnEditorActionListener;
 
 import androidx.annotation.Nullable;
 
@@ -38,6 +44,7 @@ import com.android.launcher3.util.FileUtils;
 import java.io.File;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+
 
 
 /**
@@ -233,8 +240,47 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
         @Override
         public void onClick(View view) {
-           dismissTaskMenuView(mTarget);
-           ItemClickHandler.renameFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo);
+            dismissTaskMenuView(mTarget);
+            Launcher launcher = Launcher.getLauncher(view.getContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+            LayoutInflater inflater = launcher.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dialog_file_name, null);
+            EditText mEditText = dialogView.findViewById(R.id.text1);
+            String fileName = mItemInfo.title.toString();
+            mEditText.setText(fileName);
+            int index = fileName.lastIndexOf(".");
+            if(index <= 0){
+                index = fileName.length();
+            }
+            mEditText.setSelection(0, index);
+    
+            mEditText.setOnEditorActionListener(
+                    new TextView.OnEditorActionListener() {
+                        @Override
+                        public boolean onEditorAction(
+                                TextView view, int actionId, @Nullable KeyEvent event) {
+                            if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
+                                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                                    && event.hasNoModifiers())) {
+    
+                            }
+                            return false;
+                        }
+                    });
+            mEditText.requestFocus();
+    
+            builder.setView(dialogView)
+                    .setTitle(R.string.desktop_rename)
+                    .setPositiveButton(R.string.desktop_ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            String inputEditText = mEditText.getText().toString();
+                            ItemClickHandler.renameFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo,inputEditText);
+                        }
+                    })
+                    .setNegativeButton(R.string.desktop_cancel, null)
+                    .show();
         }
     }
 
@@ -248,14 +294,11 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
         @Override
         public void onClick(View view) {
+            dismissTaskMenuView(mTarget);
             AlertDialog alertDialog = new AlertDialog.Builder(view.getContext())
             .setTitle(R.string.desktop_tips)
             .setMessage(R.string.desktop_delete_tips)
-            .setNegativeButton(R.string.desktop_cancel, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            })
+            .setNegativeButton(R.string.desktop_cancel, null)
             .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();

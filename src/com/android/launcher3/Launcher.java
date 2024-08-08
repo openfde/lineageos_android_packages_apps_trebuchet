@@ -2916,9 +2916,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     public void gotoDocApp(String method,String title){
         try{
-            Log.i(TAG,"bella method  "+method + " , title "+title);
             String res = idocAidl.basicIpcMethon(method,title);
-            Log.i(TAG,"gotoDocApp res "+res);
         }catch(Exception e){
             e.printStackTrace();
         }

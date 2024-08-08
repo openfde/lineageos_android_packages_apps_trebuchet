@@ -158,4 +158,6 @@
     <string name="desktop_delete_tips">"是否删除？"</string>
     <string name="desktop_delete">"删除"</string>
     <string name="desktop_cancel">"取消"</string>
+    <string name="desktop_ok">"确定"</string>
+    <string name="desktop_rename">"重命名"</string>
 </resources>

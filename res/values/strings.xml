@@ -368,4 +368,6 @@
     <string name="desktop_delete_tips">"is delete?"</string>
     <string name="desktop_delete">"delete"</string>
     <string name="desktop_cancel">"cancel"</string>
+    <string name="desktop_ok">"OK"</string>
+    <string name="desktop_rename">"Rename"</string>
 </resources>
