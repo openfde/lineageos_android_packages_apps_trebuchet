@@ -210,7 +210,7 @@ public abstract class BaseLoaderResults {
 
             // Load items on the current page.
             List<ItemInfo> filteredList = currentWorkspaceItems.stream()
-            .filter(info -> (info.itemType != 8 && info.itemType != 9))
+            .filter(info -> (info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT))
             .collect(Collectors.toList());
             int count = filteredList.size();//currentWorkspaceItems.size() + otherWorkspaceItems.size() ;
 

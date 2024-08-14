@@ -41,6 +41,7 @@ import com.android.launcher3.R;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.LauncherSettings;
 
 
 public class FastBitmapDrawable extends Drawable {
@@ -316,11 +317,11 @@ public class FastBitmapDrawable extends Drawable {
      */
     public static FastBitmapDrawable newIcon(Context context, ItemInfoWithIcon info) {
         FastBitmapDrawable drawable = newIcon(context, info.bitmap);
-        if(info.itemType == 8){
+        if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_dir);
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
             drawable = newIcon(context, bitmapInfo);
-        }else if(info.itemType == 9 ){
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ){
             String fileName = info.title.toString() ;
             int resId =  R.mipmap.icon_doc;
             String fileType = FileUtils.getFileTyle(fileName);

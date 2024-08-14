@@ -299,6 +299,7 @@ public class LoaderTask implements Runnable {
 
     protected void loadWorkspace(List<ShortcutInfo> allDeepShortcuts, Uri contentUri,
             String selection) {
+        //首先是创建了一些对象，这些对象，在Launcher启动流程之前大多都已经创建过，这里是获取实例        
         final Context context = mApp.getContext();
         final ContentResolver contentResolver = context.getContentResolver();
         final PackageManagerHelper pmHelper = new PackageManagerHelper(context);
@@ -317,7 +318,7 @@ public class LoaderTask implements Runnable {
         if (!clearDb && (MULTI_DB_GRID_MIRATION_ALGO.get()
                 ? !GridSizeMigrationTaskV2.migrateGridIfNeeded(context)
                 : !GridSizeMigrationTask.migrateGridIfNeeded(context))) {
-            // Migration failed. Clear workspace.
+            // Migration failed. Clear workspace.  
             clearDb = true;
         }
 

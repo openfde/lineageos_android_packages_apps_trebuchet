@@ -96,12 +96,14 @@ public class ItemClickHandler {
 
         Object tag = v.getTag();
         if (tag instanceof WorkspaceItemInfo) {
+               // 应用程序快捷方式单击的事件处理。也是调用到：startAppShortcutOrInfoActivity() 方法。
             onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher, sourceContainer);
         } else if (tag instanceof FolderInfo) {
             if (v instanceof FolderIcon) {
                 onClickFolderIcon(v);
             }
         } else if (tag instanceof AppInfo) {
+                        // 启动应用程序快捷方式或信息活动
             startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher,
                     sourceContainer == null ? CONTAINER_ALL_APPS: sourceContainer);
         } else if (tag instanceof LauncherAppWidgetInfo) {

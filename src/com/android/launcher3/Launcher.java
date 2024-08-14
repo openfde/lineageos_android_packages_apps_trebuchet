@@ -220,13 +220,14 @@ import androidx.annotation.NonNull;
 import android.provider.Settings;
 import android.Manifest;
 import com.android.documentsui.IDocAidlInterface;
+import com.android.documentsui.IDataChangedCallback;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Handler;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
-
+import android.os.ParcelFileDescriptor;
 /**
  * Default launcher application.
  */
@@ -2112,6 +2113,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             // If there are no screens, we need to have an empty screen
             mWorkspace.addExtraEmptyScreen();
         }
+         //对于绑定屏幕实质是：创建与数据库中屏幕数一致的空屏幕。
+        // 该方法里面会一直调到：Workspace#insertNewWorkspaceScreen() 方法，
+        // 通过 addview() 添加添加空屏幕
         bindAddScreens(orderedScreenIds);
 
         // After we have added all the screens, if the wallpaper was locked to the default state,
@@ -2905,6 +2909,17 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         public void onServiceConnected(ComponentName name, IBinder service) {
             // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
             idocAidl = IDocAidlInterface.Stub.asInterface(service);
+
+            try{
+                idocAidl.register(new IDataChangedCallback.Stub(){
+                    @Override
+                    public void onCallback(String params)  {
+                        Log.i(TAG," onCallback params: "+params);
+                    }
+                });
+            }catch(Exception e){
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -2916,7 +2931,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     public void gotoDocApp(String method,String title){
         try{
-            String res = idocAidl.basicIpcMethon(method,title);
+            idocAidl.basicIpcMethon(method,title);
         }catch(Exception e){
             e.printStackTrace();
         }
