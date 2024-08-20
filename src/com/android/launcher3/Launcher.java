@@ -391,10 +391,6 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         //     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE_1);
         // }
 
-        // if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-        //     // 如果权限未授予，则请求权限
-        //     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-        // }
 
         // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         //     if (!Environment.isExternalStorageManager()) {
@@ -2915,6 +2911,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     @Override
                     public void onCallback(String params)  {
                         Log.i(TAG," onCallback params: "+params);
+                        if("PASTE".equals(params)){
+                            bindWorkspace();
+                        }                      
                     }
                 });
             }catch(Exception e){
