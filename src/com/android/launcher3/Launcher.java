@@ -2168,12 +2168,22 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     public void rearray(Context context){
         List<ItemInfo> rearray = getModel().rearray(context);
+        List<ItemInfo> rearrayList = new ArrayList<>();
+        Log.i(TAG, "bindItems----rearray :  "+rearray.size());
         for (int i = 0 ; i < rearray.size() ; i++){
             ItemInfo info = rearray.get(i);
+            if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
+                File file = new File(filePath);
+                if(!file.exists()){
+\                    continue;
+                }
+            }
+            rearrayList.add(info);
             getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
                     info.cellX, info.cellY, info.spanX, info.spanY);
         }
-        bindItems(rearray, false);
+        bindItems(rearrayList, false);
     }
 
     public void bindWorkspace(){
