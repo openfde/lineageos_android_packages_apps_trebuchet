@@ -165,6 +165,7 @@ public class OptionsPopupView extends ArrowPopup
     }
 
     public static void showDefaultOptions(Launcher launcher, float x, float y) {
+
         float halfSize = launcher.getResources().getDimension(R.dimen.options_menu_thumb_size) / 2;
         if (x < 0 || y < 0) {
             x = launcher.getDragLayer().getWidth() / 2;
@@ -198,7 +199,7 @@ public class OptionsPopupView extends ArrowPopup
                 OptionsPopupView::startNewDoc));     
 
 
-        boolean isShowPasteDlg = launcher.isShowPasteDlg();  
+        boolean isShowPasteDlg = true ;//launcher.isShowPasteDlg();  
         Log.i("bella"," showDefaultOptions isShowPasteDlg: "+isShowPasteDlg);     
         if(isShowPasteDlg){
              options.add(new OptionItem(R.string.desktop_new_paste, R.drawable.ic_paste,

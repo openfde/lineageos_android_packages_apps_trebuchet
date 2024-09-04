@@ -37,6 +37,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -67,9 +68,10 @@ import com.android.launcher3.widget.WidgetAddFlowHandler;
 import com.android.launcher3.widget.WidgetManagerHelper;
 import android.net.Uri;
 import java.io.File;
-import android.content.ComponentName;
 import android.provider.DocumentsContract;
 import com.android.launcher3.util.FileUtils;
+import java.util.Map;
+
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -86,9 +88,24 @@ public class ItemClickHandler {
         return v -> onClick(v, sourceContainer);
     }
 
+    private static final long DOUBLE_CLICK_TIME_DELTA = 200; // 双击的最大时间间隔（毫秒）
+    private static long lastClickTime = 0; 
+
+
+
     private static void onClick(View v, String sourceContainer) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
+
+        long currentTime = System.currentTimeMillis();
+        long subTime = currentTime - lastClickTime;
+        if (subTime  < DOUBLE_CLICK_TIME_DELTA) {
+            //double click      
+        }else{
+            lastClickTime = currentTime;
+            return ;
+        }
+
         if (v.getWindowToken() == null) return;
 
         Launcher launcher = Launcher.getLauncher(v.getContext());
@@ -308,6 +325,17 @@ public class ItemClickHandler {
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
             String  title = item.title.toString() ;
             launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
+            return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
+            Log.i(TAG, "ITEM_TYPE_LINUX_APP: " + item);
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+            Intent inte = new Intent();
+            ComponentName componentName = new ComponentName("com.termux.x11", "com.termux.x11.AppListActivity");
+            inte.setComponent(componentName);
+            inte.putExtra("App", map.get("name").toString());
+            inte.putExtra("Path", map.get("exec").toString());
+            inte.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            launcher.startActivity(inte);
             return ;
         }else {
             intent = item.getIntent();

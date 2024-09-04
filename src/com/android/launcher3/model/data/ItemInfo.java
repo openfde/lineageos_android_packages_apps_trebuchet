@@ -229,6 +229,7 @@ public class ItemInfo {
     protected String dumpProperties() {
         return "id=" + id
                 + " type=" + LauncherSettings.Favorites.itemTypeToString(itemType)
+                + " itemType=" + itemType
                 + " container=" + LauncherSettings.Favorites.containerToString(container)
                 + " targetComponent=" + getTargetComponent()
                 + " screen=" + screenId

@@ -50,6 +50,8 @@ import com.android.launcher3.LauncherSettings;
 import java.util.stream.Collectors;
 import java.util.TreeSet;
 import java.util.Comparator;
+import android.content.ContentValues;
+
 /**
  * Base Helper class to handle results of {@link com.android.launcher3.model.LoaderTask}.
  */
@@ -210,11 +212,21 @@ public abstract class BaseLoaderResults {
 
             // Load items on the current page.
             List<ItemInfo> filteredList = currentWorkspaceItems.stream()
-            .filter(info -> (info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT))
+            .filter(info -> (!info.title.toString().contains(".desktop") && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT))
             .collect(Collectors.toList());
             int count = filteredList.size();//currentWorkspaceItems.size() + otherWorkspaceItems.size() ;
 
             Log.i(TAG, "Launcher_workspaceItems  filteredList "+ filteredList.size()  + " ,filteredList  "+filteredList );
+
+            for(ItemInfo item : filteredList){
+                if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
+                    // Log.i(TAG, "Launcher_workspaceItems  ----------------  item "+ item);
+                    ContentValues initialValues = new ContentValues();
+                    initialValues.put("title",item.title.toString());
+                    initialValues.put("itemType",item.itemType);
+                    FileUtils.createLinuxDesktopFile(initialValues);
+                }
+            }
 
             currentWorkspaceItems.clear();
             currentWorkspaceItems.addAll(filteredList);

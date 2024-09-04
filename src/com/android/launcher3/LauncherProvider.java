@@ -85,6 +85,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import com.android.launcher3.util.FileUtils;
+
 
 public class LauncherProvider extends ContentProvider {
     private static final String TAG = "LauncherProvider";
@@ -226,7 +228,8 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        Log.i(TAG,"bella...insert............. "+initialValues.toString());
+        FileUtils.createLinuxDesktopFile(initialValues);
+    
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri);
 

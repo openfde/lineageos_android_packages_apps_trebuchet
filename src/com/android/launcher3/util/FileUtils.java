@@ -4,6 +4,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import android.util.Log;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.Files;
+
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -26,6 +31,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
+import android.content.ContentValues;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import android.os.SystemProperties;
+import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
+import java.io.FileFilter;
+import java.util.Locale;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 
 
 public class FileUtils {
@@ -63,6 +80,10 @@ public class FileUtils {
     public static final String DIR_INFO = "DIR_INFO";
 
     public static final String FILE_INFO = "FILE_INFO";
+
+    public static final String OP_CREATE_LINUX_ICON = "OP_CREATE_LINUX_ICON";
+
+    public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
 
 
 private static String getUniqueFileName(String documentId,String fileName ) {
@@ -174,11 +195,15 @@ public static List<WorkspaceItemInfo> getDesktop(int count){
             int y = yindex + index ;
             info.cellY = y%scale ;
             info.cellX = xindex + y/scale;
-            info.id =  300 + (info.cellX *1000) + (info.cellY *10) ;
+            info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
 
             Log.d(TAG, "Launcher_bindItems: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
 
-            if(f.isDirectory()){
+            if(f.getName().contains("_fde.desktop")){
+                continue;
+            }else if(f.getName().contains(".desktop")){
+                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+            }else if(f.isDirectory()){
                 info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
             }else{
                 info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
@@ -213,6 +238,211 @@ public static List<WorkspaceItemInfo> getDesktop(int count){
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static  String readLinuxConfigFile() {
+        String filePath = "/volumes/.fde_path_key";
+        String content = "";
+        try {
+            content = new String(Files.readAllBytes(Paths.get(filePath)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return content;
+    }
+
+    public static int findNthSlashIndex(String str, int n) {
+        int index = -1;
+        int count = 0;
+
+        // 从头开始查找斜杠
+        for (int i = 0; i < str.length(); i++) {
+            if (str.charAt(i) == '/') {
+                count++;
+                if (count == n) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+        return index;
+    }
+
+    public static String getLinuxHomeDir(){
+        try {
+             String propertyValue = SystemProperties.get("waydroid.host_data_path");
+             int len = findNthSlashIndex(propertyValue,3);
+             return  propertyValue.substring(0,len);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+        return "/";
+     }
+
+    public static String getLinuxUUID(){
+        String result = null;
+        try {
+            String jsonString = readLinuxConfigFile();
+            JSONArray jsonArray = new JSONArray(jsonString);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                String uuid = jsonObject.getString("UUID");
+                String path = jsonObject.getString("Path");
+                if ("/".equals(path)) {
+                    result = uuid;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    public static void createLinuxDesktopFile(ContentValues initialValues){
+        if(initialValues !=null){
+            Log.i(TAG,"bella...insert....3......... "+initialValues.toString());
+
+            String title  = initialValues.get("title").toString();
+            String itemType  = initialValues.get("itemType").toString();
+
+            if(title.contains(".desktop")){
+                return ;
+            }
+
+            String pathDesktop = PATH_ID_DESKTOP+title+"_fde.desktop";
+            File file = new File(pathDesktop);
+            if(file.exists()){
+                Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                return ;
+            }
+            Path desktopFilePath = Paths.get(pathDesktop);
+            String picPath = "/volumes"+"/"+getLinuxUUID()+"/tmp/"+title+".png";
+            file = new File(picPath);
+            if(!file.exists()){
+                Log.i(TAG,"bella...insert.............picPath: "+picPath);
+            }else{
+                //if pic exists ,return 
+            }    
+
+
+            List<String> lines = List.of(
+                "[Desktop Entry]",
+                "Type=Application",
+                "Name="+title,
+                "Name[zh_CN]="+title,
+                "Categories="+itemType,
+                "Exec=/usr/bin/fde_utils start",
+                "Icon="+picPath
+            );
+     
+            // 写入.desktop文件
+            try {
+                Files.write(desktopFilePath, lines, StandardOpenOption.CREATE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public  static Map<String,Object> getLinuxDesktopFileContent(String fileName ){
+        String desktopFilePath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/"+fileName;
+        File file = new File(desktopFilePath);
+        Map<String,Object> map = new HashMap<>();
+        if(file.exists()){
+            Log.i("bella","getLinuxDesktopFileContent is 1111111111111 "+desktopFilePath);
+            Properties properties = new Properties();
+            boolean inDesktopEntrySection = false;
+            // try (FileInputStream fis = new FileInputStream(desktopFilePath)) {
+            //     InputStreamReader reader = new InputStreamReader(fis, "UTF-8");
+
+            try (FileInputStream fis = new FileInputStream(desktopFilePath);
+             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+             BufferedReader reader = new BufferedReader(isr)) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
+
+                // 检测到 [Desktop Entry] 部分的开始
+                if (line.equals("[Desktop Entry]")) {
+                    inDesktopEntrySection = true;
+                    continue;
+                }
+
+                // 退出 [Desktop Entry] 部分
+                if (inDesktopEntrySection && line.startsWith("[Desktop")) {
+                    break;
+                }
+
+                // 解析 [Desktop Entry] 部分中的 key=value 对
+                if (inDesktopEntrySection) {
+                    int equalIndex = line.indexOf('=');
+                    if (equalIndex != -1) {
+                        String key = line.substring(0, equalIndex).trim();
+                        String value = line.substring(equalIndex + 1).trim();
+                        properties.put(key, value);
+                    }
+                }
+            }
+
+
+                properties.load(reader);
+                Log.i("bella","getLinuxDesktopFileContent is properties "+properties.toString());
+                String name = properties.getProperty("Name");
+                String exec = properties.getProperty("Exec");
+                String icon = properties.getProperty("Icon");
+                map.put("name",name);
+                map.put("exec",exec);
+                map.put("icon",icon);
+
+                try{
+                    String nameZh = properties.getProperty("Name[zh_CN]");
+                    if(nameZh !=null ){
+                        map.put("nameZh",nameZh);
+                    }
+                }catch(Exception e){
+                    Log.e("bella","getLinuxDesktopFileContent  properties error "+e.toString());
+                    e.printStackTrace();
+                }
+
+                return map ;
+            } catch (Exception e) {
+                Log.e("bella","getLinuxDesktopFileContent  properties2 error "+e.toString());
+                e.printStackTrace();
+            }
+        }else{
+            Log.i("bella","icon_pic is 000000000000 "+desktopFilePath);
+        }
+        return null ;
+    }
+
+
+    public static File[]  findFilesByName(File directory, final String fileName) {
+        if (directory == null || !directory.isDirectory()) {
+            return null;
+        }
+ 
+        File[] files = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isFile() && file.getName().equals(fileName);
+            }
+        });
+ 
+        return files;
+    }
+
+    public static boolean isChineseLanguage(Context context) {
+        Locale locale = context.getResources().getConfiguration().locale;
+        String language = locale.getLanguage();
+        return language.equals("zh");
     }
 
 }

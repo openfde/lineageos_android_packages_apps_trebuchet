@@ -72,6 +72,9 @@ import java.text.NumberFormat;
 import android.util.Log;
 import com.android.launcher3.graphics.PlaceHolderIconDrawable;
 import com.android.launcher3.R;
+import com.android.launcher3.util.FileUtils;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
@@ -313,7 +316,16 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
 
         setIcon(iconDrawable);
         if (mShouldShowLabel) {
-            setText(info.title);
+               String strTitle = info.title.toString();
+               if(strTitle.contains(".desktop")){
+                Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(strTitle);
+                if(FileUtils.isChineseLanguage(getContext())){
+                    strTitle = map.get("nameZh").toString();
+                 }else{
+                    strTitle = map.get("name").toString();
+                 }
+               }
+               setText(strTitle);
         }
         if (info.contentDescription != null) {
             setContentDescription(info.isDisabled()

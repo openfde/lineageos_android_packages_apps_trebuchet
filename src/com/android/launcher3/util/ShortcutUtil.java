@@ -78,6 +78,6 @@ public class ShortcutUtil {
     }
 
     private static boolean isDocOrDir(ItemInfo info) {
-        return info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+        return info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
     }
 }

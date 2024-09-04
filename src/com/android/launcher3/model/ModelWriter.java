@@ -447,6 +447,7 @@ public class ModelWriter {
                     switch (modelItem.itemType) {
                         case Favorites.ITEM_TYPE_APPLICATION:
                         case Favorites.ITEM_TYPE_DIRECTORY:
+                        case Favorites.ITEM_TYPE_LINUX_APP:
                         case Favorites.ITEM_TYPE_DOCUMENT:
                         case Favorites.ITEM_TYPE_SHORTCUT:
                         case Favorites.ITEM_TYPE_DEEP_SHORTCUT:

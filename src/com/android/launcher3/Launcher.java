@@ -2172,11 +2172,12 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         Log.i(TAG, "bindItems----rearray :  "+rearray.size());
         for (int i = 0 ; i < rearray.size() ; i++){
             ItemInfo info = rearray.get(i);
-            if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+            if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT|| info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
                 String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
                 File file = new File(filePath);
                 if(!file.exists()){
-\                    continue;
+                    Log.i(TAG, "bindItems----rearray  0000000000000  "+filePath);
+                    continue;
                 }
             }
             rearrayList.add(info);
@@ -2184,6 +2185,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     info.cellX, info.cellY, info.spanX, info.spanY);
         }
         bindItems(rearrayList, false);
+
+        gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
+        gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
+        
     }
 
     public void bindWorkspace(){
@@ -2235,6 +2240,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                 case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
                 case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
+                case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     WorkspaceItemInfo info = (WorkspaceItemInfo) item;
                     view = createShortcut(info);
@@ -2828,7 +2834,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 if (Utilities.IS_RUNNING_IN_TEST_HARNESS) {
                     Log.d(TestProtocol.PERMANENT_DIAG_TAG, "Opening options popup on key up");
                 }
-                OptionsPopupView.showDefaultOptions(this, -1, -1);
+                OptionsPopupView.showDefaultOptions(Launcher.this, -1, -1);
             }
             return true;
         }
@@ -2864,6 +2870,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     public Stream<SystemShortcut.Factory> getSupportedShortcuts(int itemType) {
         if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
             return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
+        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            return Stream.of(APP_OPEN);
         }else{
             return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
         }
@@ -2952,7 +2960,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         ClipData clip = clipboard.getPrimaryClip();
         if (clip == null  ) {
             Log.i(TAG," showDefaultOptions is null");
+            return false ;
         }else if( clip.getItemCount() < 1){
+            return false ;
         }else{
             ClipData.Item item = clip.getItemAt(0);
             if (item.getUri() != null) {

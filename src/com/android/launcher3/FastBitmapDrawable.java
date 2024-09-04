@@ -42,7 +42,10 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import com.android.launcher3.util.FileUtils;
 import com.android.launcher3.LauncherSettings;
-
+import java.io.File;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FastBitmapDrawable extends Drawable {
 
@@ -340,8 +343,40 @@ public class FastBitmapDrawable extends Drawable {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),resId);
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,R.color.default_shadow_color_no_alpha);
             drawable = newIcon(context, bitmapInfo);
-        }else{
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_linux);
+            String title = info.title.toString();
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
+            if(map !=null){
+                String icon = map.get("icon").toString();
+                String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+icon ;
 
+                File file = new File(absoluteIcon);
+                if(file.exists()){
+                    Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
+                    bitmap = BitmapFactory.decodeFile(absoluteIcon);
+                }else{
+                    String kylinIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/kylin-software-center/data/icons/"+icon+".png";
+                    file = new File(kylinIcon); 
+                    if(file.exists()){
+                        bitmap = BitmapFactory.decodeFile(kylinIcon);
+                    }else{
+                        String ukuiIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/128x128/apps/"+icon+".png";
+                        file = new File(ukuiIcon); 
+                        if(file.exists()){
+                            bitmap = BitmapFactory.decodeFile(ukuiIcon);
+                        }else{
+                            Log.e("bella","FastBitmapDrawable  newIcon_no : file not exists: "+ukuiIcon  );
+                        }
+                    }
+                
+                }
+                
+            }
+           
+    
+            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
+            drawable = newIcon(context, bitmapInfo);
         }
 
         // FastBitmapDrawable drawable = newIcon(context, info.bitmap);
