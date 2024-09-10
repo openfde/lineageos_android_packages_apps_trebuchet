@@ -25,8 +25,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
+
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.InvariantDeviceProfile;
+import com.android.launcher3.LauncherAppState;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +47,9 @@ import java.io.FileFilter;
 import java.util.Locale;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
+import android.graphics.Point;
+import android.text.TextUtils;
+
 
 
 public class FileUtils {
@@ -171,52 +178,46 @@ public static int getDesktopFileCount (){
     }
 }
 
-public static List<WorkspaceItemInfo> getDesktop(int count){
-    String documentId = FileUtils.PATH_ID_DESKTOP; 
-    File parent = new File(documentId);
-    File[] files = parent.listFiles();
-    if(files !=null){
-        Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-        Log.d(TAG, "Launcher_bindItems: files size  "+files.length + ",count "+count );
-        int otherCount = count; //- files.length + 1;
-    
-        List<WorkspaceItemInfo> list = new ArrayList();
-        int scale = 9 ;
-        int index = 0;
-        int xindex = otherCount / scale;
-        int yindex = otherCount % scale; 
-        for(File f : files){
-            WorkspaceItemInfo info = new WorkspaceItemInfo();
-            ComponentName mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");
-            info.mComponentName = mComponentName;
-            info.title = f.getName();
-            info.container = -100;
-            info.screenId = 0;
-            int y = yindex + index ;
-            info.cellY = y%scale ;
-            info.cellX = xindex + y/scale;
-            info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
-
-            Log.d(TAG, "Launcher_bindItems: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
-
-            if(f.getName().contains("_fde.desktop")){
-                continue;
-            }else if(f.getName().contains(".desktop")){
-                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
-            }else if(f.isDirectory()){
-                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
-            }else{
-                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
-            }
-            list.add(info);
-            index++;
-        }
-        return list;
-    }else{
-        Log.d(TAG, "bindItems: files is null  " );
-    }
-    return null ;    
+/**
+ * rows count  --- 9 
+ */
+public static int getScreenRows(Context context){
+    InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+    int numRows = idp.numRows;
+    return numRows;
 }
+
+/**
+ * Columns count  --- 17 
+ */
+public static int getScreenColumns(Context context){
+    InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+    int numColumns = idp.numColumns ;
+    return numColumns;
+}
+
+/**
+ * find next free point
+ */
+public static Point findNextFreePoint(Context context){
+    int numRows  =  getScreenRows(context);
+    int numColumns  =  getScreenColumns(context);
+
+    Point point = new Point(-1,-1);
+    outer: 
+    for(int i = 0 ; i < numColumns ; i++ ){
+        for(int j = 0 ; j < numRows ; j++){
+            if(DbUtils.queryFilesByPointFromDatabase(context,i,j) == null){
+                point.x = i ;
+                point.y = j ;
+                break outer;
+            }
+        }
+    }
+    Log.i(TAG, "queryAllFilesFromDatabase: x:  "+point.x + " , y: "+point.y);
+    return point ;
+}
+
 
 /**
      * get file type
@@ -306,9 +307,9 @@ public static List<WorkspaceItemInfo> getDesktop(int count){
             Log.i(TAG,"bella...insert....3......... "+initialValues.toString());
 
             String title  = initialValues.get("title").toString();
-            String itemType  = initialValues.get("itemType").toString();
+            int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
 
-            if(title.contains(".desktop")){
+            if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
                 return ;
             }
 
@@ -352,7 +353,7 @@ public static List<WorkspaceItemInfo> getDesktop(int count){
         File file = new File(desktopFilePath);
         Map<String,Object> map = new HashMap<>();
         if(file.exists()){
-            Log.i("bella","getLinuxDesktopFileContent is 1111111111111 "+desktopFilePath);
+            // Log.i("bella","getLinuxDesktopFileContent is 1111111111111 "+desktopFilePath);
             Properties properties = new Properties();
             boolean inDesktopEntrySection = false;
             // try (FileInputStream fis = new FileInputStream(desktopFilePath)) {
@@ -394,7 +395,7 @@ public static List<WorkspaceItemInfo> getDesktop(int count){
 
 
                 properties.load(reader);
-                Log.i("bella","getLinuxDesktopFileContent is properties "+properties.toString());
+                // Log.i("bella","getLinuxDesktopFileContent is properties "+properties.toString());
                 String name = properties.getProperty("Name");
                 String exec = properties.getProperty("Exec");
                 String icon = properties.getProperty("Icon");

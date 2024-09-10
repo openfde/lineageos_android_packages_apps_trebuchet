@@ -144,7 +144,6 @@ public class OptionsPopupView extends ArrowPopup
                 .inflate(R.layout.longpress_options_menu, launcher.getDragLayer(), false);
         popup.mTargetRect = targetRect;
 
-        Log.i("bella","items "+items.size());
         for (OptionItem item : items) {
             DeepShortcutView view =
                     (DeepShortcutView) popup.inflateAndAdd(R.layout.system_shortcut, popup);
@@ -225,14 +224,14 @@ public class OptionsPopupView extends ArrowPopup
     public static boolean startNewDir(View view) {    
         Launcher launcher = Launcher.getLauncher(view.getContext());
         launcher.gotoDocApp(FileUtils.NEW_DIR,"");
-        launcher.bindWorkspace();   
+        // launcher.bindWorkspace();   
         return true;
     }
 
     public static boolean startNewDoc(View view) {      
         Launcher launcher = Launcher.getLauncher(view.getContext());
         launcher.gotoDocApp(FileUtils.NEW_FILE,"");
-        launcher.bindWorkspace();    
+        // launcher.bindWorkspace();    
         return true;
     }
 

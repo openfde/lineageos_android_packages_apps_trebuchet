@@ -189,18 +189,20 @@ public class LauncherProvider extends ContentProvider {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(args.table);
 
+
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor result = qb.query(db, projection, args.where, args.args, null, null, sortOrder);
         result.setNotificationUri(getContext().getContentResolver(), uri);
 
-        // if(initialValues.containsKey(LauncherSettings.Favorites.TITLE)) {
-        //     String title = initialValues.get(LauncherSettings.Favorites.TITLE).toString();
-        //     Log.i(TAG,"bella...insert......title....... "+title);
-        //     if(title.contains("文件")){
-        //         initialValues.put(LauncherSettings.Favorites.TITLE,"共享文件");
-        //     }
-        // }
         int rowCount = result.getCount();
+        // Log.i(TAG,"bella ..query.............rowCount: "+rowCount );
+        // if (result != null && result.moveToFirst()) {
+        //     do {
+        //         int _id = result.getInt(result.getColumnIndex("_id"));
+        //         String title = result.getString(result.getColumnIndex("title"));
+        //         Log.i(TAG,"bella ..query............._id: "+_id + " ,title: "+title);
+        //     } while (result.moveToNext());
+        // }
 
         return result;
     }

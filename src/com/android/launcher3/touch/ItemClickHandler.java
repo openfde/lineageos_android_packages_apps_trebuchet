@@ -299,7 +299,7 @@ public class ItemClickHandler {
     }else{
        launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString()+"###"+newFileName);
     }
-    launcher.bindWorkspace();  
+    // launcher.bindWorkspace();  
 }
 
     public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher,

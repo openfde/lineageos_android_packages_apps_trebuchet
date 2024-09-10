@@ -310,6 +310,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
                     }
                     dismissTaskMenuView(mTarget);
                     launcher.removeItem(icon, mItemInfo,true);
+                    // launcher.deleteFavorites(mItemInfo);
                 }
             }).create();
             alertDialog.show();

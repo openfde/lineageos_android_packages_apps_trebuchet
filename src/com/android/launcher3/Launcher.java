@@ -208,6 +208,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import android.content.ComponentName;
 import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.util.DbUtils;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.io.File;
@@ -228,6 +229,11 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.os.ParcelFileDescriptor;
+import java.util.Arrays;
+import java.util.Map;
+import android.graphics.Point;
+
+
 /**
  * Default launcher application.
  */
@@ -470,6 +476,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
         mPageToBindSynchronously = currentScreen;
 
+        Log.i(TAG, "oncreate addCallbacksAndLoad.................. ");
         if (!mModel.addCallbacksAndLoad(this)) {
             if (!internalStateHandled) {
                 // If we are not binding synchronously, show a fade in animation when
@@ -477,7 +484,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mDragLayer.getAlphaProperty(ALPHA_INDEX_LAUNCHER_LOAD).setValue(0);
             }
         }
-
+        addDesktopFiles();
         // For handling default keys
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
 
@@ -598,6 +605,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         // Calling onSaveInstanceState ensures that static cache used by listWidgets is
         // initialized properly.
         onSaveInstanceState(new Bundle());
+        Log.i(TAG, "onIdpChanged.................. ");
         mModel.rebindCallbacks();
     }
 
@@ -622,6 +630,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
 
         onDeviceProfileInitiated();
+        Log.i(TAG, "initDeviceProfile.................. ");
         mModelWriter = mModel.getWriter(getDeviceProfile().isVerticalBarLayout(), true);
     }
 
@@ -976,6 +985,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 InstallShortcutReceiver.FLAG_ACTIVITY_PAUSED, this);
 
         // Refresh shortcuts if the permission changed.
+        Log.i(TAG, "onDeferredResumed.................. ");
         mModel.refreshShortcutsIfRequired();
 
         // Set the notification listener and fetch updated notifications when we resume
@@ -1840,7 +1850,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
      * @param deleteFromDb whether or not to delete this item from the db.
      */
     public boolean removeItem(View v, final ItemInfo itemInfo, boolean deleteFromDb) {
+        Log.i(TAG," removeItem deleteFromDb : "+deleteFromDb + " , itemInfo: "+itemInfo);
+
         if (itemInfo instanceof WorkspaceItemInfo) {
+
             // Remove the shortcut from the folder before removing it from launcher
             View folderIcon = mWorkspace.getHomescreenIconByItemId(itemInfo.container);
             if (folderIcon instanceof FolderIcon) {
@@ -1849,6 +1862,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mWorkspace.removeWorkspaceItem(v);
             }
             if (deleteFromDb) {
+                Log.i(TAG," removeItem deleteFromDb : "+deleteFromDb);
                 getModelWriter().deleteItemFromDatabase(itemInfo);
             }
         } else if (itemInfo instanceof FolderInfo) {
@@ -2071,12 +2085,121 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
     }
 
+
+    public void addDesktopFile(String fileName){
+        Point point = FileUtils.findNextFreePoint(this);
+        WorkspaceItemInfo info = new WorkspaceItemInfo();
+        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+        info.title = fileName;
+        info.container = -100;
+        info.screenId = 0;
+        Intent intent = new Intent();
+        intent.setPackage("com.android.launcher3");
+        info.intent = intent;
+        info.cellY = point.y;
+        info.cellX = point.x;
+        File f = new File(fileName);
+        if(f.getName().contains(".desktop")){
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+        }else if(f.isDirectory()){
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+        }else{
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+        }
+        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        insertFavorites(info);
+    }
+
+
+    public List<WorkspaceItemInfo> addDesktopFiles(){
+        List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(this);
+        int count = 0;
+        if(listApps !=null){
+            count = listApps.size();
+        }
+    
+        String documentId = FileUtils.PATH_ID_DESKTOP; 
+        File parent = new File(documentId);
+        File[] files = parent.listFiles();
+        int scale  =  FileUtils.getScreenRows(this);
+        if(files !=null){
+            Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+            Log.d(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
+        
+            List<WorkspaceItemInfo> list = new ArrayList();
+            int index = 0;
+            int xindex = count / scale;
+            int yindex = count % scale; 
+            for(File f : files){
+                WorkspaceItemInfo info = new WorkspaceItemInfo();
+                info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+                info.title = f.getName();
+                info.container = -100;
+                info.screenId = 0;
+                Intent intent = new Intent();
+                intent.setPackage("com.android.launcher3");
+                info.intent = intent;
+                int y = yindex + index ;
+                info.cellY = y%scale ;
+                info.cellX = xindex + y/scale;
+                info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+
+                Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
+
+                if(f.getName().contains("_fde.desktop")){
+                    // info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                    continue;
+                }else if(f.getName().contains(".desktop")){
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                }else if(f.isDirectory()){
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                }else{
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+                }
+                list.add(info);
+                index++;
+                insertOrUpdateFavorites(info);
+            }
+            return list ;
+        }else{
+            Log.d(TAG, "bindItems: files is null  " );
+        }
+        return null ;
+    }
+
+    private void insertOrUpdateFavorites(ItemInfo info){
+        List<Map<String,Object>> listData = DbUtils.queryItemsFromDatabase(this,info);//getModelWriter().queryItemsFromDatabase(info);//
+        if(listData == null){
+            //insert 
+            insertFavorites(info);
+        }else{
+            //update 
+            updateFavorites(info);
+        }  
+    }
+    
+    public void insertFavorites(ItemInfo info){
+        getModelWriter().addItemToDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY);
+    }
+
+    public void updateFavorites(ItemInfo info){
+        getModelWriter().modifyItemInDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY,1,1);
+    }
+
+    public void deleteFavorites(ItemInfo info){
+        getModelWriter().deleteItemFromDatabase(info);
+    }
+
     /**
      * Refreshes the shortcuts shown on the workspace.
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
     public void startBinding() {
+        Log.i(TAG, "startBinding.................. ");
+
+        // addDesktopFiles();
+
         Object traceToken = TraceHelper.INSTANCE.beginSection("startBinding");
         // Floating panels (except the full widget sheet) are associated with individual icons. If
         // we are starting a fresh bind, close all such panels as all the icons are about
@@ -2167,6 +2290,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     }
 
     public void rearray(Context context){
+        FileUtils.findNextFreePoint(this);
         List<ItemInfo> rearray = getModel().rearray(context);
         List<ItemInfo> rearrayList = new ArrayList<>();
         Log.i(TAG, "bindItems----rearray :  "+rearray.size());
@@ -2192,10 +2316,13 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     }
 
     public void bindWorkspace(){
+
+
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                getModel().startLoader();
+                getModel().forceReload();
+                // getModel().startLoader();
             }
         }, 1000);
     }
@@ -2689,6 +2816,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
      *                    refreshes the widgets and shortcuts associated with the given package/user
      */
     public void refreshAndBindWidgetsForPackageUser(@Nullable PackageUserKey packageUser) {
+        Log.i(TAG, "refreshAndBindWidgetsForPackageUser.................. ");
         mModel.refreshAndBindWidgetsAndShortcuts(packageUser);
     }
 
@@ -2929,9 +3057,36 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     @Override
                     public void onCallback(String params)  {
                         Log.i(TAG," onCallback params: "+params);
-                        if("PASTE".equals(params)){
-                            bindWorkspace();
-                        }                      
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if("PASTE".equals(params) ){
+                                    //addDesktopFile();
+                                    bindWorkspace();
+                                } else if("REFRESH_DESKTOP".equals(params)){
+        
+                                }          
+                            }
+                        });           
+                    }
+
+                    @Override
+                    public void onCallbackString(String method,String params)  {
+                        Log.i(TAG," onCallbackString method: "+method + ", params "+params);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
+                                    addDesktopFile(params);
+                                    bindWorkspace();
+                                }else if("RENAME".equals(method)){
+                                    String[] arrFileName = params.split("###");
+                                    DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
+                                    bindWorkspace();
+                                }
+                            }
+                        });
+                       
                     }
                 });
             }catch(Exception e){

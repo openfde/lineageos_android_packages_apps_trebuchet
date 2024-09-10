@@ -97,6 +97,8 @@ public abstract class BaseLoaderResults {
             mMyBindingId = mBgDataModel.lastBindId;
         }
 
+        Log.i(TAG, "bindWorkspace: size: "+ mCallbacksList.length  + ", mBgDataModel.workspaceItems size "+mBgDataModel.workspaceItems.size());
+
         for (Callbacks cb : mCallbacksList) {
             new WorkspaceBinder(cb, mUiExecutor, mApp, mBgDataModel, mMyBindingId,
                     workspaceItems, appWidgets, orderedScreenIds).bind();
@@ -197,6 +199,8 @@ public abstract class BaseLoaderResults {
             sortWorkspaceItemsSpatially(idp, currentWorkspaceItems);
             sortWorkspaceItemsSpatially(idp, otherWorkspaceItems);
 
+            Log.i(TAG, "Launcher_workspaceItems  bind()........" );
+
             // Tell the workspace that we're about to start binding items
             executeCallbacksTask(c -> {
                 c.clearPendingBinds();
@@ -211,12 +215,13 @@ public abstract class BaseLoaderResults {
             Log.i(TAG, "Launcher_workspaceItems  currentWorkspaceItems "+ currentWorkspaceItems.size()  + " ,currentWorkspaceItems  "+currentWorkspaceItems );
 
             // Load items on the current page.
-            List<ItemInfo> filteredList = currentWorkspaceItems.stream()
-            .filter(info -> (!info.title.toString().contains(".desktop") && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT))
+            // List<ItemInfo> filteredList = currentWorkspaceItems.stream()
+            // .filter(info -> (!info.title.toString().contains(".desktop") && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT))
+            // .collect(Collectors.toList());
+            // int count = filteredList.size();//currentWorkspaceItems.size() + otherWorkspaceItems.size() ;
+             List<ItemInfo> filteredList = currentWorkspaceItems.stream()
             .collect(Collectors.toList());
-            int count = filteredList.size();//currentWorkspaceItems.size() + otherWorkspaceItems.size() ;
-
-            Log.i(TAG, "Launcher_workspaceItems  filteredList "+ filteredList.size()  + " ,filteredList  "+filteredList );
+            Log.i(TAG, "Launcher_workspaceItems  mWorkspaceItems "+ mWorkspaceItems.size()  + " ,otherWorkspaceItems  "+otherWorkspaceItems );
 
             for(ItemInfo item : filteredList){
                 if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
@@ -231,12 +236,14 @@ public abstract class BaseLoaderResults {
             currentWorkspaceItems.clear();
             currentWorkspaceItems.addAll(filteredList);
 
-            List<WorkspaceItemInfo> deskFiles = FileUtils.getDesktop(count);
-            if(deskFiles !=null){
-                currentWorkspaceItems.addAll(deskFiles);
-                mBgDataModel.workspaceItems.clear();
-                mBgDataModel.workspaceItems.addAll(currentWorkspaceItems);
-            }
+            mBgDataModel.workspaceItems.clear();
+            mBgDataModel.workspaceItems.addAll(currentWorkspaceItems);
+            // List<WorkspaceItemInfo> deskFiles = FileUtils.getDesktop(count);
+            // if(deskFiles !=null){
+            //     currentWorkspaceItems.addAll(deskFiles);
+            //     mBgDataModel.workspaceItems.clear();
+            //     mBgDataModel.workspaceItems.addAll(currentWorkspaceItems);
+            // }
         
             mBgDataModel.workspaceItems = mBgDataModel.workspaceItems.stream()
             .collect(Collectors.collectingAndThen(

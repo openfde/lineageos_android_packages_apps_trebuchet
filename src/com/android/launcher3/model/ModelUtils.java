@@ -57,7 +57,8 @@ public class ModelUtils {
                 (lhs, rhs) -> Integer.compare(lhs.container, rhs.container));
         for (T info : allWorkspaceItems) {
             if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
-                if (info.screenId == currentScreenId && (info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT)) {
+                if (info.screenId == currentScreenId ) {
+                // if (info.screenId == currentScreenId && (info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT)) {
                     currentScreenItems.add(info);
                     itemsOnScreen.add(info.id);
                 } else {

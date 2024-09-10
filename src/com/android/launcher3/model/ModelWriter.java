@@ -51,6 +51,12 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import android.database.Cursor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
+import android.text.TextUtils;
+
 
 /**
  * Class for handling model updates.
@@ -283,6 +289,7 @@ public class ModelWriter {
         });
     }
 
+
     /**
      * Remove the specified folder and all its contents from the database.
      */
@@ -301,6 +308,7 @@ public class ModelWriter {
             verifier.verifyModel();
         });
     }
+
 
     /**
      * Deletes the widget info and the widget id.
@@ -437,10 +445,16 @@ public class ModelWriter {
                     }
                 }
 
+                // Log.d(TAG, "updateItemArrays item   "+item );
+
+
                 // Items are added/removed from the corresponding FolderInfo elsewhere, such
                 // as in Workspace.onDrop. Here, we just add/remove them from the list of items
                 // that are on the desktop, as appropriate
                 ItemInfo modelItem = mBgDataModel.itemsIdMap.get(itemId);
+
+                // Log.d(TAG, "updateItemArrays modelItem   "+modelItem );
+
                 if (modelItem != null &&
                         (modelItem.container == Favorites.CONTAINER_DESKTOP ||
                                 modelItem.container == Favorites.CONTAINER_HOTSEAT)) {
