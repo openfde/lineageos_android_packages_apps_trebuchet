@@ -2086,7 +2086,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     }
 
 
-    public void addDesktopFile(String fileName){
+    public void addDesktopFile(String method,String fileName){
         Point point = FileUtils.findNextFreePoint(this);
         WorkspaceItemInfo info = new WorkspaceItemInfo();
         info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
@@ -2098,13 +2098,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         info.intent = intent;
         info.cellY = point.y;
         info.cellX = point.x;
-        File f = new File(fileName);
-        if(f.getName().contains(".desktop")){
-            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
-        }else if(f.isDirectory()){
-            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
-        }else{
+        if("NEW_FILE".equals(method)){
             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+        }else{
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY; 
         }
         info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
         insertFavorites(info);
@@ -2301,6 +2298,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 File file = new File(filePath);
                 if(!file.exists()){
                     Log.i(TAG, "bindItems----rearray  0000000000000  "+filePath);
+                    deleteFavorites(info);
                     continue;
                 }
             }
@@ -3077,7 +3075,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                             @Override
                             public void run() {
                                 if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
-                                    addDesktopFile(params);
+                                    addDesktopFile(method,params);
                                     bindWorkspace();
                                 }else if("RENAME".equals(method)){
                                     String[] arrFileName = params.split("###");

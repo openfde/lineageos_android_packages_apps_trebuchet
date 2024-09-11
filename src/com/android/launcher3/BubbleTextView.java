@@ -316,16 +316,20 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
 
         setIcon(iconDrawable);
         if (mShouldShowLabel) {
-               String strTitle = info.title.toString();
-               if(strTitle.contains(".desktop")){
-                Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(strTitle);
-                if(FileUtils.isChineseLanguage(getContext())){
-                    strTitle = map.get("nameZh").toString();
-                 }else{
-                    strTitle = map.get("name").toString();
-                 }
+               try{
+                String strTitle = info.title.toString();
+                if(strTitle.contains(".desktop")){
+                 Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(strTitle);
+                 if(FileUtils.isChineseLanguage(getContext())){
+                     strTitle = map.get("nameZh").toString();
+                  }else{
+                     strTitle = map.get("name").toString();
+                  }
+                }
+                setText(strTitle);
+               }catch(Exception e){
+                 e.printStackTrace();
                }
-               setText(strTitle);
         }
         if (info.contentDescription != null) {
             setContentDescription(info.isDisabled()

@@ -49,7 +49,8 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import android.graphics.Point;
 import android.text.TextUtils;
-
+import java.io.FileReader;
+import java.io.IOException;
 
 
 public class FileUtils {
@@ -59,6 +60,8 @@ public class FileUtils {
     public static final String OPEN_DIR = "OPEN_DIR";
 
     public static final String OPEN_FILE = "OPEN_FILE";
+
+    public static final String OPEN_LINUX_APP = "OPEN_LINUX_APP";
 
     public static final String DELETE_DIR = "DELETE_DIR";
 
@@ -348,82 +351,69 @@ public static Point findNextFreePoint(Context context){
         }
     }
 
-    public  static Map<String,Object> getLinuxDesktopFileContent(String fileName ){
-        String desktopFilePath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/"+fileName;
-        File file = new File(desktopFilePath);
-        Map<String,Object> map = new HashMap<>();
-        if(file.exists()){
-            // Log.i("bella","getLinuxDesktopFileContent is 1111111111111 "+desktopFilePath);
-            Properties properties = new Properties();
-            boolean inDesktopEntrySection = false;
-            // try (FileInputStream fis = new FileInputStream(desktopFilePath)) {
-            //     InputStreamReader reader = new InputStreamReader(fis, "UTF-8");
-
-            try (FileInputStream fis = new FileInputStream(desktopFilePath);
-             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-             BufferedReader reader = new BufferedReader(isr)) {
-
+      // 读取文件内容到字符串
+    public static String readFile(String filePath) throws IOException {
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                
-                if (line.isEmpty() || line.startsWith("#")) {
-                    continue;
-                }
-
-                // 检测到 [Desktop Entry] 部分的开始
-                if (line.equals("[Desktop Entry]")) {
-                    inDesktopEntrySection = true;
-                    continue;
-                }
-
-                // 退出 [Desktop Entry] 部分
-                if (inDesktopEntrySection && line.startsWith("[Desktop")) {
-                    break;
-                }
-
-                // 解析 [Desktop Entry] 部分中的 key=value 对
-                if (inDesktopEntrySection) {
-                    int equalIndex = line.indexOf('=');
-                    if (equalIndex != -1) {
-                        String key = line.substring(0, equalIndex).trim();
-                        String value = line.substring(equalIndex + 1).trim();
-                        properties.put(key, value);
-                    }
-                }
+            while ((line = br.readLine()) != null) {
+                content.append(line).append("\n");
             }
-
-
-                properties.load(reader);
-                // Log.i("bella","getLinuxDesktopFileContent is properties "+properties.toString());
-                String name = properties.getProperty("Name");
-                String exec = properties.getProperty("Exec");
-                String icon = properties.getProperty("Icon");
-                map.put("name",name);
-                map.put("exec",exec);
-                map.put("icon",icon);
-
-                try{
-                    String nameZh = properties.getProperty("Name[zh_CN]");
-                    if(nameZh !=null ){
-                        map.put("nameZh",nameZh);
-                    }
-                }catch(Exception e){
-                    Log.e("bella","getLinuxDesktopFileContent  properties error "+e.toString());
-                    e.printStackTrace();
-                }
-
-                return map ;
-            } catch (Exception e) {
-                Log.e("bella","getLinuxDesktopFileContent  properties2 error "+e.toString());
-                e.printStackTrace();
-            }
-        }else{
-            Log.i("bella","icon_pic is 000000000000 "+desktopFilePath);
         }
-        return null ;
+        return content.toString();
     }
 
+    public static Map<String,Object> getLinuxContentString(String fileName){
+        String filePath = "/volumes/da9e61df-57e9-4f6c-9550-fcd12b06f0e9/home/xudingqiang/桌面/"+fileName;
+        String startChar = "[Desktop";  // 查找以字母 'A' 开头的段落
+        Map<String,Object> map = new HashMap<>();
+        try {
+            // 读取文件内容
+            String content = readFile(filePath);
+            // 查找以指定字开头的段落
+
+            int firstIndex  = content.indexOf("[Desktop");
+            int secondIndex = content.indexOf("[Desktop", firstIndex + 1);
+            // Log.i(TAG,"bella...firstIndex: "+firstIndex + ", secondIndex: "+secondIndex);
+            if(secondIndex != -1){
+                content = content.substring(firstIndex,secondIndex);
+            }
+        
+            String []paragraphs = content.split("\n");
+            for (String paragraph : paragraphs) {
+                int equalIndex = paragraph.indexOf('=');
+                if (equalIndex != -1) {
+                    String key = paragraph.substring(0, equalIndex).trim();
+                    String value = paragraph.substring(equalIndex + 1).trim();
+                    map.put(key, value);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  map;
+    }
+
+    public  static Map<String,Object> getLinuxDesktopFileContent(String fileName ){
+        Map<String,Object> mp = getLinuxContentString(fileName);
+        Map<String,Object> map = new HashMap<>();
+        try{
+            String name = mp.get("Name").toString();
+            String exec = mp.get("Exec").toString();
+            String icon = mp.get("Icon").toString();
+            map.put("name",name);
+            map.put("exec",exec);
+            map.put("icon",icon);
+         
+            String nameZh = mp.get("Name[zh_CN]").toString();
+            if(nameZh !=null ){
+                map.put("nameZh",nameZh);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return map;
+    }
 
     public static File[]  findFilesByName(File directory, final String fileName) {
         if (directory == null || !directory.isDirectory()) {
