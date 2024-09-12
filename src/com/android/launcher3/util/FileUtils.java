@@ -83,6 +83,8 @@ public class FileUtils {
 
     public static final String PASTE_FILE = "PASTE_FILE";
 
+    public static final String OP_INIT = "OP_INIT";
+
     public static final String RENAME_DIR = "RENAME_DIR";
 
     public static final String RENAME_FILE = "RENAME_FILE";
@@ -95,6 +97,12 @@ public class FileUtils {
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
 
+public static void createDesktopDir(){
+        File file = new File(PATH_ID_DESKTOP);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+}    
 
 private static String getUniqueFileName(String documentId,String fileName ) {
     String name = fileName ;
@@ -306,46 +314,49 @@ public static Point findNextFreePoint(Context context){
 
 
     public static void createLinuxDesktopFile(ContentValues initialValues){
+        createDesktopDir();
         if(initialValues !=null){
             Log.i(TAG,"bella...insert....3......... "+initialValues.toString());
-
-            String title  = initialValues.get("title").toString();
-            int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
-
-            if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
-                return ;
-            }
-
-            String pathDesktop = PATH_ID_DESKTOP+title+"_fde.desktop";
-            File file = new File(pathDesktop);
-            if(file.exists()){
-                Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
-                return ;
-            }
-            Path desktopFilePath = Paths.get(pathDesktop);
-            String picPath = "/volumes"+"/"+getLinuxUUID()+"/tmp/"+title+".png";
-            file = new File(picPath);
-            if(!file.exists()){
-                Log.i(TAG,"bella...insert.............picPath: "+picPath);
-            }else{
-                //if pic exists ,return 
-            }    
-
-
-            List<String> lines = List.of(
-                "[Desktop Entry]",
-                "Type=Application",
-                "Name="+title,
-                "Name[zh_CN]="+title,
-                "Categories="+itemType,
-                "Exec=/usr/bin/fde_utils start",
-                "Icon="+picPath
-            );
-     
-            // 写入.desktop文件
-            try {
+            try{
+                String title  = initialValues.get("title").toString();
+                int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
+    
+                if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                    return ;
+                }
+    
+                String pathDesktop = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/"+title+"_fde.desktop";
+                File file = new File(pathDesktop);
+                if(file.exists()){
+                    Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                    return ;
+                }
+                Path desktopFilePath = Paths.get(pathDesktop);
+               // String picPath = "/volumes"+"/"+getLinuxUUID()+"/tmp/"+title+".png";
+                String picPath = "/tmp/"+title+".png";
+                File filePic = new File(picPath);
+                if(!filePic.exists()){
+                    Log.i(TAG,"bella...insert.............picPath: "+picPath);
+                }else{
+                    //if pic exists ,return 
+                }    
+    
+    
+                List<String> lines = List.of(
+                    "[Desktop Entry]",
+                    "Type=Application",
+                    "Name="+title,
+                    "Name[zh_CN]="+title,
+                    "Categories="+itemType,
+                    "Exec=/usr/bin/fde_utils start",
+                    "Icon="+picPath
+                );
+         
+                // 写入.desktop文件
                 Files.write(desktopFilePath, lines, StandardOpenOption.CREATE);
-            } catch (Exception e) {
+                file.setExecutable(true);
+ 
+            }catch(Exception e){
                 e.printStackTrace();
             }
         }
@@ -364,8 +375,8 @@ public static Point findNextFreePoint(Context context){
     }
 
     public static Map<String,Object> getLinuxContentString(String fileName){
-        String filePath = "/volumes/da9e61df-57e9-4f6c-9550-fcd12b06f0e9/home/xudingqiang/桌面/"+fileName;
-        String startChar = "[Desktop";  // 查找以字母 'A' 开头的段落
+        String filePath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/"+fileName;
+        String startChar = "[Desktop";  // 
         Map<String,Object> map = new HashMap<>();
         try {
             // 读取文件内容
@@ -405,9 +416,10 @@ public static Point findNextFreePoint(Context context){
             map.put("exec",exec);
             map.put("icon",icon);
          
-            String nameZh = mp.get("Name[zh_CN]").toString();
-            if(nameZh !=null ){
-                map.put("nameZh",nameZh);
+            if(mp.get("Name[zh_CN]") != null ){
+                map.put("nameZh",mp.get("Name[zh_CN]").toString());
+            }else{
+                map.put("nameZh",name); 
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -434,6 +446,65 @@ public static Point findNextFreePoint(Context context){
         Locale locale = context.getResources().getConfiguration().locale;
         String language = locale.getLanguage();
         return language.equals("zh");
+    }
+
+     // 递归查找文件
+     public static String findFileInDirectory(File directory, String fileName) {
+        File[] files = directory.listFiles();  
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // 如果是目录，递归查找子目录
+                    String found = findFileInDirectory(file, fileName);
+                    if (found != null) {
+                        return found;
+                    }
+                } else if (file.getName().equals(fileName)) {
+                    // 找到文件
+                    return file.getAbsolutePath();
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public static String findLinuxIconPath(String fileName){
+        String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+fileName ;
+        File file = new File(absoluteIcon);
+        if(file.exists()){
+            return absoluteIcon;
+        }else {
+            absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/kylin-software-center/data/icons/"+fileName;
+            file = new File(absoluteIcon);
+            if(file.exists()){
+                return absoluteIcon;
+            }else{
+                absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/128x128/apps/"+fileName;
+                file = new File(absoluteIcon);
+                if(file.exists()){
+                    return absoluteIcon;
+                }else{
+                    absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/hicolor/scalable/apps/"+fileName;
+                    file = new File(absoluteIcon);
+                    if(file.exists()){
+                        return absoluteIcon;
+                    }else{
+                        absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/32x32/apps/"+fileName;                        file = new File(absoluteIcon);
+                        if(file.exists()){
+                            return absoluteIcon;
+                        }else{
+                            absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/hicolor/256x256/apps/"+fileName;                        file = new File(absoluteIcon);
+                            if(file.exists()){
+                                return absoluteIcon;
+                            }else{
+                                return null ;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

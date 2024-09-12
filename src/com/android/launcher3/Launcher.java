@@ -406,6 +406,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         //     }
         // }
 
+        FileUtils.createDesktopDir();
         bindService();
 
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_CREATE_EVT,
@@ -484,7 +485,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mDragLayer.getAlphaProperty(ALPHA_INDEX_LAUNCHER_LOAD).setValue(0);
             }
         }
-        addDesktopFiles();
+        // addDesktopFiles();
         // For handling default keys
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
 
@@ -3049,7 +3050,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         public void onServiceConnected(ComponentName name, IBinder service) {
             // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
             idocAidl = IDocAidlInterface.Stub.asInterface(service);
-
+            addDesktopFiles();
             try{
                 idocAidl.register(new IDataChangedCallback.Stub(){
                     @Override

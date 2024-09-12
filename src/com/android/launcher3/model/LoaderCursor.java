@@ -200,8 +200,12 @@ public class LoaderCursor extends CursorWrapper {
                 return true;
             } catch (Exception e) {
                 Log.e(TAG, "Failed to decode byte array for info " + info, e);
+                e.printStackTrace();
                 return false;
             }
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
         }
     }
 

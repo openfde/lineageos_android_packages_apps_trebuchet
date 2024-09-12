@@ -88,7 +88,7 @@ public class ItemClickHandler {
         return v -> onClick(v, sourceContainer);
     }
 
-    private static final long DOUBLE_CLICK_TIME_DELTA = 200; // 双击的最大时间间隔（毫秒）
+    private static final long DOUBLE_CLICK_TIME_DELTA = 400; // 双击的最大时间间隔（毫秒）
     private static long lastClickTime = 0; 
 
 

@@ -118,7 +118,9 @@ public class FastBitmapDrawable extends Drawable {
     }
 
     protected void drawInternal(Canvas canvas, Rect bounds) {
-        canvas.drawBitmap(mBitmap, null, bounds, mPaint);
+        if(mBitmap != null){
+            canvas.drawBitmap(mBitmap, null, bounds, mPaint);
+        }
     }
 
     @Override
@@ -349,25 +351,51 @@ public class FastBitmapDrawable extends Drawable {
             Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
             if(map !=null){
                 String icon = map.get("icon").toString();
-                String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+icon ;
+                String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID() + icon ;
 
                 File file = new File(absoluteIcon);
-                if(file.exists()){
+
+                if(file.exists() &&  !icon.contains(".svg") ){
                     Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
                     bitmap = BitmapFactory.decodeFile(absoluteIcon);
                 }else{
-                    String kylinIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/kylin-software-center/data/icons/"+icon+".png";
-                    file = new File(kylinIcon); 
-                    if(file.exists()){
-                        bitmap = BitmapFactory.decodeFile(kylinIcon);
-                    }else{
-                        String ukuiIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/128x128/apps/"+icon+".png";
-                        file = new File(ukuiIcon); 
-                        if(file.exists()){
-                            bitmap = BitmapFactory.decodeFile(ukuiIcon);
+                    ///usr/share/icons/hicolor/32x32/apps
+                    String pathParent = "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/" ;
+                    File directory = new File(pathParent);  // 获取应用私有文件目录
+        
+                    String fileName = "";
+                    if(icon.contains(".svg")){
+                        File tempFile = new File(absoluteIcon);
+                        if(tempFile.exists()){
+                            fileName = tempFile.getName().replace(".svg",".png");
                         }else{
-                            Log.e("bella","FastBitmapDrawable  newIcon_no : file not exists: "+ukuiIcon  );
+                            fileName = icon.replace(".svg",".png");
                         }
+                    }else{
+                        fileName =  icon+".png";
+                    }
+                   
+                    // String absolutePath = FileUtils.findFileInDirectory(directory,fileName);
+                    String absolutePath = FileUtils.findLinuxIconPath(fileName);
+
+                    Log.i("bella","FastBitmapDrawable  pathParent : "+pathParent  + " , absolutePath "+absolutePath  + ",fileName "+fileName);
+
+                    if(absolutePath != null){
+                        if(!absolutePath.contains(".")){
+                            absolutePath = absolutePath +".png";
+                        }
+                        Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
+                        File fi = new File(absolutePath);
+                        if(fi.exists()){
+                            bitmap = BitmapFactory.decodeFile(absolutePath);
+                        }else{
+                            bitmap = BitmapFactory.decodeFile(icon);
+                            Log.e("bella","FastBitmapDrawable "+absolutePath+"  is not exist  newIcon_no : file not exists: "  );   
+                        }
+                      
+                    }else{
+                        bitmap = BitmapFactory.decodeFile(icon);
+                        Log.e("bella","FastBitmapDrawable   : "+absolutePath+ "  file not exists: ");
                     }
                 
                 }
