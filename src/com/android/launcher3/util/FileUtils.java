@@ -97,8 +97,8 @@ public class FileUtils {
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
 
-public static void createDesktopDir(){
-        File file = new File(PATH_ID_DESKTOP);
+public static void createDesktopDir(String path){
+        File file = new File(path);
         if(!file.exists()){
             file.mkdirs();
         }
@@ -314,7 +314,7 @@ public static Point findNextFreePoint(Context context){
 
 
     public static void createLinuxDesktopFile(ContentValues initialValues){
-        createDesktopDir();
+        createDesktopDir(PATH_ID_DESKTOP);
         if(initialValues !=null){
             Log.i(TAG,"bella...insert....3......... "+initialValues.toString());
             try{
@@ -332,8 +332,7 @@ public static Point findNextFreePoint(Context context){
                     return ;
                 }
                 Path desktopFilePath = Paths.get(pathDesktop);
-               // String picPath = "/volumes"+"/"+getLinuxUUID()+"/tmp/"+title+".png";
-                String picPath = "/tmp/"+title+".png";
+                String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.openfde/pic/"+title+".png";
                 File filePic = new File(picPath);
                 if(!filePic.exists()){
                     Log.i(TAG,"bella...insert.............picPath: "+picPath);

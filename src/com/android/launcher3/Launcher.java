@@ -406,7 +406,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         //     }
         // }
 
-        FileUtils.createDesktopDir();
+        FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
+        FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/"); 
+        FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/pic/"); 
+
         bindService();
 
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_CREATE_EVT,
@@ -2116,7 +2119,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             count = listApps.size();
         }
     
-        String documentId = FileUtils.PATH_ID_DESKTOP; 
+     //   String documentId = FileUtils.PATH_ID_DESKTOP;
+        String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
         File parent = new File(documentId);
         File[] files = parent.listFiles();
         int scale  =  FileUtils.getScreenRows(this);
@@ -2287,8 +2291,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mWorkspace.removeExtraEmptyScreen(false);
     }
 
+    public void refresh(){
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
     public void rearray(Context context){
-        FileUtils.findNextFreePoint(this);
         List<ItemInfo> rearray = getModel().rearray(context);
         List<ItemInfo> rearrayList = new ArrayList<>();
         Log.i(TAG, "bindItems----rearray :  "+rearray.size());
@@ -2298,7 +2305,6 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
                 File file = new File(filePath);
                 if(!file.exists()){
-                    Log.i(TAG, "bindItems----rearray  0000000000000  "+filePath);
                     deleteFavorites(info);
                     continue;
                 }
@@ -2307,11 +2313,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
                     info.cellX, info.cellY, info.spanX, info.spanY);
         }
-        bindItems(rearrayList, false);
-
-        gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
-        gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
-        
+        bindItems(rearrayList, false);        
     }
 
     public void bindWorkspace(){
@@ -3050,7 +3052,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         public void onServiceConnected(ComponentName name, IBinder service) {
             // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
             idocAidl = IDocAidlInterface.Stub.asInterface(service);
+            gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
+            gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
             addDesktopFiles();
+                   
             try{
                 idocAidl.register(new IDataChangedCallback.Stub(){
                     @Override

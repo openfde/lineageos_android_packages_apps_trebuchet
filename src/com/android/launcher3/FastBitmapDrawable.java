@@ -349,7 +349,7 @@ public class FastBitmapDrawable extends Drawable {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_linux);
             String title = info.title.toString();
             Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
-            if(map !=null){
+            if(map !=null && map.get("icon") !=null){
                 String icon = map.get("icon").toString();
                 String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID() + icon ;
 
