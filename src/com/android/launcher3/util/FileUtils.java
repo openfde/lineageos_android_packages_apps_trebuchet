@@ -51,7 +51,7 @@ import android.graphics.Point;
 import android.text.TextUtils;
 import java.io.FileReader;
 import java.io.IOException;
-
+import java.lang.reflect.Method;
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -96,6 +96,8 @@ public class FileUtils {
     public static final String OP_CREATE_LINUX_ICON = "OP_CREATE_LINUX_ICON";
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
+
+    public static boolean isOpenLinuxApp = false ;
 
 public static void createDesktopDir(String path){
         File file = new File(path);
@@ -314,6 +316,10 @@ public static Point findNextFreePoint(Context context){
 
 
     public static void createLinuxDesktopFile(ContentValues initialValues){
+        // desktop linux app temp delete 
+        if(!isOpenLinuxApp){
+            return ;
+        }
         createDesktopDir(PATH_ID_DESKTOP);
         if(initialValues !=null){
             Log.i(TAG,"bella...insert....3......... "+initialValues.toString());
@@ -465,6 +471,26 @@ public static Point findNextFreePoint(Context context){
             }
         }
         return null;
+    }
+
+    public static void setSystemProperty(String key, String value) {
+        try {
+            Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
+            Method setMethod = systemPropertiesClass.getDeclaredMethod("set", String.class, String.class);
+            setMethod.invoke(null, key, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean isAppInstalled(Context context, String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            return true; // app installed
+        } catch (PackageManager.NameNotFoundException e) {
+            return false; // app not install
+        }
     }
 
 

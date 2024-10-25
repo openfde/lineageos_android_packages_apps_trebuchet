@@ -196,6 +196,9 @@ public class LoaderCursor extends CursorWrapper {
             // Failed to load from resource, try loading from DB.
             byte[] data = getBlob(iconIndex);
             try {
+                if(data == null ){
+                    return false ;
+                }
                 info.bitmap = li.createIconBitmap(decodeByteArray(data, 0, data.length));
                 return true;
             } catch (Exception e) {

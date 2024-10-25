@@ -232,8 +232,10 @@ import android.os.ParcelFileDescriptor;
 import java.util.Arrays;
 import java.util.Map;
 import android.graphics.Point;
-
-
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.TextView;
+import android.widget.LinearLayout;
 /**
  * Default launcher application.
  */
@@ -391,6 +393,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e(TAG, "bella Launcher_oncreate .................. ");
+
+        FileUtils.setSystemProperty("launcher_time",System.currentTimeMillis()+"");
+ 
 
         // if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
         //     // 如果权限未授予，则请求权限
@@ -480,7 +486,6 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
         mPageToBindSynchronously = currentScreen;
 
-        Log.i(TAG, "oncreate addCallbacksAndLoad.................. ");
         if (!mModel.addCallbacksAndLoad(this)) {
             if (!internalStateHandled) {
                 // If we are not binding synchronously, show a fade in animation when
@@ -2149,10 +2154,13 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
 
                 if(f.getName().contains("_fde.desktop")){
-                    // info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
                     continue;
                 }else if(f.getName().contains(".desktop")){
                     info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                    // desktop linux app temp delete 
+                    if(!FileUtils.isOpenLinuxApp){
+                        continue;
+                    }
                 }else if(f.isDirectory()){
                     info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
                 }else{
@@ -2318,12 +2326,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     public void bindWorkspace(){
 
-
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                getModel().forceReload();
-                // getModel().startLoader();
+              //  getModel().forceReload();
+                 getModel().startLoader();
             }
         }, 1000);
     }
@@ -3111,6 +3118,69 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void selectOpenType(String method,String title){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_select_app, null);
+
+        LinearLayout layoutSecondType = dialogView.findViewById(R.id.layoutSecondType);
+        LinearLayout layoutThirdType = dialogView.findViewById(R.id.layoutThirdType);
+
+        if(FileUtils.isAppInstalled(this,"com.iiordanov.bVNC")){
+            layoutSecondType.setVisibility(View.VISIBLE);
+        }else{
+            layoutSecondType.setVisibility(View.GONE);
+        }
+
+        if(FileUtils.isAppInstalled(this,"com.fde.x11")){
+            layoutThirdType.setVisibility(View.VISIBLE);
+        }else{
+            layoutThirdType.setVisibility(View.GONE);
+        }
+
+        TextView txtOnlyOnce = dialogView.findViewById(R.id.txtOnlyOnce);
+        TextView txtAlways = dialogView.findViewById(R.id.txtAlways);
+        TextView txtSecondType = dialogView.findViewById(R.id.txtSecondType);
+        TextView txtThirdType = dialogView.findViewById(R.id.txtThirdType);
+
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+        // 显示对话框
+        dialog.show();
+
+        txtOnlyOnce.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###open");
+                dialog.dismiss();
+            }
+        });
+
+        txtAlways.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###open");
+                dialog.dismiss();
+            }
+        });
+
+        txtSecondType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###vnc");
+                dialog.dismiss();
+            }
+        });
+
+        txtThirdType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###x11");
+                dialog.dismiss();
+            }
+        });
     }
 
     public boolean isShowPasteDlg(){

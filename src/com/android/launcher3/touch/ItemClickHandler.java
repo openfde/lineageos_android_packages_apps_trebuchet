@@ -331,7 +331,9 @@ public class ItemClickHandler {
             Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
             String name = map.get("name").toString();
             String exec = map.get("exec").toString();
-            launcher.gotoDocApp(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
+           // launcher.gotoDocApp(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
+            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
+            
             // Intent inte = new Intent();
             // ComponentName componentName = new ComponentName("com.termux.x11", "com.termux.x11.AppListActivity");
             // inte.setComponent(componentName);
@@ -339,6 +341,8 @@ public class ItemClickHandler {
             // inte.putExtra("Path", exec);
             // inte.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             // launcher.startActivity(inte);
+
+            
             return ;
         }else {
             intent = item.getIntent();
