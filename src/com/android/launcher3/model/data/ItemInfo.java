@@ -146,7 +146,7 @@ public class ItemInfo {
      * When the instance is created using {@link #copyFrom}, this field is used to keep track of
      * original {@link ComponentName}.
      */
-    private ComponentName mComponentName;
+    public ComponentName mComponentName;
 
     public UserHandle user;
 
@@ -175,6 +175,10 @@ public class ItemInfo {
 
     public Intent getIntent() {
         return null;
+    }
+
+    public String getTitle(){
+        return title.toString();
     }
 
     @Nullable
@@ -225,6 +229,7 @@ public class ItemInfo {
     protected String dumpProperties() {
         return "id=" + id
                 + " type=" + LauncherSettings.Favorites.itemTypeToString(itemType)
+                + " itemType=" + itemType
                 + " container=" + LauncherSettings.Favorites.containerToString(container)
                 + " targetComponent=" + getTargetComponent()
                 + " screen=" + screenId
@@ -235,6 +240,7 @@ public class ItemInfo {
                 + " user=" + user
                 + " title=" + title;
     }
+    
 
     /**
      * Whether this item is disabled.

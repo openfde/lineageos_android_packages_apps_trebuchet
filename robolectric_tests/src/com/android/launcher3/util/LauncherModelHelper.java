@@ -48,6 +48,7 @@ import com.android.launcher3.model.BgDataModel.Callbacks;
 import com.android.launcher3.model.data.AppInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.pm.UserCache;
+import android.util.Log;
 
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
@@ -174,6 +175,7 @@ public class LauncherModelHelper {
                         continue;
                     }
                     String[] commands = line.split(" ");
+                    Log.("bella","initializeData commands  "+commands[0] + " ,  "+commands);
                     switch (commands[0]) {
                         case "classMap":
                             classMap.put(commands[1], Class.forName(commands[2]));

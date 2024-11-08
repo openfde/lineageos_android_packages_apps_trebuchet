@@ -40,11 +40,13 @@ import com.android.launcher3.util.PackageManagerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Log;
 
 /**
  * Task to add auto-created workspace items.
  */
 public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
+    public static final String TAG = "LauncherAddWorkspaceItemsTask";
 
     private final List<Pair<ItemInfo, Object>> mItemList;
 
@@ -60,6 +62,9 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
         if (mItemList.isEmpty()) {
             return;
         }
+
+        Log.i(TAG,"AddWorkspaceItemsTask AllAppsList size " +  " , data "+apps.data.size() + ", mItemList size "+mItemList.size());
+        Log.i(TAG,"AddWorkspaceItemsTask mItemList : "+mItemList);
 
         final ArrayList<ItemInfo> addedItemsFinal = new ArrayList<>();
         final IntArray addedWorkspaceScreensFinal = new IntArray();
@@ -184,6 +189,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                             }
                         }
                     }
+                    Log.i(TAG, "bindAppsAdded  execute........ ");
                     callbacks.bindAppsAdded(addedWorkspaceScreensFinal,
                             addNotAnimated, addAnimated);
                 }

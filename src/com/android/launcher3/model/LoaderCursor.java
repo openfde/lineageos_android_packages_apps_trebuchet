@@ -176,6 +176,7 @@ public class LoaderCursor extends CursorWrapper {
      * Loads the icon from the cursor and updates the {@param info} if the icon is an app resource.
      */
     protected boolean loadIcon(WorkspaceItemInfo info) {
+        Log.i(TAG,"loadIcon....Launcher....... "+info.toString());
         try (LauncherIcons li = LauncherIcons.obtain(mContext)) {
             if (itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT) {
                 String packageName = getString(iconPackageIndex);
@@ -195,19 +196,26 @@ public class LoaderCursor extends CursorWrapper {
             // Failed to load from resource, try loading from DB.
             byte[] data = getBlob(iconIndex);
             try {
+                if(data == null ){
+                    return false ;
+                }
                 info.bitmap = li.createIconBitmap(decodeByteArray(data, 0, data.length));
                 return true;
             } catch (Exception e) {
                 Log.e(TAG, "Failed to decode byte array for info " + info, e);
+                e.printStackTrace();
                 return false;
             }
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
         }
     }
 
     /**
      * Returns the title or empty string
      */
-    private String getTitle() {
+    public String getTitle() {
         String title = getString(titleIndex);
         return TextUtils.isEmpty(title) ? "" : Utilities.trim(title);
     }

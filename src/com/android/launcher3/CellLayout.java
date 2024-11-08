@@ -77,7 +77,7 @@ import java.util.Stack;
 
 public class CellLayout extends ViewGroup {
     private static final String TAG = "CellLayout";
-    private static final boolean LOGD = false;
+    private static final boolean LOGD = true;
 
     protected final ActivityContext mActivity;
     @ViewDebug.ExportedProperty(category = "launcher")
@@ -603,6 +603,7 @@ public class CellLayout extends ViewGroup {
                 Log.d(TAG, "Adding view to ShortcutsAndWidgetsContainer: " + child);
             }
             mShortcutsAndWidgets.addView(child, index, lp);
+            Log.d(TAG, "addViewToCellLayout markCells "+markCells );
 
             if (markCells) markCellsAsOccupiedForView(child);
 

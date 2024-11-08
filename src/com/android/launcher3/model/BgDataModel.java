@@ -78,7 +78,7 @@ public class BgDataModel {
      * List of all the folders and shortcuts directly on the home screen (no widgets
      * or shortcuts within folders).
      */
-    public final ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
+    public  ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
 
     /**
      * All LauncherAppWidgetInfo created by LauncherModel.
@@ -251,6 +251,9 @@ public class BgDataModel {
                 // Fall through
             }
             case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
+            case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
+            case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
+            case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
             case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                 if (item.container == LauncherSettings.Favorites.CONTAINER_DESKTOP ||
                         item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT) {

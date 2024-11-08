@@ -47,6 +47,9 @@ import static com.android.launcher3.logging.StatsLogManager.containerTypeToAtomS
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 import static com.android.launcher3.popup.SystemShortcut.APP_OPEN;
 import static com.android.launcher3.popup.SystemShortcut.APP_REMOVE;
+import static com.android.launcher3.popup.SystemShortcut.APP_COPY;
+import static com.android.launcher3.popup.SystemShortcut.APP_CUT;
+import static com.android.launcher3.popup.SystemShortcut.APP_RENAME;
 import static com.android.launcher3.popup.SystemShortcut.INSTALL;
 import static com.android.launcher3.popup.SystemShortcut.WIDGETS;
 import static com.android.launcher3.states.RotationHelper.REQUEST_LOCK;
@@ -203,7 +206,36 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import android.content.ComponentName;
+import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.util.DbUtils;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.io.File;
 
+import android.os.Environment;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import android.net.Uri;
+import androidx.annotation.NonNull;
+import android.provider.Settings;
+import android.Manifest;
+import com.android.documentsui.IDocAidlInterface;
+import com.android.documentsui.IDataChangedCallback;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.Handler;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.os.ParcelFileDescriptor;
+import java.util.Arrays;
+import java.util.Map;
+import android.graphics.Point;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.TextView;
+import android.widget.LinearLayout;
 /**
  * Default launcher application.
  */
@@ -268,6 +300,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     private LauncherAppTransitionManager mAppTransitionManager;
     private Configuration mOldConfig;
+
+    IDocAidlInterface idocAidl;
+
+    private Handler handler = new Handler();
+
 
     @Thunk
     Workspace mWorkspace;
@@ -349,8 +386,38 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     private SafeCloseable mUserChangedCallbackCloseable;
 
+    public static final int REQUEST_CODE = 1000;
+
+    public static final int REQUEST_CODE_1 = 1001;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e(TAG, "bella Launcher_oncreate .................. ");
+
+        FileUtils.setSystemProperty("launcher_time",System.currentTimeMillis()+"");
+ 
+
+        // if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        //     // 如果权限未授予，则请求权限
+        //     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE_1);
+        // }
+
+
+        // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        //     if (!Environment.isExternalStorageManager()) {
+        //         Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+        //         intent.setData(Uri.parse("package:" + getPackageName()));
+        //         startActivity(intent);
+        //     }
+        // }
+
+        FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
+        FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/"); 
+        FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/pic/"); 
+
+        bindService();
+
         Object traceToken = TraceHelper.INSTANCE.beginSection(ON_CREATE_EVT,
                 TraceHelper.FLAG_UI_EVENT);
         if (DEBUG_STRICT_MODE) {
@@ -426,7 +493,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mDragLayer.getAlphaProperty(ALPHA_INDEX_LAUNCHER_LOAD).setValue(0);
             }
         }
-
+        // addDesktopFiles();
         // For handling default keys
         setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
 
@@ -470,6 +537,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mUserChangedCallbackCloseable = UserCache.INSTANCE.get(this).addUserChangeListener(
                 () -> getStateManager().goToState(NORMAL));
     }
+
 
     protected LauncherOverlayManager getDefaultOverlay() {
         return new LauncherOverlayManager() { };
@@ -546,6 +614,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         // Calling onSaveInstanceState ensures that static cache used by listWidgets is
         // initialized properly.
         onSaveInstanceState(new Bundle());
+        Log.i(TAG, "onIdpChanged.................. ");
         mModel.rebindCallbacks();
     }
 
@@ -570,6 +639,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
 
         onDeviceProfileInitiated();
+        Log.i(TAG, "initDeviceProfile.................. ");
         mModelWriter = mModel.getWriter(getDeviceProfile().isVerticalBarLayout(), true);
     }
 
@@ -645,6 +715,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     private int completeAdd(
             int requestCode, Intent intent, int appWidgetId, PendingRequestArgs info) {
         int screenId = info.screenId;
+        Log.d(TAG, "completeAdd: loading default c.screenId "+screenId  + ",requestCode "+requestCode );
+
         if (info.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
             // When the screen id represents an actual screen (as opposed to a rank) we make sure
             // that the drop page actually exists.
@@ -922,6 +994,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 InstallShortcutReceiver.FLAG_ACTIVITY_PAUSED, this);
 
         // Refresh shortcuts if the permission changed.
+        Log.i(TAG, "onDeferredResumed.................. ");
         mModel.refreshShortcutsIfRequired();
 
         // Set the notification listener and fetch updated notifications when we resume
@@ -1786,7 +1859,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
      * @param deleteFromDb whether or not to delete this item from the db.
      */
     public boolean removeItem(View v, final ItemInfo itemInfo, boolean deleteFromDb) {
+        Log.i(TAG," removeItem deleteFromDb : "+deleteFromDb + " , itemInfo: "+itemInfo);
+
         if (itemInfo instanceof WorkspaceItemInfo) {
+
             // Remove the shortcut from the folder before removing it from launcher
             View folderIcon = mWorkspace.getHomescreenIconByItemId(itemInfo.container);
             if (folderIcon instanceof FolderIcon) {
@@ -1795,6 +1871,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mWorkspace.removeWorkspaceItem(v);
             }
             if (deleteFromDb) {
+                Log.i(TAG," removeItem deleteFromDb : "+deleteFromDb);
                 getModelWriter().deleteItemFromDatabase(itemInfo);
             }
         } else if (itemInfo instanceof FolderInfo) {
@@ -2017,12 +2094,122 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
     }
 
+
+    public void addDesktopFile(String method,String fileName){
+        Point point = FileUtils.findNextFreePoint(this);
+        WorkspaceItemInfo info = new WorkspaceItemInfo();
+        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+        info.title = fileName;
+        info.container = -100;
+        info.screenId = 0;
+        Intent intent = new Intent();
+        intent.setPackage("com.android.launcher3");
+        info.intent = intent;
+        info.cellY = point.y;
+        info.cellX = point.x;
+        if("NEW_FILE".equals(method)){
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+        }else{
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY; 
+        }
+        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        insertFavorites(info);
+    }
+
+
+    public List<WorkspaceItemInfo> addDesktopFiles(){
+        List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(this);
+        int count = 0;
+        if(listApps !=null){
+            count = listApps.size();
+        }
+    
+     //   String documentId = FileUtils.PATH_ID_DESKTOP;
+        String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
+        File parent = new File(documentId);
+        File[] files = parent.listFiles();
+        int scale  =  FileUtils.getScreenRows(this);
+        if(files !=null){
+            Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+            Log.d(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
+        
+            List<WorkspaceItemInfo> list = new ArrayList();
+            int index = 0;
+            int xindex = count / scale;
+            int yindex = count % scale; 
+            for(File f : files){
+                WorkspaceItemInfo info = new WorkspaceItemInfo();
+                info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+                info.title = f.getName();
+                info.container = -100;
+                info.screenId = 0;
+                Intent intent = new Intent();
+                intent.setPackage("com.android.launcher3");
+                info.intent = intent;
+                int y = yindex + index ;
+                info.cellY = y%scale ;
+                info.cellX = xindex + y/scale;
+                info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+
+                Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
+
+                if(f.getName().contains("_fde.desktop")){
+                    continue;
+                }else if(f.getName().contains(".desktop")){
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                    // desktop linux app temp delete 
+                    if(!FileUtils.isOpenLinuxApp){
+                        continue;
+                    }
+                }else if(f.isDirectory()){
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                }else{
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+                }
+                list.add(info);
+                index++;
+                insertOrUpdateFavorites(info);
+            }
+            return list ;
+        }else{
+            Log.d(TAG, "bindItems: files is null  " );
+        }
+        return null ;
+    }
+
+    private void insertOrUpdateFavorites(ItemInfo info){
+        List<Map<String,Object>> listData = DbUtils.queryItemsFromDatabase(this,info);//getModelWriter().queryItemsFromDatabase(info);//
+        if(listData == null){
+            //insert 
+            insertFavorites(info);
+        }else{
+            //update 
+            updateFavorites(info);
+        }  
+    }
+    
+    public void insertFavorites(ItemInfo info){
+        getModelWriter().addItemToDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY);
+    }
+
+    public void updateFavorites(ItemInfo info){
+        getModelWriter().modifyItemInDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY,1,1);
+    }
+
+    public void deleteFavorites(ItemInfo info){
+        getModelWriter().deleteItemFromDatabase(info);
+    }
+
     /**
      * Refreshes the shortcuts shown on the workspace.
      *
      * Implementation of the method from LauncherModel.Callbacks.
      */
     public void startBinding() {
+        Log.i(TAG, "startBinding.................. ");
+
+        // addDesktopFiles();
+
         Object traceToken = TraceHelper.INSTANCE.beginSection("startBinding");
         // Floating panels (except the full widget sheet) are associated with individual icons. If
         // we are starting a fresh bind, close all such panels as all the icons are about
@@ -2055,6 +2242,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             // If there are no screens, we need to have an empty screen
             mWorkspace.addExtraEmptyScreen();
         }
+         //对于绑定屏幕实质是：创建与数据库中屏幕数一致的空屏幕。
+        // 该方法里面会一直调到：Workspace#insertNewWorkspaceScreen() 方法，
+        // 通过 addview() 添加添加空屏幕
         bindAddScreens(orderedScreenIds);
 
         // After we have added all the screens, if the wallpaper was locked to the default state,
@@ -2088,6 +2278,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void bindAppsAdded(IntArray newScreens, ArrayList<ItemInfo> addNotAnimated,
             ArrayList<ItemInfo> addAnimated) {
+
+        Log.i(TAG, "bindAppsAdded  addNotAnimated: "+addNotAnimated.size() + ",addAnimated: "+addAnimated.size());
+
         // Add the new screens
         if (newScreens != null) {
             bindAddScreens(newScreens);
@@ -2106,19 +2299,47 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mWorkspace.removeExtraEmptyScreen(false);
     }
 
-    public void rearray(View v){
-        List<ItemInfo> rearray = getModel().rearray(v.getContext());
+    public void refresh(){
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    public void rearray(Context context){
+        List<ItemInfo> rearray = getModel().rearray(context);
+        List<ItemInfo> rearrayList = new ArrayList<>();
+        Log.i(TAG, "bindItems----rearray :  "+rearray.size());
         for (int i = 0 ; i < rearray.size() ; i++){
             ItemInfo info = rearray.get(i);
+            if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT|| info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+                String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
+                File file = new File(filePath);
+                if(!file.exists()){
+                    deleteFavorites(info);
+                    continue;
+                }
+            }
+            rearrayList.add(info);
             getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
                     info.cellX, info.cellY, info.spanX, info.spanY);
         }
-        bindItems(rearray, false);
+        bindItems(rearrayList, false);        
+    }
+
+    public void bindWorkspace(){
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+              //  getModel().forceReload();
+                 getModel().startLoader();
+            }
+        }, 1000);
     }
 
     public void removeView(int x, int y){
         mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));
     }
+
+    
 
     /**
      * Bind the items start-end from the list.
@@ -2128,13 +2349,19 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void bindItems(final List<ItemInfo> items, final boolean forceAnimateIcons) {
         // Get the list of added items and intersect them with the set of items here
+
         final Collection<Animator> bounceAnims = new ArrayList<>();
         final boolean animateIcons = forceAnimateIcons && canRunNewAppsAnimation();
         Workspace workspace = mWorkspace;
         int newItemsScreenId = -1;
+
+        Log.d(TAG, "bindItems: items size  "+items.size() + ",toString "+items.toString());
+        
         int end = items.size();
+
         for (int i = 0; i < end; i++) {
-            final ItemInfo item = items.get(i);
+             ItemInfo item = items.get(i);
+            Log.d(TAG, "bindItems: loading default c.itemType "+item.itemType  + " ,end "+end + " ,title "+item.title + " ,dumpProperties "+item.toString());
 
             // Short circuit if we are loading dock items for a configuration which has no dock
             if (item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT &&
@@ -2146,6 +2373,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             switch (item.itemType) {
                 case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
                 case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
+                case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
+                case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
+                case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     WorkspaceItemInfo info = (WorkspaceItemInfo) item;
                     view = createShortcut(info);
@@ -2169,24 +2399,26 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     throw new RuntimeException("Invalid Item Type");
             }
 
+
             /*
              * Remove colliding items.
              */
             if (item.container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
-                CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
-                if (cl != null && cl.isOccupied(item.cellX, item.cellY)) {
-                    View v = cl.getChildAt(item.cellX, item.cellY);
-                    Object tag = v.getTag();
-                    String desc = "Collision while binding workspace item: " + item
-                            + ". Collides with " + tag;
-                    if (FeatureFlags.IS_STUDIO_BUILD) {
-                        throw (new RuntimeException(desc));
-                    } else {
-                        Log.d(TAG, desc);
-                        getModelWriter().deleteItemFromDatabase(item);
-                        continue;
-                    }
-                }
+                item = findNextCoordinate(item);
+                // CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
+                // if (cl != null && cl.isOccupied(item.cellX, item.cellY)) {
+                //     View v = cl.getChildAt(item.cellX, item.cellY);
+                //     Object tag = v.getTag();
+                //     String desc = "Collision while binding workspace item: " + item
+                //             + ". Collides with " + tag;
+                //     if (FeatureFlags.IS_STUDIO_BUILD) {
+                //         throw (new RuntimeException(desc));
+                //     } else {
+                //         Log.d(TAG, desc);
+                //         getModelWriter().deleteItemFromDatabase(item);
+                //         continue;
+                //     }
+                // }
             }
             workspace.addInScreenFromBind(view, item);
             if (animateIcons) {
@@ -2227,6 +2459,25 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             }
         }
         workspace.requestLayout();
+    }
+
+    public  ItemInfo findNextCoordinate(ItemInfo item) {
+        int xindex = item.cellX;
+        int yindex = item.cellY ;
+        CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
+        if (cl != null && cl.isOccupied(xindex, yindex)) {
+            if(yindex >= 8 ){
+                yindex = 0;
+                xindex++;
+            }else{
+                yindex++;
+            }
+            item.cellX = xindex;
+            item.cellY = yindex;
+            return findNextCoordinate(item);
+        }else{
+            return item ;
+        }
     }
 
     @Override
@@ -2573,6 +2824,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
      *                    refreshes the widgets and shortcuts associated with the given package/user
      */
     public void refreshAndBindWidgetsForPackageUser(@Nullable PackageUserKey packageUser) {
+        Log.i(TAG, "refreshAndBindWidgetsForPackageUser.................. ");
         mModel.refreshAndBindWidgetsAndShortcuts(packageUser);
     }
 
@@ -2718,7 +2970,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 if (Utilities.IS_RUNNING_IN_TEST_HARNESS) {
                     Log.d(TestProtocol.PERMANENT_DIAG_TAG, "Opening options popup on key up");
                 }
-                OptionsPopupView.showDefaultOptions(this, -1, -1);
+                OptionsPopupView.showDefaultOptions(Launcher.this, -1, -1);
             }
             return true;
         }
@@ -2751,8 +3003,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         AbstractFloatingView.closeAllOpenViews(this, animate);
     }
 
-    public Stream<SystemShortcut.Factory> getSupportedShortcuts() {
-        return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
+    public Stream<SystemShortcut.Factory> getSupportedShortcuts(int itemType) {
+        if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+            return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
+        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            return Stream.of(APP_OPEN);
+        }else{
+            return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
+        }
     }
 
     public Stream<SystemShortcut.Factory> getWidgetSupportedShortcuts() {
@@ -2789,4 +3047,160 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     private static class NonConfigInstance {
         public Configuration config;
     }
+
+    private void bindService(){
+        Intent mIntent = new Intent();
+        mIntent.setComponent(new ComponentName("com.android.documentsui", "com.android.documentsui.IpcService"));
+        boolean bindFlag = bindService(mIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
+            idocAidl = IDocAidlInterface.Stub.asInterface(service);
+            gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
+            gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
+            addDesktopFiles();
+                   
+            try{
+                idocAidl.register(new IDataChangedCallback.Stub(){
+                    @Override
+                    public void onCallback(String params)  {
+                        Log.i(TAG," onCallback params: "+params);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if("PASTE".equals(params) ){
+                                    //addDesktopFile();
+                                    bindWorkspace();
+                                } else if("REFRESH_DESKTOP".equals(params)){
+        
+                                }          
+                            }
+                        });           
+                    }
+
+                    @Override
+                    public void onCallbackString(String method,String params)  {
+                        Log.i(TAG," onCallbackString method: "+method + ", params "+params);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
+                                    addDesktopFile(method,params);
+                                    bindWorkspace();
+                                }else if("RENAME".equals(method)){
+                                    String[] arrFileName = params.split("###");
+                                    DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
+                                    bindWorkspace();
+                                }
+                            }
+                        });
+                       
+                    }
+                });
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // ipcAidl = null;
+            idocAidl = null;
+        }
+    };
+
+    public void gotoDocApp(String method,String title){
+        try{
+            idocAidl.basicIpcMethon(method,title);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void selectOpenType(String method,String title){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_select_app, null);
+
+        LinearLayout layoutSecondType = dialogView.findViewById(R.id.layoutSecondType);
+        LinearLayout layoutThirdType = dialogView.findViewById(R.id.layoutThirdType);
+
+        if(FileUtils.isAppInstalled(this,"com.iiordanov.bVNC")){
+            layoutSecondType.setVisibility(View.VISIBLE);
+        }else{
+            layoutSecondType.setVisibility(View.GONE);
+        }
+
+        if(FileUtils.isAppInstalled(this,"com.fde.x11")){
+            layoutThirdType.setVisibility(View.VISIBLE);
+        }else{
+            layoutThirdType.setVisibility(View.GONE);
+        }
+
+        TextView txtOnlyOnce = dialogView.findViewById(R.id.txtOnlyOnce);
+        TextView txtAlways = dialogView.findViewById(R.id.txtAlways);
+        TextView txtSecondType = dialogView.findViewById(R.id.txtSecondType);
+        TextView txtThirdType = dialogView.findViewById(R.id.txtThirdType);
+
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+        // 显示对话框
+        dialog.show();
+
+        txtOnlyOnce.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###open");
+                dialog.dismiss();
+            }
+        });
+
+        txtAlways.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###open");
+                dialog.dismiss();
+            }
+        });
+
+        txtSecondType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###vnc");
+                dialog.dismiss();
+            }
+        });
+
+        txtThirdType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                gotoDocApp(method,title+"###x11");
+                dialog.dismiss();
+            }
+        });
+    }
+
+    public boolean isShowPasteDlg(){
+        // OptionsPopupView.requestFocus();
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = clipboard.getPrimaryClip();
+        if (clip == null  ) {
+            Log.i(TAG," showDefaultOptions is null");
+            return false ;
+        }else if( clip.getItemCount() < 1){
+            return false ;
+        }else{
+            ClipData.Item item = clip.getItemAt(0);
+            if (item.getUri() != null) {
+                return true ;
+            }else{
+                Log.i(TAG," showDefaultOptions uri is null");
+            }
+        }
+       return false ;
+    }
+
 }

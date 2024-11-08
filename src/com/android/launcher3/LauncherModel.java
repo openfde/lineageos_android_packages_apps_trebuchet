@@ -72,6 +72,13 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
+import com.android.launcher3.util.FileUtils;
+import java.util.Collections;
+import android.content.ComponentName;
+import java.util.Set;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
@@ -79,7 +86,7 @@ import java.util.function.Supplier;
  * for the Launcher.
  */
 public class LauncherModel extends LauncherApps.Callback implements InstallSessionTracker.Callback {
-    private static final boolean DEBUG_RECEIVER = false;
+    private static final boolean DEBUG_RECEIVER = true;
 
     static final String TAG = "Launcher.Model";
 
@@ -265,6 +272,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         // Start the loader if launcher is already running, otherwise the loader will run,
         // the next time launcher starts
         if (hasCallbacks()) {
+            Log.i(TAG, "forceReload.................. ");
             startLoader();
         }
     }
@@ -274,6 +282,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
      */
     public void rebindCallbacks() {
         if (hasCallbacks()) {
+            Log.i(TAG, "rebindCallbacks.................. ");
             startLoader();
         }
     }
@@ -287,6 +296,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
             if (mCallbacksList.remove(callbacks)) {
                 if (stopLoader()) {
                     // Rebind existing callbacks
+                    Log.i(TAG, "removeCallbacks.................. ");
                     startLoader();
                 }
             }
@@ -300,6 +310,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
     public boolean addCallbacksAndLoad(Callbacks callbacks) {
         synchronized (mLock) {
             addCallbacks(callbacks);
+            Log.i(TAG, "addCallbacksAndLoad.................. ");
             return startLoader();
 
         }
@@ -313,6 +324,13 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         synchronized (mCallbacksList) {
             mCallbacksList.add(callbacks);
         }
+    }
+
+    public void addDeskFileList(Context context){
+        Launcher launcher = Launcher.getLauncher(context);
+        List<WorkspaceItemInfo> list = launcher.addDesktopFiles();
+        ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+
     }
 
     public List<ItemInfo> rearray(Context context){
@@ -330,7 +348,11 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 stopLoader();
 //                LoaderResults loaderResults = new LoaderResults(
 //                        mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
-                ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+               ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+               Log.i(TAG, "workspaceItems..................size  "+workspaceItems.size());
+                // Log.i(TAG, "workspaceItems "+workspaceItems.size());
+               Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
+               
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
                 Launcher launcher = Launcher.getLauncher(context);
                 for (int i = 0 ;i < workspaceItems.size(); i++){
@@ -346,12 +368,16 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         return null;
     }
 
+
     /**
      * Starts the loader. Tries to bind {@params synchronousBindPage} synchronously if possible.
      * @return true if the page could be bound synchronously.
      */
     public boolean startLoader() {
         // Enable queue before starting loader. It will get disabled in Launcher#finishBindingItems
+        Log.i(TAG, "startLoader.................. ");
+
+
         InstallShortcutReceiver.enableInstallQueue(InstallShortcutReceiver.FLAG_LOADER_RUNNING);
         synchronized (mLock) {
             // Don't bother to start the thread if we know it's not going to do anything
@@ -367,6 +393,8 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 LoaderResults loaderResults = new LoaderResults(
                         mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
                 if (mModelLoaded && !mIsLoaderTaskRunning) {
+                    Log.i(TAG, "startLoader....1111111111111111 mModelLoaded: "+mModelLoaded +",mIsLoaderTaskRunning "+mIsLoaderTaskRunning);
+
                     // Divide the set of loaded items into those that we are binding synchronously,
                     // and everything else that is to be bound normally (asynchronously).
                     loaderResults.bindWorkspace();
@@ -377,6 +405,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                     loaderResults.bindWidgets();
                     return true;
                 } else {
+                    Log.i(TAG, "startLoader....222222222222 mModelLoaded: "+mModelLoaded +",mIsLoaderTaskRunning "+mIsLoaderTaskRunning);
                     startLoaderForResults(loaderResults);
                 }
             }
@@ -402,6 +431,8 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
 
     public void startLoaderForResults(LoaderResults results) {
         synchronized (mLock) {
+            Log.i(TAG, "startLoaderForResults.................. ");
+
             stopLoader();
             mLoaderTask = new LoaderTask(mApp, mBgAllAppsList, mBgDataModel, results);
 
@@ -491,6 +522,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 mTask = task;
                 mIsLoaderTaskRunning = true;
                 mModelLoaded = false;
+                Log.i(TAG, "LoaderTransaction.................. ");
             }
         }
 
@@ -592,7 +624,9 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         enqueueModelUpdateTask(new BaseModelUpdateTask() {
             @Override
             public void execute(LauncherAppState app, BgDataModel dataModel, AllAppsList apps) {
+                Log.d(TAG, "updateAndBindWorkspaceItem  ........................");
                 WorkspaceItemInfo info = itemProvider.get();
+                Log.d(TAG, "updateAndBindWorkspaceItem  "+info);
                 getModelWriter().updateItemInDatabase(info);
                 ArrayList<WorkspaceItemInfo> update = new ArrayList<>();
                 update.add(info);
@@ -605,6 +639,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         enqueueModelUpdateTask(new BaseModelUpdateTask() {
             @Override
             public void execute(LauncherAppState app, BgDataModel dataModel, AllAppsList apps) {
+                Log.d(TAG, "refreshAndBindWidgetsAndShortcuts  ........................");
                 dataModel.widgetsModel.update(app, packageUser);
                 bindUpdatedWidgets(dataModel);
             }

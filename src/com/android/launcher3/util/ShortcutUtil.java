@@ -27,7 +27,7 @@ public class ShortcutUtil {
      * Returns true when we should show shortcut menu for the item.
      */
     public static boolean supportsShortcuts(ItemInfo info) {
-        return isActive(info) && (isApp(info) || isPinnedShortcut(info));
+        return isActive(info) && (isApp(info) || isPinnedShortcut(info) || isDocOrDir(info));
     }
 
     /**
@@ -75,5 +75,9 @@ public class ShortcutUtil {
         return info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT
                 && info.container != ItemInfo.NO_ID
                 && info instanceof WorkspaceItemInfo;
+    }
+
+    private static boolean isDocOrDir(ItemInfo info) {
+        return info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
     }
 }

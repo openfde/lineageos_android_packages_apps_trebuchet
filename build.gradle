@@ -1,11 +1,20 @@
 buildscript {
     repositories {
-        mavenCentral()
-        google()
-        jcenter()
+//        mavenCentral()
+//        google()
+//        jcenter()
+        maven {
+            url 'https://maven.aliyun.com/repository/jcenter'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/central'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/google'
+        }
     }
     dependencies {
-        classpath GRADLE_CLASS_PATH
+        classpath 'com.android.tools.build:gradle:4.2.2'
         classpath PROTOBUF_CLASS_PATH
     }
 }
@@ -21,10 +30,10 @@ android {
     buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
-        minSdkVersion 25
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 29
+        targetSdkVersion 30
+        versionCode 30
+        versionName "11"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -137,11 +146,15 @@ android {
 
 allprojects {
     repositories {
-        maven { url "../../../prebuilts/sdk/current/androidx/m2repository" }
-        maven { url "../../../prebuilts/fullsdk-darwin/extras/android/m2repository" }
-        maven { url "../../../prebuilts/fullsdk-linux/extras/android/m2repository" }
-        mavenCentral()
-        google()
+        maven {
+            url 'https://maven.aliyun.com/repository/jcenter'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/central'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/google'
+        }
     }
 }
 

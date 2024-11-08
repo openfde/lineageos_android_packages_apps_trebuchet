@@ -37,7 +37,15 @@ import com.android.launcher3.graphics.PlaceHolderIconDrawable;
 import com.android.launcher3.icons.BitmapInfo;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.util.Themes;
-
+import com.android.launcher3.R;
+import android.graphics.BitmapFactory;
+import android.util.Log;
+import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.LauncherSettings;
+import java.io.File;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FastBitmapDrawable extends Drawable {
 
@@ -110,7 +118,9 @@ public class FastBitmapDrawable extends Drawable {
     }
 
     protected void drawInternal(Canvas canvas, Rect bounds) {
-        canvas.drawBitmap(mBitmap, null, bounds, mPaint);
+        if(mBitmap != null){
+            canvas.drawBitmap(mBitmap, null, bounds, mPaint);
+        }
     }
 
     @Override
@@ -312,6 +322,92 @@ public class FastBitmapDrawable extends Drawable {
      */
     public static FastBitmapDrawable newIcon(Context context, ItemInfoWithIcon info) {
         FastBitmapDrawable drawable = newIcon(context, info.bitmap);
+        if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_dir);
+            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
+            drawable = newIcon(context, bitmapInfo);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ){
+            String fileName = info.title.toString() ;
+            int resId =  R.mipmap.icon_doc;
+            String fileType = FileUtils.getFileTyle(fileName);
+            if(fileType !=null){
+                 if(fileType.contains("png") || fileType.contains("jpg")){
+                    resId =  R.mipmap.icon_pic;
+                 }else if(fileType.contains("txt") || fileType.contains("md") || fileType.contains("xml")  || fileType.contains("java")  || fileType.contains("htm") || fileType.contains("json")  ){
+                    resId =  R.mipmap.icon_doc;
+                 } else{
+                    resId =  R.mipmap.icon_unkown;
+                 } 
+            }else{
+                resId =  R.mipmap.icon_unkown;
+            }
+            Log.i("bella"," newIcon  fileType : "+fileType  + " , info "+info );
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),resId);
+            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,R.color.default_shadow_color_no_alpha);
+            drawable = newIcon(context, bitmapInfo);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_linux);
+            String title = info.title.toString();
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
+            if(map !=null && map.get("icon") !=null){
+                String icon = map.get("icon").toString();
+                String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID() + icon ;
+
+                File file = new File(absoluteIcon);
+
+                if(file.exists() &&  !icon.contains(".svg") ){
+                    Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
+                    bitmap = BitmapFactory.decodeFile(absoluteIcon);
+                }else{
+                    ///usr/share/icons/hicolor/32x32/apps
+                    String pathParent = "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/" ;
+                    File directory = new File(pathParent);  // 获取应用私有文件目录
+        
+                    String fileName = "";
+                    if(icon.contains(".svg")){
+                        File tempFile = new File(absoluteIcon);
+                        if(tempFile.exists()){
+                            fileName = tempFile.getName().replace(".svg",".png");
+                        }else{
+                            fileName = icon.replace(".svg",".png");
+                        }
+                    }else{
+                        fileName =  icon+".png";
+                    }
+                   
+                    // String absolutePath = FileUtils.findFileInDirectory(directory,fileName);
+                    String absolutePath = FileUtils.findLinuxIconPath(fileName);
+
+                    Log.i("bella","FastBitmapDrawable  pathParent : "+pathParent  + " , absolutePath "+absolutePath  + ",fileName "+fileName);
+
+                    if(absolutePath != null){
+                        if(!absolutePath.contains(".")){
+                            absolutePath = absolutePath +".png";
+                        }
+                        Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
+                        File fi = new File(absolutePath);
+                        if(fi.exists()){
+                            bitmap = BitmapFactory.decodeFile(absolutePath);
+                        }else{
+                            bitmap = BitmapFactory.decodeFile(icon);
+                            Log.e("bella","FastBitmapDrawable "+absolutePath+"  is not exist  newIcon_no : file not exists: "  );   
+                        }
+                      
+                    }else{
+                        bitmap = BitmapFactory.decodeFile(icon);
+                        Log.e("bella","FastBitmapDrawable   : "+absolutePath+ "  file not exists: ");
+                    }
+                
+                }
+                
+            }
+           
+    
+            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
+            drawable = newIcon(context, bitmapInfo);
+        }
+
+        // FastBitmapDrawable drawable = newIcon(context, info.bitmap);
         drawable.setIsDisabled(info.isDisabled());
         return drawable;
     }

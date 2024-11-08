@@ -52,6 +52,10 @@
     <string name="uninstall_drop_target_label" msgid="4722034217958379417">"卸载"</string>
     <string name="app_open_drop_target_label" >"打开"</string>
     <string name="remove_drop_target">"移除"</string>
+    <string name="copy_drop_target">"复制"</string>
+    <string name="cut_drop_target">"剪切"</string>
+    <string name="delete_drop_target">"删除"</string>
+    <string name="rename_drop_target">"重命名"</string>
     <string name="install_drop_target_label" msgid="2539096853673231757">"安装"</string>
     <string name="dismiss_prediction_label" msgid="3357562989568808658">"不要提供应用建议"</string>
     <string name="pin_prediction" msgid="4196423321649756498">"固定预测的应用"</string>
@@ -147,4 +151,13 @@
     <string name="work_switch_tip" msgid="808075064383839144">"暂停工作应用及其通知"</string>
     <string name="remote_action_failed" msgid="1383965239183576790">"失败：<xliff:g id="WHAT">%1$s</xliff:g>"</string>
     <string name="desktop_icon_rearray">"自动排列"</string>
+    <string name="desktop_new_document">"新建文档"</string>
+    <string name="desktop_new_directory">"新建文件夹"</string>
+    <string name="desktop_new_paste">"粘贴"</string>
+    <string name="desktop_tips">"提示"</string>
+    <string name="desktop_delete_tips">"是否删除？"</string>
+    <string name="desktop_delete">"删除"</string>
+    <string name="desktop_cancel">"取消"</string>
+    <string name="desktop_ok">"确定"</string>
+    <string name="desktop_rename">"重命名"</string>
 </resources>

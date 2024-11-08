@@ -85,6 +85,8 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import com.android.launcher3.util.FileUtils;
+
 
 public class LauncherProvider extends ContentProvider {
     private static final String TAG = "LauncherProvider";
@@ -180,15 +182,27 @@ public class LauncherProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
+        Log.i(TAG,"bella ..query............. "+selection + " ,sortOrder "+sortOrder);
         createDbIfNotExists();
 
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(args.table);
 
+
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         Cursor result = qb.query(db, projection, args.where, args.args, null, null, sortOrder);
         result.setNotificationUri(getContext().getContentResolver(), uri);
+
+        int rowCount = result.getCount();
+        // Log.i(TAG,"bella ..query.............rowCount: "+rowCount );
+        // if (result != null && result.moveToFirst()) {
+        //     do {
+        //         int _id = result.getInt(result.getColumnIndex("_id"));
+        //         String title = result.getString(result.getColumnIndex("title"));
+        //         Log.i(TAG,"bella ..query............._id: "+_id + " ,title: "+title);
+        //     } while (result.moveToNext());
+        // }
 
         return result;
     }
@@ -216,6 +230,8 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
+        FileUtils.createLinuxDesktopFile(initialValues);
+    
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri);
 
@@ -325,6 +341,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Log.i(TAG,"bella....delete............. "+selection);
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
 

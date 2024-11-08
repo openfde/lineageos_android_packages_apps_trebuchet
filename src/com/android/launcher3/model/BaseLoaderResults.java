@@ -40,6 +40,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import android.content.ComponentName;
+import com.android.launcher3.util.FileUtils;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.io.File;
+import com.android.launcher3.model.data.WorkspaceItemInfo;
+import com.android.launcher3.LauncherSettings;
+import java.util.stream.Collectors;
+import java.util.TreeSet;
+import java.util.Comparator;
+import android.content.ContentValues;
+
 /**
  * Base Helper class to handle results of {@link com.android.launcher3.model.LoaderTask}.
  */
@@ -84,6 +96,8 @@ public abstract class BaseLoaderResults {
             mBgDataModel.lastBindId++;
             mMyBindingId = mBgDataModel.lastBindId;
         }
+
+        Log.i(TAG, "bindWorkspace: size: "+ mCallbacksList.length  + ", mBgDataModel.workspaceItems size "+mBgDataModel.workspaceItems.size());
 
         for (Callbacks cb : mCallbacksList) {
             new WorkspaceBinder(cb, mUiExecutor, mApp, mBgDataModel, mMyBindingId,
@@ -185,6 +199,8 @@ public abstract class BaseLoaderResults {
             sortWorkspaceItemsSpatially(idp, currentWorkspaceItems);
             sortWorkspaceItemsSpatially(idp, otherWorkspaceItems);
 
+            Log.i(TAG, "Launcher_workspaceItems  bind()........" );
+
             // Tell the workspace that we're about to start binding items
             executeCallbacksTask(c -> {
                 c.clearPendingBinds();
@@ -195,7 +211,52 @@ public abstract class BaseLoaderResults {
             executeCallbacksTask(c -> c.bindScreens(mOrderedScreenIds), mUiExecutor);
 
             Executor mainExecutor = mUiExecutor;
+
+            Log.i(TAG, "Launcher_workspaceItems  currentWorkspaceItems "+ currentWorkspaceItems.size()  + " ,currentWorkspaceItems  "+currentWorkspaceItems );
+
             // Load items on the current page.
+            // List<ItemInfo> filteredList = currentWorkspaceItems.stream()
+            // .filter(info -> (!info.title.toString().contains(".desktop") && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && info.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT))
+            // .collect(Collectors.toList());
+            // int count = filteredList.size();//currentWorkspaceItems.size() + otherWorkspaceItems.size() ;
+             List<ItemInfo> filteredList = currentWorkspaceItems.stream()
+            .collect(Collectors.toList());
+            Log.i(TAG, "Launcher_workspaceItems  mWorkspaceItems "+ mWorkspaceItems.size()  + " ,otherWorkspaceItems  "+otherWorkspaceItems );
+
+            for(ItemInfo item : filteredList){
+                if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
+                    // Log.i(TAG, "Launcher_workspaceItems  ----------------  item "+ item);
+                    ContentValues initialValues = new ContentValues();
+                    initialValues.put("title",item.title.toString());
+                    initialValues.put("itemType",item.itemType);
+                    FileUtils.createLinuxDesktopFile(initialValues);
+                }
+            }
+
+            currentWorkspaceItems.clear();
+            currentWorkspaceItems.addAll(filteredList);
+
+            mBgDataModel.workspaceItems.clear();
+            mBgDataModel.workspaceItems.addAll(currentWorkspaceItems);
+            // List<WorkspaceItemInfo> deskFiles = FileUtils.getDesktop(count);
+            // if(deskFiles !=null){
+            //     currentWorkspaceItems.addAll(deskFiles);
+            //     mBgDataModel.workspaceItems.clear();
+            //     mBgDataModel.workspaceItems.addAll(currentWorkspaceItems);
+            // }
+        
+            mBgDataModel.workspaceItems = mBgDataModel.workspaceItems.stream()
+            .collect(Collectors.collectingAndThen(
+                    Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(ItemInfo::getTitle))),
+                    ArrayList::new
+            ));
+
+            currentWorkspaceItems = currentWorkspaceItems.stream()
+            .collect(Collectors.collectingAndThen(
+                    Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(ItemInfo::getTitle))),
+                    ArrayList::new
+            ));
+
             bindWorkspaceItems(currentWorkspaceItems, mainExecutor);
             bindAppWidgets(currentAppWidgets, mainExecutor);
 
@@ -213,7 +274,9 @@ public abstract class BaseLoaderResults {
             executeCallbacksTask(c -> c.finishFirstPageBind(
                     validFirstPage ? (ViewOnDrawExecutor) deferredExecutor : null), mainExecutor);
 
+  
             bindWorkspaceItems(otherWorkspaceItems, deferredExecutor);
+
             bindAppWidgets(otherAppWidgets, deferredExecutor);
             // Tell the workspace that we're done binding items
             executeCallbacksTask(c -> c.finishBindingItems(currentScreen), deferredExecutor);
@@ -230,17 +293,30 @@ public abstract class BaseLoaderResults {
             }
         }
 
+    
+
         private void bindWorkspaceItems(
                 final ArrayList<ItemInfo> workspaceItems, final Executor executor) {
             // Bind the workspace items
-            int count = workspaceItems.size();
+            ArrayList<ItemInfo> newItems = new ArrayList<>();
+           try{
+                newItems.addAll(workspaceItems);
+           }catch(Exception e){
+                e.printStackTrace();
+           }
+
+            int count = newItems.size();
+
+
             for (int i = 0; i < count; i += ITEMS_CHUNK) {
                 final int start = i;
                 final int chunkSize = (i + ITEMS_CHUNK <= count) ? ITEMS_CHUNK : (count - i);
+                Log.i(TAG, "Launcher bindWorkspaceItems:  itemList  count "+count );
                 executeCallbacksTask(
-                        c -> c.bindItems(workspaceItems.subList(start, start + chunkSize), false),
+                        c -> c.bindItems(newItems.subList(start, start + chunkSize), false),
                         executor);
             }
+
         }
 
         private void bindAppWidgets(List<LauncherAppWidgetInfo> appWidgets, Executor executor) {
@@ -248,6 +324,7 @@ public abstract class BaseLoaderResults {
             int count = appWidgets.size();
             for (int i = 0; i < count; i++) {
                 final ItemInfo widget = appWidgets.get(i);
+                Log.i(TAG, "Launcher bindAppWidgets:  itemList " );
                 executeCallbacksTask(
                         c -> c.bindItems(Collections.singletonList(widget), false), executor);
             }

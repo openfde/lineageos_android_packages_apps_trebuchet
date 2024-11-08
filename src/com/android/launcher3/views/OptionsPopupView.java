@@ -19,6 +19,9 @@ import static com.android.launcher3.Utilities.EXTRA_WALLPAPER_FLAVOR;
 import static com.android.launcher3.Utilities.EXTRA_WALLPAPER_OFFSET;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_REARRAY;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_DIR;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS;
 
@@ -51,9 +54,16 @@ import com.android.launcher3.shortcuts.DeepShortcutView;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.TestProtocol;
 import com.android.launcher3.widget.WidgetsFullSheet;
-
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import com.android.launcher3.util.FileUtils;
+
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+
 
 /**
  * Popup shown on long pressing an empty space in launcher
@@ -63,13 +73,18 @@ public class OptionsPopupView extends ArrowPopup
 
     private final ArrayMap<View, OptionItem> mItemMap = new ArrayMap<>();
     private RectF mTargetRect;
+    Context context ;
 
     public OptionsPopupView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        this.context= context;
+        // requestFocus();   
     }
 
     public OptionsPopupView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.context= context;
+        // requestFocus();   
     }
 
     @Override
@@ -139,6 +154,7 @@ public class OptionsPopupView extends ArrowPopup
             view.setOnLongClickListener(popup);
             popup.mItemMap.put(view, item);
         }
+        // popup.requestFocus();
         popup.reorderAndShow(popup.getChildCount());
     }
 
@@ -148,6 +164,7 @@ public class OptionsPopupView extends ArrowPopup
     }
 
     public static void showDefaultOptions(Launcher launcher, float x, float y) {
+
         float halfSize = launcher.getResources().getDimension(R.dimen.options_menu_thumb_size) / 2;
         if (x < 0 || y < 0) {
             x = launcher.getDragLayer().getWidth() / 2;
@@ -172,6 +189,23 @@ public class OptionsPopupView extends ArrowPopup
                 LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
                 OptionsPopupView::startSettings));
 
+        options.add(new OptionItem(R.string.desktop_new_directory, R.drawable.ic_dir,
+                LAUNCHER_DESKTOP_ICON_TAP_NEW_DIR,
+                OptionsPopupView::startNewDir));
+
+        options.add(new OptionItem(R.string.desktop_new_document, R.drawable.ic_doc,
+                LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC,
+                OptionsPopupView::startNewDoc));     
+
+
+        boolean isShowPasteDlg = true ;//launcher.isShowPasteDlg();  
+        Log.i("bella"," showDefaultOptions isShowPasteDlg: "+isShowPasteDlg);     
+        if(isShowPasteDlg){
+             options.add(new OptionItem(R.string.desktop_new_paste, R.drawable.ic_paste,
+                LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE,
+                OptionsPopupView::startPaste));   
+        } 
+
         options.add(new OptionItem(R.string.desktop_icon_rearray, R.drawable.ic_apps,
                 LAUNCHER_DESKTOP_ICON_TAP_REARRAY,
                 OptionsPopupView::startRearray));
@@ -182,7 +216,29 @@ public class OptionsPopupView extends ArrowPopup
     public static boolean startRearray(View view) {
         TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "start: rearray");
         Launcher launcher = Launcher.getLauncher(view.getContext());
-        launcher.rearray(view);
+        launcher.bindWorkspace();   
+        launcher.rearray(view.getContext());
+        return true;
+    }
+
+    public static boolean startNewDir(View view) {    
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.gotoDocApp(FileUtils.NEW_DIR,"");
+        // launcher.bindWorkspace();   
+        return true;
+    }
+
+    public static boolean startNewDoc(View view) {      
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.gotoDocApp(FileUtils.NEW_FILE,"");
+        // launcher.bindWorkspace();    
+        return true;
+    }
+
+    public static boolean startPaste(View view){
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.gotoDocApp(FileUtils.PASTE_FILE,"");
+        launcher.bindWorkspace();    
         return true;
     }
 

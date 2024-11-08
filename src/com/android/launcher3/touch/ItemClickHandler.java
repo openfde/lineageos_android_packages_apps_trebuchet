@@ -37,6 +37,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -65,6 +66,11 @@ import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.widget.PendingAppWidgetHostView;
 import com.android.launcher3.widget.WidgetAddFlowHandler;
 import com.android.launcher3.widget.WidgetManagerHelper;
+import android.net.Uri;
+import java.io.File;
+import android.provider.DocumentsContract;
+import com.android.launcher3.util.FileUtils;
+import java.util.Map;
 
 /**
  * Class for handling clicks on workspace and all-apps items
@@ -82,9 +88,24 @@ public class ItemClickHandler {
         return v -> onClick(v, sourceContainer);
     }
 
+    private static final long DOUBLE_CLICK_TIME_DELTA = 400; // 双击的最大时间间隔（毫秒）
+    private static long lastClickTime = 0; 
+
+
+
     private static void onClick(View v, String sourceContainer) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
+
+        long currentTime = System.currentTimeMillis();
+        long subTime = currentTime - lastClickTime;
+        if (subTime  < DOUBLE_CLICK_TIME_DELTA) {
+            //double click      
+        }else{
+            lastClickTime = currentTime;
+            return ;
+        }
+
         if (v.getWindowToken() == null) return;
 
         Launcher launcher = Launcher.getLauncher(v.getContext());
@@ -92,12 +113,14 @@ public class ItemClickHandler {
 
         Object tag = v.getTag();
         if (tag instanceof WorkspaceItemInfo) {
+               // 应用程序快捷方式单击的事件处理。也是调用到：startAppShortcutOrInfoActivity() 方法。
             onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher, sourceContainer);
         } else if (tag instanceof FolderInfo) {
             if (v instanceof FolderIcon) {
                 onClickFolderIcon(v);
             }
         } else if (tag instanceof AppInfo) {
+                        // 启动应用程序快捷方式或信息活动
             startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher,
                     sourceContainer == null ? CONTAINER_ALL_APPS: sourceContainer);
         } else if (tag instanceof LauncherAppWidgetInfo) {
@@ -254,6 +277,31 @@ public class ItemClickHandler {
         startAppShortcutOrInfoActivity(v, shortcut, launcher, sourceContainer);
     }
 
+    public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){
+         if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            launcher.gotoDocApp(FileUtils.COPY_DIR,item.title.toString());
+         }else{
+            launcher.gotoDocApp(FileUtils.COPY_FILE,item.title.toString());
+         }
+    }
+
+    public static void cutFiletoClipboard(Launcher launcher,ItemInfo item){
+        if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+           launcher.gotoDocApp(FileUtils.CUT_DIR,item.title.toString());
+        }else{
+           launcher.gotoDocApp(FileUtils.CUT_FILE,item.title.toString());
+        }
+   }
+
+   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item,String newFileName){
+    if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString()+"###"+newFileName);
+    }else{
+       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString()+"###"+newFileName);
+    }
+    // launcher.bindWorkspace();  
+}
+
     public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher,
             @Nullable String sourceContainer) {
         TestLogging.recordEvent(
@@ -262,7 +310,41 @@ public class ItemClickHandler {
         if (item instanceof PromiseAppInfo) {
             PromiseAppInfo promiseAppInfo = (PromiseAppInfo) item;
             intent = promiseAppInfo.getMarketIntent(launcher);
-        } else {
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            String title = item.title.toString() ;
+            // String path = "%2fDesktop%2f"+title +"%2f";
+            // String uriPath = "content://com.android.externalstorage.documents/document/primary:" + path;
+            // Uri uri = Uri.parse(uriPath);
+            // Log.i(TAG,"bella Launcher uriPath "+uriPath + " , path "+path);
+            // intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            // intent.addCategory(Intent.CATEGORY_OPENABLE);
+            // intent.setType("*/*");
+            // intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+            launcher.gotoDocApp(FileUtils.OPEN_DIR,title);
+            return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
+            String  title = item.title.toString() ;
+            launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
+            return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
+            Log.i(TAG, "ITEM_TYPE_LINUX_APP: " + item);
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+            String name = map.get("name").toString();
+            String exec = map.get("exec").toString();
+           // launcher.gotoDocApp(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
+            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
+            
+            // Intent inte = new Intent();
+            // ComponentName componentName = new ComponentName("com.termux.x11", "com.termux.x11.AppListActivity");
+            // inte.setComponent(componentName);
+            // inte.putExtra("App", name);
+            // inte.putExtra("Path", exec);
+            // inte.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            // launcher.startActivity(inte);
+
+            
+            return ;
+        }else {
             intent = item.getIntent();
         }
         if (intent == null) {

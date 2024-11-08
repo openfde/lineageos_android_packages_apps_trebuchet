@@ -142,6 +142,9 @@ public class LoaderTask implements Runnable {
         mUserCache = UserCache.INSTANCE.get(mApp.getContext());
         mSessionHelper = InstallSessionHelper.INSTANCE.get(mApp.getContext());
         mIconCache = mApp.getIconCache();
+
+        Log.i(TAG, "Launcher_workspaceItems  LoaderTask............... ");
+
     }
 
     protected synchronized void waitForIdle() {
@@ -164,6 +167,8 @@ public class LoaderTask implements Runnable {
         ArrayList<ItemInfo> firstScreenItems = new ArrayList<>();
 
         ArrayList<ItemInfo> allItems = new ArrayList<>();
+        Log.i(TAG, "mBgDataModel.workspaceItems.......size....... "+mBgDataModel.workspaceItems.size());
+
         synchronized (mBgDataModel) {
             allItems.addAll(mBgDataModel.workspaceItems);
             allItems.addAll(mBgDataModel.appWidgets);
@@ -188,6 +193,9 @@ public class LoaderTask implements Runnable {
         TimingLogger logger = new TimingLogger(TAG, "run");
         try (LauncherModel.LoaderTransaction transaction = mApp.getModel().beginLoader(this)) {
             List<ShortcutInfo> allShortcuts = new ArrayList<>();
+
+            Log.i(TAG, "LoaderTask...run............... ");
+
             loadWorkspace(allShortcuts);
             loadCachedPredictions();
             logger.addSplit("loadWorkspace");
@@ -299,6 +307,10 @@ public class LoaderTask implements Runnable {
 
     protected void loadWorkspace(List<ShortcutInfo> allDeepShortcuts, Uri contentUri,
             String selection) {
+
+         Log.i(TAG, "Launcher_workspaceItems  loadWorkspace...............allDeepShortcuts:  "+allDeepShortcuts.size());
+
+        //首先是创建了一些对象，这些对象，在Launcher启动流程之前大多都已经创建过，这里是获取实例        
         final Context context = mApp.getContext();
         final ContentResolver contentResolver = context.getContentResolver();
         final PackageManagerHelper pmHelper = new PackageManagerHelper(context);
@@ -317,7 +329,7 @@ public class LoaderTask implements Runnable {
         if (!clearDb && (MULTI_DB_GRID_MIRATION_ALGO.get()
                 ? !GridSizeMigrationTaskV2.migrateGridIfNeeded(context)
                 : !GridSizeMigrationTask.migrateGridIfNeeded(context))) {
-            // Migration failed. Clear workspace.
+            // Migration failed. Clear workspace.  
             clearDb = true;
         }
 
@@ -407,10 +419,13 @@ public class LoaderTask implements Runnable {
                         switch (c.itemType) {
                         case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
                         case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
+                        case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
+                        case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
+                        case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
                         case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT:
                             intent = c.parseIntent();
                             if (intent == null) {
-                                c.markDeleted("Invalid or null intent");
+                                c.markDeleted("Invalid or null intent 2");
                                 continue;
                             }
 
@@ -884,6 +899,7 @@ public class LoaderTask implements Runnable {
     }
 
     private List<LauncherActivityInfo> loadAllApps() {
+        
         final List<UserHandle> profiles = mUserCache.getUserProfiles();
         List<LauncherActivityInfo> allActivityList = new ArrayList<>();
         // Clear the list of apps
