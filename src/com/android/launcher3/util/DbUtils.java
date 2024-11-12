@@ -156,6 +156,38 @@ public class DbUtils {
     }
 
 
+    public static List<Map<String,Object>> queryDesktopTextFilesFromDatabase(Context context){
+        String[] selectionArgs = {"8","9"};
+        String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
+    
+        List<Map<String,Object>> list = null;
+    
+        Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
+    
+        if(list == null ){
+            Log.i(TAG, "queryDesktopTextFilesFromDatabase is null");
+        }
+        return list ;
+    }
+
+
     public static List<Map<String,Object>> queryItemsFromDatabase(Context context,String fileName){
         String selection = "title = ?";
         String[] selectionArgs = {fileName};
@@ -234,6 +266,15 @@ public class DbUtils {
         selection, selectionArgs);
 
         Log.i(TAG, "updateTitleFromDatabase is res: "+res);
+    }
+
+
+    public static void deleteTitleFromDatabase(Context context,String title){
+        Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
+        String selection = "title = ?";
+        String[] selectionArgs = {title};
+        int res = context.getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,selection, selectionArgs);
+        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
     }
     
 }
