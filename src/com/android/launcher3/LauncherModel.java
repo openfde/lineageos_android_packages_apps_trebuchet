@@ -79,6 +79,7 @@ import java.util.Set;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
+import com.android.launcher3.util.DbUtils;
 
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
@@ -348,7 +349,22 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                 stopLoader();
 //                LoaderResults loaderResults = new LoaderResults(
 //                        mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
-               ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
+               ArrayList<ItemInfo> tempItems = mBgDataModel.workspaceItems;
+               ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
+               for(ItemInfo ii : tempItems) {
+                    if(ii.itemType == 8  || ii.itemType == 9){
+                        String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
+                        File f = new File(documentId + ii.getTitle());
+                        if(f.exists()){
+                            workspaceItems.add(ii);
+                        }else{
+                            //mBgDataModel.removeItem(context, ii);
+                        }
+                    }else{
+                        workspaceItems.add(ii);
+                    }
+               }
+               mBgDataModel.workspaceItems = workspaceItems;
                Log.i(TAG, "workspaceItems..................size  "+workspaceItems.size());
                 // Log.i(TAG, "workspaceItems "+workspaceItems.size());
                Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));

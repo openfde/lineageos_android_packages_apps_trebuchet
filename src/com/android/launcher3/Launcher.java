@@ -2126,6 +2126,22 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     
      //   String documentId = FileUtils.PATH_ID_DESKTOP;
         String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
+
+
+        List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(this);
+
+        if(listTexts !=null){
+            for(Map<String,Object> mp : listTexts){
+                String fName = mp.get("title").toString();
+                Log.d(TAG, "addDesktopFiles fName  "+fName );
+                File f = new File(documentId + fName);
+                if(!f.exists()){
+                    // mBgDataModel.removeItem(mContext, item);
+                     DbUtils.deleteTitleFromDatabase(this,fName);   
+                }
+            }
+        }
+
         File parent = new File(documentId);
         File[] files = parent.listFiles();
         int scale  =  FileUtils.getScreenRows(this);
@@ -2313,6 +2329,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
                 File file = new File(filePath);
                 if(!file.exists()){
+
                     deleteFavorites(info);
                     continue;
                 }
@@ -3073,9 +3090,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                             public void run() {
                                 if("PASTE".equals(params) ){
                                     //addDesktopFile();
+                                    addDesktopFiles();
                                     bindWorkspace();
+                                    //getModel().forceReload();
                                 } else if("REFRESH_DESKTOP".equals(params)){
-        
+                                    addDesktopFiles();
                                 }          
                             }
                         });           
@@ -3093,7 +3112,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                                 }else if("RENAME".equals(method)){
                                     String[] arrFileName = params.split("###");
                                     DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
-                                    bindWorkspace();
+                                    //bindWorkspace();
+                                    getModel().forceReload();
                                 }
                             }
                         });
