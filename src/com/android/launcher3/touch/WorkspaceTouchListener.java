@@ -43,13 +43,15 @@ import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.TestProtocol;
 import com.android.launcher3.views.OptionsPopupView;
 import android.util.Log;
+import com.android.launcher3.keyboard.ViewGroupFocusHelper;
+import com.android.launcher3.BubbleTextView;
 
 /**
  * Helper class to handle touch on empty space in workspace and show options popup on long press
  */
 public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListener
         implements OnTouchListener {
-
+     private static final String TAG = "WorkspaceTouchListener";
     /**
      * STATE_PENDING_PARENT_INFORM is the state between longPress performed & the next motionEvent.
      * This next event is used to send an ACTION_CANCEL to Workspace, to that it clears any
@@ -83,10 +85,14 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
     @Override
     public boolean onTouch(View view, MotionEvent ev) {
         mGestureDetector.onTouchEvent(ev);
-
+        
         int action = ev.getActionMasked();
         if (action == ACTION_DOWN) {
             // Check if we can handle long press.
+            // mLauncher.changeFavoriteFocus(true);
+            view.setFocusableInTouchMode(true);
+            view.requestFocus();
+
             boolean handleLongPress = canHandleLongPress();
 
             if (handleLongPress) {
@@ -105,7 +111,6 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
                 mLongPressState = STATE_REQUESTED;
                 mTouchDownPoint.set(ev.getX(), ev.getY());
                 if (ev.getButtonState() == MotionEvent.BUTTON_SECONDARY){
-                    Log.i("bella"," showDefaultOptions aaaaaaaaaaaaaaa ---------");
                     OptionsPopupView.showDefaultOptions(mLauncher, mTouchDownPoint.x, mTouchDownPoint.y);
                 }
             }
@@ -179,7 +184,6 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
                 mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                         HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                 mLauncher.getStatsLogManager().logger().log(LAUNCHER_WORKSPACE_LONGPRESS);
-                Log.i("bella"," showDefaultOptions bbbbbbbbbbbbbbbbbb ---------");
                 OptionsPopupView.showDefaultOptions(mLauncher, mTouchDownPoint.x, mTouchDownPoint.y);
             } else {
                 cancelLongPress();

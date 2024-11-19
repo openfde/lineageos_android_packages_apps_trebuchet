@@ -71,7 +71,7 @@ import java.io.File;
 import android.provider.DocumentsContract;
 import com.android.launcher3.util.FileUtils;
 import java.util.Map;
-
+import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -88,7 +88,7 @@ public class ItemClickHandler {
         return v -> onClick(v, sourceContainer);
     }
 
-    private static final long DOUBLE_CLICK_TIME_DELTA = 400; // 双击的最大时间间隔（毫秒）
+    private static final long DOUBLE_CLICK_TIME_DELTA = 400; // 
     private static long lastClickTime = 0; 
 
 
@@ -96,11 +96,21 @@ public class ItemClickHandler {
     private static void onClick(View v, String sourceContainer) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
-
+        Object tag = v.getTag();
+        Launcher launcher = Launcher.getLauncher(v.getContext());
+        ViewGroupFocusHelper mFocusHandler = launcher.getFocusHandler();
+        if(v instanceof BubbleTextView){
+            //mFocusHandler.onFocusChange(v,true);
+            v.setFocusableInTouchMode(true);
+            v.requestFocus();
+        }
+     
         long currentTime = System.currentTimeMillis();
         long subTime = currentTime - lastClickTime;
         if (subTime  < DOUBLE_CLICK_TIME_DELTA) {
-            //double click      
+            //double click   
+            v.setFocusableInTouchMode(false);
+            v.clearFocus();
         }else{
             lastClickTime = currentTime;
             return ;
@@ -108,10 +118,10 @@ public class ItemClickHandler {
 
         if (v.getWindowToken() == null) return;
 
-        Launcher launcher = Launcher.getLauncher(v.getContext());
+
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
 
-        Object tag = v.getTag();
+
         if (tag instanceof WorkspaceItemInfo) {
                // 应用程序快捷方式单击的事件处理。也是调用到：startAppShortcutOrInfoActivity() 方法。
             onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher, sourceContainer);

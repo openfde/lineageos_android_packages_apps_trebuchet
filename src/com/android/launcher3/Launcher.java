@@ -305,6 +305,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     private Handler handler = new Handler();
 
+    BubbleTextView favorite ;
 
     @Thunk
     Workspace mWorkspace;
@@ -1266,10 +1267,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
      * @return A View inflated from layoutResId.
      */
     public View createShortcut(ViewGroup parent, WorkspaceItemInfo info) {
-        BubbleTextView favorite = (BubbleTextView) LayoutInflater.from(parent.getContext())
+        favorite = (BubbleTextView) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.app_icon, parent, false);
         favorite.applyFromWorkspaceItem(info);
         favorite.setOnClickListener(ItemClickHandler.INSTANCE);
+        //favorite.setOnLongClickListener(null);
         favorite.setOnFocusChangeListener(mFocusHandler);
         return favorite;
     }
