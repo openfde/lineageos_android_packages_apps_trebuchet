@@ -30,6 +30,8 @@ import android.graphics.Rect;
 import android.util.Property;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.util.Log;
+import com.android.launcher3.BubbleTextView;
 
 import com.android.launcher3.R;
 
@@ -39,6 +41,7 @@ import com.android.launcher3.R;
 public abstract class FocusIndicatorHelper implements
         OnFocusChangeListener, AnimatorUpdateListener {
 
+    private static final String TAG = "FocusIndicatorHelper";
     private static final float MIN_VISIBLE_ALPHA = 0.2f;
     private static final long ANIM_DURATION = 150;
 
@@ -153,44 +156,59 @@ public abstract class FocusIndicatorHelper implements
         return null;
     }
 
-    @Override
-    public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-            endCurrentAnimation();
+    public void hasFocusView(View v){
+        endCurrentAnimation();
 
-            if (mAlpha > MIN_VISIBLE_ALPHA) {
-                mTargetView = v;
+        if (mAlpha > MIN_VISIBLE_ALPHA) {
+            mTargetView = v;
 
-                mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
-                        PropertyValuesHolder.ofFloat(ALPHA, 1),
-                        PropertyValuesHolder.ofFloat(SHIFT, 1));
-                mCurrentAnimation.addListener(new ViewSetListener(v, true));
-            } else {
-                setCurrentView(v);
-
-                mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
-                        PropertyValuesHolder.ofFloat(ALPHA, 1));
-            }
-
-            mLastFocusedView = v;
+            mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
+                    PropertyValuesHolder.ofFloat(ALPHA, 1),
+                    PropertyValuesHolder.ofFloat(SHIFT, 1));
+            mCurrentAnimation.addListener(new ViewSetListener(v, true));
         } else {
-            if (mLastFocusedView == v) {
-                mLastFocusedView = null;
-                endCurrentAnimation();
-                mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
-                        PropertyValuesHolder.ofFloat(ALPHA, 0));
-                mCurrentAnimation.addListener(new ViewSetListener(null, false));
-            }
+            setCurrentView(v);
+
+            mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
+                    PropertyValuesHolder.ofFloat(ALPHA, 1));
         }
 
-        // invalidate once
+        mLastFocusedView = v;
         invalidateDirty();
 
-        mLastFocusedView = hasFocus ? v : null;
         if (mCurrentAnimation != null) {
             mCurrentAnimation.addUpdateListener(this);
             mCurrentAnimation.setDuration(ANIM_DURATION).start();
         }
+    }
+
+    public void noHasFocusView(View v){
+        if (mLastFocusedView == v) {
+            mLastFocusedView = null;
+            endCurrentAnimation();
+            mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
+                    PropertyValuesHolder.ofFloat(ALPHA, 0));
+            mCurrentAnimation.addListener(new ViewSetListener(null, false));
+        }
+        invalidateDirty();
+
+        mLastFocusedView =  null;
+        if (mCurrentAnimation != null) {
+            mCurrentAnimation.addUpdateListener(this);
+            mCurrentAnimation.setDuration(ANIM_DURATION).start();
+        }
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (hasFocus) {
+            hasFocusView(v);
+        } else {
+            noHasFocusView(v);
+        }
+
+        // invalidate once
+      
     }
 
     protected void endCurrentAnimation() {
