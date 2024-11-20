@@ -303,11 +303,11 @@ public class ItemClickHandler {
         }
    }
 
-   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item,String newFileName){
+   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item){
     if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
-       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString()+"###"+newFileName);
+       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
     }else{
-       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString()+"###"+newFileName);
+       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
     }
     // launcher.bindWorkspace();  
 }
