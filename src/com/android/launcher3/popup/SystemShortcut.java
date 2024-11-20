@@ -241,46 +241,9 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         @Override
         public void onClick(View view) {
             dismissTaskMenuView(mTarget);
-            Launcher launcher = Launcher.getLauncher(view.getContext());
-            AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-            LayoutInflater inflater = launcher.getLayoutInflater();
-            View dialogView = inflater.inflate(R.layout.dialog_file_name, null);
-            EditText mEditText = dialogView.findViewById(R.id.text1);
-            String fileName = mItemInfo.title.toString();
-            mEditText.setText(fileName);
-            int index = fileName.lastIndexOf(".");
-            if(index <= 0){
-                index = fileName.length();
-            }
-            mEditText.setSelection(0, index);
-    
-            mEditText.setOnEditorActionListener(
-                    new TextView.OnEditorActionListener() {
-                        @Override
-                        public boolean onEditorAction(
-                                TextView view, int actionId, @Nullable KeyEvent event) {
-                            if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
-                                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
-                                    && event.hasNoModifiers())) {
-    
-                            }
-                            return false;
-                        }
-                    });
-            mEditText.requestFocus();
-    
-            builder.setView(dialogView)
-                    .setTitle(R.string.desktop_rename)
-                    .setPositiveButton(R.string.desktop_ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            String inputEditText = mEditText.getText().toString();
-                            ItemClickHandler.renameFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo,inputEditText);
-                        }
-                    })
-                    .setNegativeButton(R.string.desktop_cancel, null)
-                    .show();
+            ItemClickHandler.renameFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo);
+            // Launcher launcher = Launcher.getLauncher(view.getContext());
+           
         }
     }
 
