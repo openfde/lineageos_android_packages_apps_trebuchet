@@ -1650,6 +1650,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         mAppTransitionManager.unregisterRemoteAnimations();
         mUserChangedCallbackCloseable.close();
         mAllAppsController.onActivityDestroyed();
+        unbindService(serviceConnection);
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -3135,11 +3136,17 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     };
 
     public void gotoDocApp(String method,String title){
-        try{
-            idocAidl.basicIpcMethon(method,title);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    idocAidl.basicIpcMethon(method,title);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+       
     }
 
     public void selectOpenType(String method,String title){
