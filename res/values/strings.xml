@@ -109,6 +109,7 @@
     <string name="pin_prediction">Pin Prediction</string>
 
     <string name="app_open_drop_target_label" >open</string>
+    <string name="app_open_type" >"open type"</string>
     <string name="copy_drop_target">"Copy"</string>
     <string name="cut_drop_target">"Cut"</string>
     <string name="rename_drop_target">"Rename"</string>

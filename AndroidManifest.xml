@@ -32,6 +32,8 @@
     <uses-permission android:name="android.permission.READ_CLIPBOARD" />
     <uses-permission android:name="android.permission.WRITE_CLIPBOARD" />
     <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
     <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS" />
@@ -50,6 +52,7 @@
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:icon">
 

@@ -157,6 +157,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
 
     public static final Factory<BaseDraggingActivity> APP_INFO = AppInfo::new;
     public static final Factory<BaseDraggingActivity> APP_OPEN = AppOpen::new;
+    public static final Factory<BaseDraggingActivity> APP_OPEN_TYPE = AppOpenType::new;
     public static final Factory<BaseDraggingActivity> APP_REMOVE = AppRemove::new;
     public static final Factory<BaseDraggingActivity> APP_COPY = AppCopy::new ;
     public static final Factory<BaseDraggingActivity> APP_CUT = AppCut::new ;
@@ -190,7 +191,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
     public static class AppOpen extends SystemShortcut {
 
         public AppOpen(BaseDraggingActivity target, ItemInfo itemInfo, View bubbleTextView) {
-            super(R.drawable.ic_open_no_shadow, R.string.app_open_drop_target_label, target,
+            super(R.drawable.ic_open_app, R.string.app_open_drop_target_label, target,
                     itemInfo, bubbleTextView);
         }
 
@@ -198,6 +199,20 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         public void onClick(View view) {
            dismissTaskMenuView(mTarget);
            ItemClickHandler.startAppShortcutOrInfoActivity(view, mItemInfo, Launcher.getLauncher(view.getContext()), null);
+        }
+    }
+
+    public static class AppOpenType extends SystemShortcut {
+
+        public AppOpenType(BaseDraggingActivity target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_open_type, R.string.app_open_type, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+           dismissTaskMenuView(mTarget);
+           ItemClickHandler.appOpenLinuxType( Launcher.getLauncher(view.getContext()),mItemInfo);
         }
     }
 
@@ -215,7 +230,6 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         //    ItemClickHandler.startAppShortcutOrInfoActivity(view, mItemInfo, Launcher.getLauncher(view.getContext()), null);
         }
     }
-
 
     public static class AppCut extends SystemShortcut {
 

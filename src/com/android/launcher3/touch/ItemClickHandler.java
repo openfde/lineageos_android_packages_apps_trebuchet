@@ -287,6 +287,13 @@ public class ItemClickHandler {
         startAppShortcutOrInfoActivity(v, shortcut, launcher, sourceContainer);
     }
 
+    public static void appOpenLinuxType(Launcher launcher,ItemInfo item){
+        Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+        String name = map.get("name").toString();
+        String exec = map.get("exec").toString();
+        launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###type");
+   }
+
     public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){
          if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
             launcher.gotoDocApp(FileUtils.COPY_DIR,item.title.toString());
@@ -342,7 +349,7 @@ public class ItemClickHandler {
             String name = map.get("name").toString();
             String exec = map.get("exec").toString();
            // launcher.gotoDocApp(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
-            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
+            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open");
             
             // Intent inte = new Intent();
             // ComponentName componentName = new ComponentName("com.termux.x11", "com.termux.x11.AppListActivity");
