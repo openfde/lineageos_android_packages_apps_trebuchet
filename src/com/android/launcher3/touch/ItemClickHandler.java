@@ -291,7 +291,7 @@ public class ItemClickHandler {
         Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
         String name = map.get("name").toString();
         String exec = map.get("exec").toString();
-        launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###type");
+        launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###type###"+item.title.toString());
    }
 
     public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){
@@ -349,7 +349,7 @@ public class ItemClickHandler {
             String name = map.get("name").toString();
             String exec = map.get("exec").toString();
            // launcher.gotoDocApp(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
-            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open");
+            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open###"+item.title.toString());
             
             // Intent inte = new Intent();
             // ComponentName componentName = new ComponentName("com.termux.x11", "com.termux.x11.AppListActivity");
