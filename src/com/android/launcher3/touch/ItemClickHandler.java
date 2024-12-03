@@ -98,6 +98,7 @@ public class ItemClickHandler {
         // view has detached (it's possible for this to happen if the view is removed mid touch).
         Object tag = v.getTag();
         Launcher launcher = Launcher.getLauncher(v.getContext());
+        launcher.gotoDocApp(FileUtils.CLICK_BLANK,"");
         ViewGroupFocusHelper mFocusHandler = launcher.getFocusHandler();
         if(v instanceof BubbleTextView){
             //mFocusHandler.onFocusChange(v,true);

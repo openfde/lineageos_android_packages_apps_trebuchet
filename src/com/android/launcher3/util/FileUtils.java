@@ -63,6 +63,8 @@ public class FileUtils {
 
     public static final String OPEN_LINUX_APP = "OPEN_LINUX_APP";
 
+    public static final String CLICK_BLANK = "CLICK_BLANK";
+
     public static final String DELETE_DIR = "DELETE_DIR";
 
     public static final String DELETE_FILE = "DELETE_FILE";
