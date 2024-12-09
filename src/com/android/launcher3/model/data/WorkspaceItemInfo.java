@@ -121,7 +121,7 @@ public class WorkspaceItemInfo extends ItemInfoWithIcon {
     /** TODO: Remove this.  It's only called by ApplicationInfo.makeWorkspaceItem. */
     public WorkspaceItemInfo(AppInfo info) {
         super(info);
-        title = Utilities.trim(info.title);
+        title = info.title ;//Utilities.trim(info.title);
         intent = new Intent(info.getIntent());
     }
 

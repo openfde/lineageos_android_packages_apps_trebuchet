@@ -289,7 +289,7 @@ public class IconCache extends BaseIconCache {
         CacheEntry entry = cacheLocked(info.getComponent(), info.getUser(), () -> info,
                 mComponentWithLabelCachingLogic, false /* usePackageIcon */,
                 true /* useLowResIcon */);
-        return Utilities.trim(entry.title);
+        return entry.title.toString() ;//Utilities.trim(entry.title);
     }
 
     /**
@@ -316,7 +316,7 @@ public class IconCache extends BaseIconCache {
     }
 
     protected void applyCacheEntry(CacheEntry entry, ItemInfoWithIcon info) {
-        info.title = Utilities.trim(entry.title);
+        info.title = entry.title ;//  Utilities.trim(entry.title);
         info.contentDescription = entry.contentDescription;
         info.bitmap = (entry.bitmap == null) ? getDefaultIcon(info.user) : entry.bitmap;
     }

@@ -2134,7 +2134,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     
      //   String documentId = FileUtils.PATH_ID_DESKTOP;
         String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
-
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/Desktop/";  
+        }
 
         List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(this);
 
