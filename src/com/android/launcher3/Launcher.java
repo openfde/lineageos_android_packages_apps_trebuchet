@@ -2185,9 +2185,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 }else if(f.getName().contains(".desktop")){
                     info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
                     // desktop linux app temp delete 
-                    // if(!FileUtils.isOpenLinuxApp){
-                    //     continue;
-                    // }
+                    if(!FileUtils.isOpenLinuxApp){
+                        continue;
+                    }
                 }else if(f.isDirectory()){
                     info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
                 }else{
