@@ -383,6 +383,7 @@ public final class Utilities {
         // Just strip any sequence of whitespace or java space characters from the beginning and end
         Matcher m = sTrimPattern.matcher(s);
         return m.replaceAll("$1");
+        // return s.toString();
     }
 
     /**

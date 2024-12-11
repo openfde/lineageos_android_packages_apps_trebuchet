@@ -51,6 +51,7 @@
     <string name="remove_drop_target_label" msgid="7812859488053230776">"移除"</string>
     <string name="uninstall_drop_target_label" msgid="4722034217958379417">"卸载"</string>
     <string name="app_open_drop_target_label" >"打开"</string>
+    <string name="app_open_type" >"打开方式"</string>
     <string name="remove_drop_target">"移除"</string>
     <string name="copy_drop_target">"复制"</string>
     <string name="cut_drop_target">"剪切"</string>

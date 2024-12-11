@@ -45,7 +45,7 @@ import com.android.launcher3.views.OptionsPopupView;
 import android.util.Log;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import com.android.launcher3.BubbleTextView;
-
+import com.android.launcher3.util.FileUtils;
 /**
  * Helper class to handle touch on empty space in workspace and show options popup on long press
  */
@@ -92,6 +92,7 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
             // mLauncher.changeFavoriteFocus(true);
             view.setFocusableInTouchMode(true);
             view.requestFocus();
+            mLauncher.gotoDocApp(FileUtils.CLICK_BLANK,"");
 
             boolean handleLongPress = canHandleLongPress();
 

@@ -358,7 +358,13 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                         if(f.exists()){
                             workspaceItems.add(ii);
                         }else{
-                            //mBgDataModel.removeItem(context, ii);
+                            documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/Desktop/";  
+                            f = new File(documentId + ii.getTitle());
+                            if(f.exists()){
+                                workspaceItems.add(ii);
+                            }else{
+                                Log.i(TAG, "workspaceItems.............not exist:"+ii.title + " ,  "+ii +",documentId "+documentId);
+                            }
                         }
                     }else{
                         workspaceItems.add(ii);

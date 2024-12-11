@@ -217,7 +217,7 @@ public class LoaderCursor extends CursorWrapper {
      */
     public String getTitle() {
         String title = getString(titleIndex);
-        return TextUtils.isEmpty(title) ? "" : Utilities.trim(title);
+        return TextUtils.isEmpty(title) ? "" : title ;// Utilities.trim(title);
     }
 
     /**

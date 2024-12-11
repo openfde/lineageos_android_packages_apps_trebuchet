@@ -46,6 +46,7 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.containerTypeToAtomState;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
 import static com.android.launcher3.popup.SystemShortcut.APP_OPEN;
+import static com.android.launcher3.popup.SystemShortcut.APP_OPEN_TYPE;
 import static com.android.launcher3.popup.SystemShortcut.APP_REMOVE;
 import static com.android.launcher3.popup.SystemShortcut.APP_COPY;
 import static com.android.launcher3.popup.SystemShortcut.APP_CUT;
@@ -394,11 +395,15 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e(TAG, "bella Launcher_oncreate .................. ");
 
         FileUtils.setSystemProperty("launcher_time",System.currentTimeMillis()+"");
  
 
+        //close animator_duration_scale
+        // Settings.Global.putFloat(getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 0);
+        // Settings.Global.putFloat(getContentResolver(),Settings.Global.WINDOW_ANIMATION_SCALE, 0);
+        // Settings.Global.putFloat(getContentResolver(),Settings.Global.TRANSITION_ANIMATION_SCALE, 0);
+        
         // if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
         //     // 如果权限未授予，则请求权限
         //     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, REQUEST_CODE_1);
@@ -2129,7 +2134,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     
      //   String documentId = FileUtils.PATH_ID_DESKTOP;
         String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
-
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/Desktop/";  
+        }
 
         List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(this);
 
@@ -2177,9 +2185,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 }else if(f.getName().contains(".desktop")){
                     info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
                     // desktop linux app temp delete 
-                    if(!FileUtils.isOpenLinuxApp){
-                        continue;
-                    }
+                    // if(!FileUtils.isOpenLinuxApp){
+                    //     continue;
+                    // }
                 }else if(f.isDirectory()){
                     info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
                 }else{
@@ -3027,7 +3035,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
             return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
         }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-            return Stream.of(APP_OPEN);
+            return Stream.of(APP_OPEN,APP_OPEN_TYPE);
         }else{
             return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
         }
@@ -3150,66 +3158,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     }
 
     public void selectOpenType(String method,String title){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_select_app, null);
-
-        LinearLayout layoutSecondType = dialogView.findViewById(R.id.layoutSecondType);
-        LinearLayout layoutThirdType = dialogView.findViewById(R.id.layoutThirdType);
-
-        if(FileUtils.isAppInstalled(this,"com.iiordanov.bVNC")){
-            layoutSecondType.setVisibility(View.VISIBLE);
-        }else{
-            layoutSecondType.setVisibility(View.GONE);
-        }
-
-        if(FileUtils.isAppInstalled(this,"com.fde.x11")){
-            layoutThirdType.setVisibility(View.VISIBLE);
-        }else{
-            layoutThirdType.setVisibility(View.GONE);
-        }
-
-        TextView txtOnlyOnce = dialogView.findViewById(R.id.txtOnlyOnce);
-        TextView txtAlways = dialogView.findViewById(R.id.txtAlways);
-        TextView txtSecondType = dialogView.findViewById(R.id.txtSecondType);
-        TextView txtThirdType = dialogView.findViewById(R.id.txtThirdType);
-
-        builder.setView(dialogView);
-        AlertDialog dialog = builder.create();
-        // 显示对话框
-        dialog.show();
-
-        txtOnlyOnce.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gotoDocApp(method,title+"###open");
-                dialog.dismiss();
-            }
-        });
-
-        txtAlways.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gotoDocApp(method,title+"###open");
-                dialog.dismiss();
-            }
-        });
-
-        txtSecondType.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gotoDocApp(method,title+"###vnc");
-                dialog.dismiss();
-            }
-        });
-
-        txtThirdType.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                gotoDocApp(method,title+"###x11");
-                dialog.dismiss();
-            }
-        });
+        gotoDocApp(method,title);
     }
 
     public boolean isShowPasteDlg(){

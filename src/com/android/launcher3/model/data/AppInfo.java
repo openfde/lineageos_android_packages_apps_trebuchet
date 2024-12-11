@@ -89,7 +89,7 @@ public class AppInfo extends ItemInfoWithIcon {
     public AppInfo(AppInfo info) {
         super(info);
         componentName = info.componentName;
-        title = Utilities.trim(info.title);
+        title = info.title;// Utilities.trim(info.title);
         intent = new Intent(info.intent);
         user = info.user;
         runtimeStatusFlags = info.runtimeStatusFlags;

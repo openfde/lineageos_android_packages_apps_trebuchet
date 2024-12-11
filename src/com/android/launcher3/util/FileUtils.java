@@ -63,6 +63,8 @@ public class FileUtils {
 
     public static final String OPEN_LINUX_APP = "OPEN_LINUX_APP";
 
+    public static final String CLICK_BLANK = "CLICK_BLANK";
+
     public static final String DELETE_DIR = "DELETE_DIR";
 
     public static final String DELETE_FILE = "DELETE_FILE";
@@ -331,7 +333,12 @@ public static Point findNextFreePoint(Context context){
                     return ;
                 }
     
-                String pathDesktop = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/"+title+"_fde.desktop";
+                String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
+                File ff = new File(documentId);
+                if(!ff.exists()){
+                    documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/Desktop/";  
+                }
+                String pathDesktop = documentId+title+"_fde.desktop";
                 File file = new File(pathDesktop);
                 if(file.exists()){
                     Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
@@ -380,7 +387,12 @@ public static Point findNextFreePoint(Context context){
     }
 
     public static Map<String,Object> getLinuxContentString(String fileName){
-        String filePath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/"+fileName;
+        String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/Desktop/";  
+        }
+        String filePath = documentId +fileName;
         String startChar = "[Desktop";  // 
         Map<String,Object> map = new HashMap<>();
         try {
@@ -516,13 +528,20 @@ public static Point findNextFreePoint(Context context){
                         return absoluteIcon;
                     }else{
                         absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/32x32/apps/"+fileName;                        file = new File(absoluteIcon);
+                        file = new File(absoluteIcon);
                         if(file.exists()){
                             return absoluteIcon;
                         }else{
                             absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/hicolor/256x256/apps/"+fileName;                        file = new File(absoluteIcon);
+                            file = new File(absoluteIcon);
                             if(file.exists()){
                                 return absoluteIcon;
                             }else{
+                                absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/Vintage/apps/32/"+fileName;                        file = new File(absoluteIcon);
+                                file = new File(absoluteIcon);
+                                if(file.exists()){
+                                    return absoluteIcon;
+                                }
                                 return null ;
                             }
                         }
