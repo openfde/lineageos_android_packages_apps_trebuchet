@@ -333,7 +333,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mWorkspaceFadeInAdjacentScreens = grid.shouldFadeAdjacentWorkspaceScreens();
 
         Rect padding = grid.workspacePadding;
-        Log.e(TAG, "setInsets l:" + padding.left + " t:" + padding.top + " r:" + padding.right  + " b:" + padding.bottom);
+        //set horizental padding
         setPadding(30, padding.top, 30, padding.bottom);
         mInsets.set(insets);
 
@@ -378,7 +378,6 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         Rect padding = mLauncher.getDeviceProfile().cellLayoutPaddingPx;
         mWorkspaceScreens.forEach(cellLayout -> {
             cellLayout.setPadding(padding.left, padding.top, padding.right, padding.bottom);
-            Log.e(TAG, "updateCellLayoutMeasures l:" + padding.left + " t:" + padding.top + " r:" + padding.right  + " b:" + padding.bottom);
             cellLayout.setSpaceBetweenCellLayoutsPx(getPageSpacing() / 4);
         });
     }
