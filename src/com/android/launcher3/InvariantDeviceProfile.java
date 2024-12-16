@@ -389,10 +389,16 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
     private void initGrid(Context context, Info displayInfo, DisplayOption displayOption,
             @DeviceType int deviceType) {
+        iconSize = displayOption.iconSizes;
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         GridOption closestProfile = displayOption.grid;
-        numRows = closestProfile.numRows;
-        numColumns = closestProfile.numColumns;
+        float density = metrics.density;
+        float iconPixel = iconSize[INDEX_DEFAULT] * density;
+        int heightPixels = metrics.heightPixels;
+        int widthPixels = metrics.widthPixels;
+        numRows = (int) ((heightPixels * 0.5) / iconPixel);
+        numColumns = (int) ((widthPixels * 0.5) / iconPixel);
+        Log.e(TAG, "numRows=" + numRows + "  numColumns=" + numColumns);        
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
         dbFile = closestProfile.dbFile;
         defaultLayoutId = closestProfile.defaultLayoutId;
@@ -424,7 +430,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
         inlineNavButtonsEndSpacing = closestProfile.inlineNavButtonsEndSpacing;
 
-        iconSize = displayOption.iconSizes;
+        // iconSize = displayOption.iconSizes;
         float maxIconSize = iconSize[0];
         for (int i = 1; i < iconSize.length; i++) {
             maxIconSize = Math.max(maxIconSize, iconSize[i]);
