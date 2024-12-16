@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 <com.android.launcher3.DropTargetBar xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/dynamic_grid_drop_target_size"
+    android:layout_width="1dp"
+    android:layout_height="0dp"
     android:layout_gravity="center_horizontal|top"
     android:focusable="false"
     android:alpha="0"

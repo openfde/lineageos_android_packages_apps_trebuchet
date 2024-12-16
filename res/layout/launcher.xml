@@ -47,6 +47,7 @@
         <!-- DO NOT CHANGE THE ID -->
         <include
             android:id="@+id/hotseat"
+            android:visibility="gone"
             layout="@layout/hotseat" />
 
         <!-- Keep these behind the workspace so that they are not visible when

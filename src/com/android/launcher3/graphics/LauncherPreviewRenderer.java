@@ -221,7 +221,7 @@ public class LauncherPreviewRenderer extends ContextWrapper
 
         mHotseat = mRootView.findViewById(R.id.hotseat);
         mHotseat.resetLayout(false);
-
+        mHotseat.setVisibility(View.GONE);
         mLauncherWidgetSpanInfo = launcherWidgetSpanInfo == null ? new SparseArray<>() :
                 launcherWidgetSpanInfo;
 
@@ -232,6 +232,7 @@ public class LauncherPreviewRenderer extends ContextWrapper
                         : mDp.workspacePadding.right) + mDp.cellLayoutPaddingPx.right,
                 mDp.workspacePadding.bottom + mDp.cellLayoutPaddingPx.bottom
         );
+        firstScreen.setPadding(0,0,0,0);
         mWorkspaceScreens.put(FIRST_SCREEN_ID, firstScreen);
 
         if (mDp.isTwoPanels) {

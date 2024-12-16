@@ -32,7 +32,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
+import android.view.View;
 import com.android.launcher3.util.HorizontalInsettableView;
 import com.android.launcher3.util.MultiTranslateDelegate;
 import com.android.launcher3.views.ActivityContext;
@@ -66,6 +66,7 @@ public class Hotseat extends CellLayout implements Insettable {
 
         mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this, false);
         addView(mQsb);
+        this.setVisibility(View.GONE);
     }
 
     /**
@@ -179,30 +180,30 @@ public class Hotseat extends CellLayout implements Insettable {
 
     @Override
     public void setInsets(Rect insets) {
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        DeviceProfile grid = mActivity.getDeviceProfile();
+        // FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+        // DeviceProfile grid = mActivity.getDeviceProfile();
 
-        if (grid.isVerticalBarLayout()) {
-            mQsb.setVisibility(View.GONE);
-            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            if (grid.isSeascape()) {
-                lp.gravity = Gravity.LEFT;
-                lp.width = grid.hotseatBarSizePx + insets.left;
-            } else {
-                lp.gravity = Gravity.RIGHT;
-                lp.width = grid.hotseatBarSizePx + insets.right;
-            }
-        } else {
-            mQsb.setVisibility(View.VISIBLE);
-            lp.gravity = Gravity.BOTTOM;
-            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            lp.height = grid.hotseatBarSizePx;
-        }
+        // if (grid.isVerticalBarLayout()) {
+        //     mQsb.setVisibility(View.GONE);
+        //     lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        //     if (grid.isSeascape()) {
+        //         lp.gravity = Gravity.LEFT;
+        //         lp.width = grid.hotseatBarSizePx + insets.left;
+        //     } else {
+        //         lp.gravity = Gravity.RIGHT;
+        //         lp.width = grid.hotseatBarSizePx + insets.right;
+        //     }
+        // } else {
+        //     mQsb.setVisibility(View.VISIBLE);
+        //     lp.gravity = Gravity.BOTTOM;
+        //     lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        //     lp.height = grid.hotseatBarSizePx;
+        // }
 
-        Rect padding = grid.getHotseatLayoutPadding(getContext());
-        setPadding(padding.left, padding.top, padding.right, padding.bottom);
-        setLayoutParams(lp);
-        InsettableFrameLayout.dispatchInsets(this, insets);
+        // Rect padding = grid.getHotseatLayoutPadding(getContext());
+        // setPadding(padding.left, padding.top, padding.right, padding.bottom);
+        // setLayoutParams(lp);
+        // InsettableFrameLayout.dispatchInsets(this, insets);
     }
 
     public void setWorkspace(Workspace<?> w) {
