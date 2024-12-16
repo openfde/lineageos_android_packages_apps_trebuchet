@@ -419,26 +419,26 @@ public class QuickstepTransitionManager implements OnDeviceProfileChangeListener
             boolean launcherClosing) {
         // Set the state animation first so that any state listeners are called
         // before our internal listeners.
-        mLauncher.getStateManager().setCurrentAnimation(anim);
+        // mLauncher.getStateManager().setCurrentAnimation(anim);
 
-        // Note: the targetBounds are relative to the launcher
-        int startDelay = getSingleFrameMs(mLauncher);
-        Animator windowAnimator = getOpeningWindowAnimators(
-                v, appTargets, wallpaperTargets, nonAppTargets, launcherClosing);
-        windowAnimator.setStartDelay(startDelay);
-        anim.play(windowAnimator);
-        if (launcherClosing) {
-            // Delay animation by a frame to avoid jank.
-            Pair<AnimatorSet, Runnable> launcherContentAnimator =
-                    getLauncherContentAnimator(true /* isAppOpening */, startDelay, false);
-            anim.play(launcherContentAnimator.first);
-            anim.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    launcherContentAnimator.second.run();
-                }
-            });
-        }
+        // // Note: the targetBounds are relative to the launcher
+        // int startDelay = getSingleFrameMs(mLauncher);
+        // Animator windowAnimator = getOpeningWindowAnimators(
+        //         v, appTargets, wallpaperTargets, nonAppTargets, launcherClosing);
+        // windowAnimator.setStartDelay(startDelay);
+        // anim.play(windowAnimator);
+        // if (launcherClosing) {
+        //     // Delay animation by a frame to avoid jank.
+        //     Pair<AnimatorSet, Runnable> launcherContentAnimator =
+        //             getLauncherContentAnimator(true /* isAppOpening */, startDelay, false);
+        //     anim.play(launcherContentAnimator.first);
+        //     anim.addListener(new AnimatorListenerAdapter() {
+        //         @Override
+        //         public void onAnimationEnd(Animator animation) {
+        //             launcherContentAnimator.second.run();
+        //         }
+        //     });
+        // }
     }
 
     private void composeWidgetLaunchAnimator(
