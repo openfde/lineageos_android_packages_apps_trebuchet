@@ -495,7 +495,7 @@ public class TaskbarManager {
 
             destroyExistingTaskbar();
 
-            boolean isTaskbarEnabled = dp != null && isTaskbarEnabled(dp);
+            boolean isTaskbarEnabled =  false ;// dp != null && isTaskbarEnabled(dp);
             debugWhyTaskbarNotDestroyed("recreateTaskbar: isTaskbarEnabled=" + isTaskbarEnabled
                 + " [dp != null (i.e. mUserUnlocked)]=" + (dp != null)
                 + " FLAG_HIDE_NAVBAR_WINDOW=" + ENABLE_TASKBAR_NAVBAR_UNIFICATION

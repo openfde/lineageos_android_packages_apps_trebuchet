@@ -205,14 +205,14 @@ public class ImageActionUtils {
 
         // Work around b/159412574
         if (intents.length == 1) {
-            MAIN_EXECUTOR.execute(() -> context.startActivity(intents[0],
-                    ActivityOptions.makeSceneTransitionAnimation((Activity) context, scaledImage,
-                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle()));
+            MAIN_EXECUTOR.execute(() -> context.startActivity(intents[0]));
+                    // ActivityOptions.makeSceneTransitionAnimation((Activity) context, scaledImage,
+                            // ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle()));
 
         } else {
-            MAIN_EXECUTOR.execute(() -> context.startActivities(intents,
-                    ActivityOptions.makeSceneTransitionAnimation((Activity) context, scaledImage,
-                            ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle()));
+            MAIN_EXECUTOR.execute(() -> context.startActivities(intents));
+                    // ActivityOptions.makeSceneTransitionAnimation((Activity) context, scaledImage,
+                            // ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME).toBundle()));
         }
     }
 
