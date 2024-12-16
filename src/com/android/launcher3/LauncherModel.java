@@ -40,6 +40,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.celllayout.CellPosMapper;
 import com.android.launcher3.config.FeatureFlags;
 import com.android.launcher3.icons.IconCache;
@@ -363,7 +364,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                ArrayList<ItemInfo> tempItems = mBgDataModel.workspaceItems;
                ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
                for(ItemInfo ii : tempItems) {
-                    if(ii.itemType == 8  || ii.itemType == 9){
+                    if(ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY  || ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
                         String documentId =  FileUtils.getRootDir() + "/桌面/";  
                         File f = new File(documentId + ii.getTitle());
                         if(f.exists()){
