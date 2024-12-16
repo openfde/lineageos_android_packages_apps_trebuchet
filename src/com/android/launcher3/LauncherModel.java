@@ -83,6 +83,14 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.android.launcher3.util.FileUtils;
+import java.util.Collections;
+import android.content.ComponentName;
+import java.util.Set;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Map;
+
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
  * LauncherModel object held in a static. Also provide APIs for updating the database state
@@ -335,6 +343,62 @@ public class LauncherModel implements InstallSessionTracker.Callback {
         synchronized (mCallbacksList) {
             mCallbacksList.add(callbacks);
         }
+    }
+
+    public List<ItemInfo> rearray(Context context){
+        // InstallShortcutReceiver.enableInstallQueue(InstallShortcutReceiver.FLAG_LOADER_RUNNING);
+        synchronized (mLock) {
+            // Don't bother to start the thread if we know it's not going to do anything
+            final Callbacks[] callbacksList = getCallbacks();
+            if (callbacksList.length > 0) {
+                // Clear any pending bind-runnables from the synchronized load process.
+                // for (Callbacks cb : callbacksList) {
+                //     mMainExecutor.execute(cb::clearPendingBinds);
+                // }
+
+                // If there is already one running, tell it to stop.
+                stopLoader();
+//                LoaderResults loaderResults = new LoaderResults(
+//                        mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
+               ArrayList<ItemInfo> tempItems = mBgDataModel.workspaceItems;
+               ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
+               for(ItemInfo ii : tempItems) {
+                    if(ii.itemType == 8  || ii.itemType == 9){
+                        String documentId =  FileUtils.getRootDir() + "/桌面/";  
+                        File f = new File(documentId + ii.getTitle());
+                        if(f.exists()){
+                            workspaceItems.add(ii);
+                        }else{
+                            documentId =  FileUtils.getRootDir()+"/Desktop/";  
+                            f = new File(documentId + ii.getTitle());
+                            if(f.exists()){
+                                workspaceItems.add(ii);
+                            }else{
+                                Log.i(TAG, "workspaceItems.............not exist:"+ii.title + " ,  "+ii +",documentId "+documentId);
+                            }
+                        }
+                    }else{
+                        workspaceItems.add(ii);
+                    }
+               }
+               mBgDataModel.workspaceItems = workspaceItems;
+               Log.i(TAG, "workspaceItems..................size  "+workspaceItems.size());
+                // Log.i(TAG, "workspaceItems "+workspaceItems.size());
+               Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
+               
+                InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+                Launcher launcher = Launcher.getLauncher(context);
+                for (int i = 0 ;i < workspaceItems.size(); i++){
+                    ItemInfo info = workspaceItems.get(i);
+                    launcher.removeView(info.cellX , info.cellY);
+                    info.cellX = i/idp.numRows;
+                    info.cellY = i%idp.numRows;
+                }
+//                startLoaderForResults(loaderResults);
+                return workspaceItems;
+            }
+        }
+        return null;
     }
 
     /**

@@ -202,7 +202,7 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
         PopupContainerWithArrow<Launcher> container;
         PopupDataProvider popupDataProvider = launcher.getPopupDataProvider();
         int deepShortcutCount = popupDataProvider.getShortcutCountForItem(item);
-        List<SystemShortcut> systemShortcuts = launcher.getSupportedShortcuts()
+        List<SystemShortcut> systemShortcuts = launcher.getSupportedShortcuts(item.itemType)
                 .map(s -> s.getShortcut(launcher, item, icon))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

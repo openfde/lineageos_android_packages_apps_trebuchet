@@ -92,6 +92,12 @@ import static com.android.launcher3.logging.StatsLogManager.StatsLatencyLogger.L
 import static com.android.launcher3.model.ItemInstallQueue.FLAG_ACTIVITY_PAUSED;
 import static com.android.launcher3.model.ItemInstallQueue.FLAG_DRAG_AND_DROP;
 import static com.android.launcher3.popup.SystemShortcut.APP_INFO;
+import static com.android.launcher3.popup.SystemShortcut.APP_OPEN;
+import static com.android.launcher3.popup.SystemShortcut.APP_OPEN_TYPE;
+import static com.android.launcher3.popup.SystemShortcut.APP_REMOVE;
+import static com.android.launcher3.popup.SystemShortcut.APP_COPY;
+import static com.android.launcher3.popup.SystemShortcut.APP_CUT;
+import static com.android.launcher3.popup.SystemShortcut.APP_RENAME;
 import static com.android.launcher3.popup.SystemShortcut.INSTALL;
 import static com.android.launcher3.popup.SystemShortcut.WIDGETS;
 import static com.android.launcher3.states.RotationHelper.REQUEST_LOCK;
@@ -101,6 +107,7 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.ItemInfoMatcher.forFolderMatch;
 import static com.android.launcher3.util.SettingsCache.TOUCHPAD_NATURAL_SCROLLING;
 
+import android.os.Handler;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
@@ -278,7 +285,18 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
+import com.android.documentsui.IDocAidlInterface;
+import com.android.documentsui.IDataChangedCallback;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.content.ComponentName;
+import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.util.DbUtils;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.io.File;
+import java.util.Arrays;
+import android.graphics.Point;
 /**
  * Default launcher application.
  */
@@ -324,6 +342,8 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private final KeyboardShortcutsDelegate mKeyboardShortcutsDelegate =
             new KeyboardShortcutsDelegate(this);
+    IDocAidlInterface idocAidl;
+    private Handler handler = new Handler();        
 
     @Thunk
     Workspace<?> mWorkspace;
@@ -419,6 +439,11 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
+
+        FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
+        bindService();
+        FileUtils.createDesktopDir( FileUtils.getRootDir() + "/.openfde/"); 
+        FileUtils.createDesktopDir( FileUtils.getRootDir() + "/.openfde/pic/"); 
         mStartupLatencyLogger = createStartupLatencyLogger(
                 sIsNewProcess
                         ? LockedUserState.get(this).isUserUnlockedAtLauncherStartup()
@@ -1340,7 +1365,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mOverviewPanel = findViewById(R.id.overview_panel);
         mHotseat = findViewById(R.id.hotseat);
         mHotseat.setWorkspace(mWorkspace);
-
+        mHotseat.setVisibility(View.GONE);
         // Setup the drag layer
         mDragLayer.setup(mDragController, mWorkspace);
 
@@ -1365,6 +1390,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         // Setup the drag controller (drop targets have to be added in reverse order in priority)
         mDropTargetBar.setup(mDragController);
+        mDropTargetBar.setVisibility(View.GONE);
         mAllAppsController.setupViews(mScrimView, mAppsView);
 
         mWorkspace.getPageIndicator().setShouldAutoHide(true);
@@ -1756,6 +1782,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         // changes while launcher is still loading.
         getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
         mOverlayManager.onActivityDestroyed();
+        unbindService(serviceConnection);
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
@@ -2213,23 +2240,24 @@ public class Launcher extends StatefulActivity<LauncherState>
         int newItemsScreenId = -1;
         int index = 0;
         for (Pair<ItemInfo, View> e : shortcuts) {
-            final ItemInfo item = e.first;
+             ItemInfo item = e.first;
 
             // Remove colliding items.
             CellPos presenterPos = getCellPosMapper().mapModelToPresenter(item);
             if (item.container == CONTAINER_DESKTOP) {
-                CellLayout cl = mWorkspace.getScreenWithId(presenterPos.screenId);
-                if (cl != null && cl.isOccupied(presenterPos.cellX, presenterPos.cellY)) {
-                    Object tag = cl.getChildAt(presenterPos.cellX, presenterPos.cellY).getTag();
-                    String desc = "Collision while binding workspace item: " + item
-                            + ". Collides with " + tag;
-                    if (FeatureFlags.IS_STUDIO_BUILD) {
-                        throw (new RuntimeException(desc));
-                    } else {
-                        getModelWriter().deleteItemFromDatabase(item, desc);
-                        continue;
-                    }
-                }
+                item = findNextCoordinate(item);
+                // CellLayout cl = mWorkspace.getScreenWithId(presenterPos.screenId);
+                // if (cl != null && cl.isOccupied(presenterPos.cellX, presenterPos.cellY)) {
+                //     Object tag = cl.getChildAt(presenterPos.cellX, presenterPos.cellY).getTag();
+                //     String desc = "Collision while binding workspace item: " + item
+                //             + ". Collides with " + tag;
+                //     if (FeatureFlags.IS_STUDIO_BUILD) {
+                //         throw (new RuntimeException(desc));
+                //     } else {
+                //         getModelWriter().deleteItemFromDatabase(item, desc);
+                //         continue;
+                //     }
+                // }
             }
 
             View view = e.second;
@@ -3029,6 +3057,15 @@ public class Launcher extends StatefulActivity<LauncherState>
         return new RectF(x - halfSize, y - halfSize, x + halfSize, y + halfSize);
     }
 
+    public Stream<SystemShortcut.Factory> getSupportedShortcuts(int itemType) {
+        if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+            return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
+        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            return Stream.of(APP_OPEN,APP_OPEN_TYPE);
+        }else{
+            return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
+        }
+    }
     public Stream<SystemShortcut.Factory> getSupportedShortcuts() {
         return Stream.of(APP_INFO, WIDGETS, INSTALL);
     }
@@ -3084,4 +3121,294 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     // End of Getters and Setters
+    private void bindService(){
+        Intent mIntent = new Intent();
+        mIntent.setComponent(new ComponentName("com.android.documentsui", "com.android.documentsui.IpcService"));
+        boolean bindFlag = bindService(mIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        Log.i(TAG," bindService bindFlag: "+bindFlag);
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
+            idocAidl = IDocAidlInterface.Stub.asInterface(service);
+            if(FileUtils.isOpenLinuxApp){
+             gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
+             gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
+            }
+     
+            addDesktopFiles();
+                   
+            try{
+                idocAidl.register(new IDataChangedCallback.Stub(){
+                    @Override
+                    public void onCallback(String params)  {
+                        Log.i(TAG," onCallback params: "+params);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if("PASTE".equals(params) ){
+                                    //addDesktopFile();
+                                    addDesktopFiles();
+                                    bindWorkspace();
+                                    //getModel().forceReload();
+                                } else if("REFRESH_DESKTOP".equals(params)){
+                                    addDesktopFiles();
+                                }          
+                            }
+                        });           
+                    }
+
+                    @Override
+                    public void onCallbackString(String method,String params)  {
+                        Log.i(TAG," onCallbackString method: "+method + ", params "+params);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
+                                    addDesktopFile(method,params);
+                                    bindWorkspace();
+                                }else if("RENAME".equals(method)){
+                                    String[] arrFileName = params.split("###");
+                                    DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
+                                    bindWorkspace();
+                                    getModel().forceReload();
+                                }
+                            }
+                        });
+                       
+                    }
+                });
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // ipcAidl = null;
+            idocAidl = null;
+        }
+    };
+
+    public void gotoDocApp(String method,String title){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    Log.i(TAG, "bellaLauncher gotoDocApp  method: " + method + ", title "+title);
+                    idocAidl.basicIpcMethon(method,title);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+       
+    }
+
+    public void selectOpenType(String method,String title){
+        gotoDocApp(method,title);
+    }
+
+    public boolean isShowPasteDlg(){
+        // ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        // ClipData clip = clipboard.getPrimaryClip();
+        // if (clip == null  ) {
+        //     Log.i(TAG," showDefaultOptions is null");
+        //     return false ;
+        // }else if( clip.getItemCount() < 1){
+        //     return false ;
+        // }else{
+        //     ClipData.Item item = clip.getItemAt(0);
+        //     if (item.getUri() != null) {
+        //         return true ;
+        //     }else{
+        //         Log.i(TAG," showDefaultOptions uri is null");
+        //     }
+        // }
+       return false ;
+    }
+
+    private void insertOrUpdateFavorites(ItemInfo info){
+        List<Map<String,Object>> listData = getModelWriter().queryItemsFromDatabase(info);//
+        if(listData == null){
+            //insert 
+            insertFavorites(info);
+        }else{
+            //update 
+            updateFavorites(info);
+        }  
+    }
+    
+    public void insertFavorites(ItemInfo info){
+        Log.d(TAG, "addDesktopFiles: insertFavorites ItemInfo "+info);
+        getModelWriter().insertItemToDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY);
+    }
+
+    public void updateFavorites(ItemInfo info){
+        Log.d(TAG, "addDesktopFiles: updateFavorites ItemInfo "+info);
+        getModelWriter().modifyItemInDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY,1,1);
+    }
+
+    public void deleteFavorites(ItemInfo info){
+        getModelWriter().deleteItemFromDatabase(info,"");
+    }
+
+
+    public void addDesktopFile(String method,String fileName){
+        Point point = FileUtils.findNextFreePoint(this);
+        WorkspaceItemInfo info = new WorkspaceItemInfo();
+        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+        info.title = fileName;
+        info.container = -100;
+        info.screenId = 0;
+        Intent intent = new Intent();
+        intent.setPackage("com.android.launcher3");
+        info.intent = intent;
+        info.cellY = point.y;
+        info.cellX = point.x;
+        if("NEW_FILE".equals(method)){
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+        }else{
+            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY; 
+        }
+        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        insertFavorites(info);
+    }
+
+      public List<WorkspaceItemInfo> addDesktopFiles(){
+        List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(this);
+        int count = 0;
+        if(listApps !=null){
+            count = listApps.size();
+        }
+    
+     //   String documentId = FileUtils.PATH_ID_DESKTOP;
+        String documentId =  FileUtils.getRootDir() +"/桌面/";  
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  FileUtils.getRootDir() + "/Desktop/";  
+        }
+
+        List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(this);
+
+        if(listTexts !=null){
+            for(Map<String,Object> mp : listTexts){
+                String fName = mp.get("title").toString();
+                Log.d(TAG, "addDesktopFiles fName  "+fName );
+                File f = new File(documentId + fName);
+                if(!f.exists()){
+                    // mBgDataModel.removeItem(mContext, item);
+                    getModelWriter().deleteTitleFromDatabase(fName);   
+                }
+            }
+        }
+
+        File parent = new File(documentId);
+        File[] files = parent.listFiles();
+        int scale  =  FileUtils.getScreenRows(this);
+        if(files !=null){
+            Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+            Log.d(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
+        
+            List<WorkspaceItemInfo> list = new ArrayList();
+            int index = 0;
+            int xindex = count / scale;
+            int yindex = count % scale; 
+            for(File f : files){
+                WorkspaceItemInfo info = new WorkspaceItemInfo();
+                info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+                info.title = f.getName();
+                info.container = -100;
+                info.screenId = 0;
+                Intent intent = new Intent();
+                intent.setPackage("com.android.launcher3");
+                info.intent = intent;
+                int y = yindex + index ;
+                info.cellY = y%scale ;
+                info.cellX = xindex + y/scale;
+                info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+
+                Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
+
+                if(f.getName().contains("_fde.desktop")){
+                    continue;
+                }else if(f.getName().contains(".desktop")){
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                    // desktop linux app temp delete 
+                    // if(!FileUtils.isOpenLinuxApp){
+                    //     continue;
+                    // }
+                }else if(f.isDirectory()){
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                }else{
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+                }
+                list.add(info);
+                index++;
+                insertOrUpdateFavorites(info);
+            }
+            return list ;
+        }else{
+            Log.d(TAG, "bindItems: files is null  " );
+        }
+        return null ;
+    }
+
+    public void bindWorkspace(){
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+              //  getModel().forceReload();
+                 getModel().startLoader();
+            }
+        }, 1000);
+    }
+
+    public void removeView(int x, int y){
+        mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));
+    }
+
+    public void rearray(Context context){
+        List<ItemInfo> rearray = getModel().rearray(context);
+        List<ItemInfo> rearrayList = new ArrayList<>();
+        Log.i(TAG, "bindItems----rearray :  "+rearray.size());
+        for (int i = 0 ; i < rearray.size() ; i++){
+            ItemInfo info = rearray.get(i);
+            // if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT|| info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            //     String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
+            //     File file = new File(filePath);
+            //     if(!file.exists()){
+
+            //         deleteFavorites(info);
+            //         continue;
+            //     }
+            // }
+            rearrayList.add(info);
+            getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
+                    info.cellX, info.cellY, info.spanX, info.spanY);
+        }
+        bindItems(rearrayList, false);        
+    }
+
+    public  ItemInfo findNextCoordinate(ItemInfo item) {
+        int xindex = item.cellX;
+        int yindex = item.cellY ;
+        CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
+        if (cl != null && cl.isOccupied(xindex, yindex)) {
+            if(yindex >= 8 ){
+                yindex = 0;
+                xindex++;
+            }else{
+                yindex++;
+            }
+            item.cellX = xindex;
+            item.cellY = yindex;
+            return findNextCoordinate(item);
+        }else{
+            return item ;
+        }
+    }
 }

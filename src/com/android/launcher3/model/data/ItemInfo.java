@@ -177,7 +177,7 @@ public class ItemInfo {
      * original {@link ComponentName}.
      */
     @Nullable
-    private ComponentName mComponentName;
+    public ComponentName mComponentName;
 
     @NonNull
     public UserHandle user;
@@ -212,6 +212,10 @@ public class ItemInfo {
     @Nullable
     public Intent getIntent() {
         return null;
+    }
+
+    public String getTitle(){
+        return title.toString();
     }
 
     @Nullable
@@ -288,6 +292,7 @@ public class ItemInfo {
     protected String dumpProperties() {
         return "id=" + id
                 + " type=" + LauncherSettings.Favorites.itemTypeToString(itemType)
+                + " itemType=" + itemType
                 + " container=" + getContainerInfo()
                 + " targetComponent=" + getTargetComponent()
                 + " screen=" + screenId
@@ -296,9 +301,10 @@ public class ItemInfo {
                 + " minSpan(" + minSpanX + "," + minSpanY + ")"
                 + " rank=" + rank
                 + " user=" + user
+                + " appTitle=" + appTitle
                 + " title=" + title;
     }
-
+    
     /**
      * Whether this item is disabled.
      */

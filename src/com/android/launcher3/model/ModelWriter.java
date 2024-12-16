@@ -57,7 +57,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
+import java.util.Map;
+import java.util.HashMap;
+import android.database.Cursor;
 /**
  * Class for handling model updates.
  */
@@ -233,6 +235,51 @@ public class ModelWriter {
         notifyOtherCallbacks(c -> c.bindItemsModified(Collections.singletonList(item)));
     }
 
+    public List<Map<String,Object>> queryItemsFromDatabase(ItemInfo item){
+
+        String selection = "title = ?";
+        String[] selectionArgs = {item.title.toString()};
+        List<Map<String,Object>> list = null;
+
+        Cursor cursor =  mModel.getModelDbController().query(Favorites.TABLE_NAME,null,selection,selectionArgs,"title desc");
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
+
+        if(list == null ){
+            Log.i(TAG, "queryItemsFromDatabase is null");
+        }else{
+            Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
+        }
+
+        return list ;
+    }
+
+    public void insertItemToDatabase( ItemInfo item, int container, int screenId, int cellX, int cellY) {
+        Log.d(TAG, "addDesktopFiles: addItemToDatabase 3333 "+item);
+        final ContentWriter writer = new ContentWriter(mContext);
+        item.onAddToDatabase(writer);
+        writer.put(Favorites._ID, item.id);
+
+        Log.d(TAG, "addDesktopFiles: addItemToDatabase 4444 "+item);
+        mModel.getModelDbController().insert(Favorites.TABLE_NAME, writer.getValues(mContext));
+
+    }
+
     /**
      * Add an item to the database in a specified container. Sets the container, screen, cellX and
      * cellY fields of the item. Also assigns an ID to the item.
@@ -240,19 +287,23 @@ public class ModelWriter {
     public void addItemToDatabase(final ItemInfo item,
             int container, int screenId, int cellX, int cellY) {
         updateItemInfoProps(item, container, screenId, cellX, cellY);
+        Log.d(TAG, "addDesktopFiles: addItemToDatabase 111 "+item);
 
         item.id = mModel.getModelDbController().generateNewItemId();
         notifyOtherCallbacks(c -> c.bindItems(Collections.singletonList(item), false));
 
         ModelVerifier verifier = new ModelVerifier();
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        Log.d(TAG, "addDesktopFiles: addItemToDatabase 2222 "+item);
         newModelTask(() -> {
             // Write the item on background thread, as some properties might have been updated in
             // the background.
+            Log.d(TAG, "addDesktopFiles: addItemToDatabase 3333 "+item);
             final ContentWriter writer = new ContentWriter(mContext);
             item.onAddToDatabase(writer);
             writer.put(Favorites._ID, item.id);
 
+            Log.d(TAG, "addDesktopFiles: addItemToDatabase 4444 "+item);
             mModel.getModelDbController().insert(Favorites.TABLE_NAME, writer.getValues(mContext));
             synchronized (mBgDataModel) {
                 checkItemInfoLocked(item.id, item, stackTrace);
@@ -260,6 +311,14 @@ public class ModelWriter {
                 verifier.verifyModel();
             }
         }).executeOnModelThread();
+    }
+
+    public  void deleteTitleFromDatabase(String title){
+        Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
+        String selection = "title = ?";
+        String[] selectionArgs = {title};
+        int res = mModel.getModelDbController().delete(Favorites.TABLE_NAME, selection, selectionArgs);
+        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
     }
 
     /**
@@ -477,6 +536,9 @@ public class ModelWriter {
                                 modelItem.container == Favorites.CONTAINER_HOTSEAT)) {
                     switch (modelItem.itemType) {
                         case Favorites.ITEM_TYPE_APPLICATION:
+                        case Favorites.ITEM_TYPE_DIRECTORY:
+                        case Favorites.ITEM_TYPE_DOCUMENT:
+                        case Favorites.ITEM_TYPE_LINUX_APP:
                         case Favorites.ITEM_TYPE_DEEP_SHORTCUT:
                         case Favorites.ITEM_TYPE_FOLDER:
                         case Favorites.ITEM_TYPE_APP_PAIR:

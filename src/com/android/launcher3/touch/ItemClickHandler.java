@@ -79,6 +79,13 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import android.net.Uri;
+import java.io.File;
+import android.provider.DocumentsContract;
+import com.android.launcher3.util.FileUtils;
+import java.util.Map;
+import com.android.launcher3.keyboard.ViewGroupFocusHelper;
+
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -361,10 +368,59 @@ public class ItemClickHandler {
         startAppShortcutOrInfoActivity(v, shortcut, launcher);
     }
 
-    private static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher) {
+    public static void appOpenLinuxType(Launcher launcher,ItemInfo item){
+        Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+        String name = map.get("name").toString();
+        String exec = map.get("exec").toString();
+        launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###type###"+item.title.toString());
+   }
+
+    public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){
+         if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            launcher.gotoDocApp(FileUtils.COPY_DIR,item.title.toString());
+         }else{
+            launcher.gotoDocApp(FileUtils.COPY_FILE,item.title.toString());
+         }
+    }
+
+    public static void cutFiletoClipboard(Launcher launcher,ItemInfo item){
+        if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+           launcher.gotoDocApp(FileUtils.CUT_DIR,item.title.toString());
+        }else{
+           launcher.gotoDocApp(FileUtils.CUT_FILE,item.title.toString());
+        }
+   }
+
+   public static void renameFiletoClipboard(Launcher launcher,ItemInfo item){
+    if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
+    }else{
+       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
+    }
+    // launcher.bindWorkspace();  
+}
+
+    public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher) {
         TestLogging.recordEvent(
                 TestProtocol.SEQUENCE_MAIN, "start: startAppShortcutOrInfoActivity");
         Intent intent = item.getIntent();
+        Log.i(TAG, "bellaLauncher startAppShortcutOrInfoActivity: " + item);
+        if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            String title = item.title.toString() ;
+            launcher.gotoDocApp(FileUtils.OPEN_DIR,title);
+            return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
+            String  title = item.title.toString() ;
+            launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
+            return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
+        
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+            String name = map.get("name").toString();
+            String exec = map.get("exec").toString();
+            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open###"+item.title.toString());
+            return ;
+        }
         if (item instanceof ItemInfoWithIcon itemInfoWithIcon) {
             if ((itemInfoWithIcon.runtimeStatusFlags
                     & ItemInfoWithIcon.FLAG_INSTALL_SESSION_ACTIVE) != 0) {

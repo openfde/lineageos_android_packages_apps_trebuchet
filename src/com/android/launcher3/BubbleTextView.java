@@ -56,6 +56,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.widget.TextView;
+import com.android.launcher3.graphics.IconPalette;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -87,10 +88,15 @@ import com.android.launcher3.util.ShortcutUtil;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.IconLabelDotView;
-
+import com.android.launcher3.icons.BitmapInfo;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
+import com.android.launcher3.R;
+import com.android.launcher3.util.FileUtils;
+import android.util.Log;
 
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
@@ -123,6 +129,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private IntArray mBreakPointsIntArray;
     private CharSequence mLastOriginalText;
     private CharSequence mLastModifiedText;
+
+    private static final String TAG = "BubbleTextView";
 
     private static final Property<BubbleTextView, Float> DOT_SCALE_PROPERTY
             = new Property<BubbleTextView, Float>(Float.TYPE, "dotScale") {
@@ -256,7 +264,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             defaultIconSize = mDeviceProfile.iconSizePx;
         } else {
             // widget_selection or shortcut_popup
-            defaultIconSize = mDeviceProfile.iconSizePx;
+            defaultIconSize = mDeviceProfile.allAppsIconSizePx;//mDeviceProfile.iconSizePx;
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         }
 
@@ -427,6 +435,29 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             flags |= FLAG_SKIP_USER_BADGE;
         }
         FastBitmapDrawable iconDrawable = info.newIcon(getContext(), flags);
+        Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(),R.mipmap.icon_unkown);
+        if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.icon_dir);
+            iconDrawable = new FastBitmapDrawable(bitmap);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ){
+            String fileName = info.title.toString() ;
+            int resId =  R.mipmap.icon_doc;
+            String fileType = FileUtils.getFileTyle(fileName);
+            if(fileType !=null){
+                 if(fileType.contains("png") || fileType.contains("jpg")){
+                    resId =  R.mipmap.icon_pic;
+                 }else if(fileType.contains("txt") || fileType.contains("md") || fileType.contains("xml")  || fileType.contains("java")  || fileType.contains("htm") || fileType.contains("json")  ){
+                    resId =  R.mipmap.icon_doc;
+                 } else{
+                    resId =  R.mipmap.icon_unkown;
+                 } 
+            }else{
+                resId =  R.mipmap.icon_unkown;
+            }
+            Log.i(TAG,"bellaLauncher applyIconAndLabel  fileName: "+fileName + " ,fileType  "+fileType);
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
+            iconDrawable = new FastBitmapDrawable(bitmap);
+        }
         mDotParams.appColor = iconDrawable.getIconColor();
         mDotParams.dotColor = Themes.getAttrColor(getContext(), R.attr.notificationDotColor);
         setIcon(iconDrawable);

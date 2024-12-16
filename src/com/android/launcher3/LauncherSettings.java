@@ -138,6 +138,12 @@ public class LauncherSettings {
          */
         public static final int ITEM_TYPE_SEARCH_ACTION = 9;
 
+        public static final int ITEM_TYPE_DIRECTORY = 18;
+
+        public static final int ITEM_TYPE_DOCUMENT = 19;
+
+        public static final int ITEM_TYPE_LINUX_APP = 20;
+
         /**
          * The custom icon bitmap.
          * <P>Type: BLOB</P>

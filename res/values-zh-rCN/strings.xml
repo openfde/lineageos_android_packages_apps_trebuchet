@@ -192,4 +192,22 @@
     <string name="ps_add_button_label" msgid="8611055839242385935">"安装应用"</string>
     <string name="ps_add_button_content_description" msgid="3254274107740952556">"将应用安装到私密空间"</string>
     <string name="bubble_bar_overflow_description" msgid="7410995531938041192">"菜单"</string>
+    <string name="app_open_drop_target_label" >"打开"</string>
+    <string name="app_open_type" >"打开方式"</string>
+    <string name="remove_drop_target">"移除"</string>
+    <string name="copy_drop_target">"复制"</string>
+    <string name="cut_drop_target">"剪切"</string>
+    <string name="delete_drop_target">"删除"</string>
+    <string name="rename_drop_target">"重命名"</string>
+
+    <string name="desktop_icon_rearray">"自动排列"</string>
+    <string name="desktop_new_document">"新建文档"</string>
+    <string name="desktop_new_directory">"新建文件夹"</string>
+    <string name="desktop_new_paste">"粘贴"</string>
+    <string name="desktop_tips">"提示"</string>
+    <string name="desktop_delete_tips">"是否删除？"</string>
+    <string name="desktop_delete">"删除"</string>
+    <string name="desktop_cancel">"取消"</string>
+    <string name="desktop_ok">"确定"</string>
+    <string name="desktop_rename">"重命名"</string>
 </resources>

@@ -153,6 +153,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
      */
     private static final float ALLOW_DROP_TRANSITION_PROGRESS = 0.25f;
 
+    private static final String TAG = "CellLayout";
+
     /**
      * The value that {@link #mTransitionProgress} must be greater than for
      * {@link #isFinishedSwitchingState()} ()} to return true.
@@ -345,6 +347,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // We assume symmetrical padding in portrait mode.
             int maxInsets = Math.max(insets.left, insets.right);
             int maxPadding = Math.max(grid.edgeMarginPx, padding.left + 1);
+            Log.i(TAG, "bellaLauncher maxInsets=" + maxInsets + "  maxPadding=" + maxPadding);
             setPageSpacing(Math.max(maxInsets, maxPadding));
         }
 
@@ -786,6 +789,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         SparseArray<CellLayout> finalScreens = new SparseArray<>();
 
         int pageCount = mScreenOrder.size();
+        Log.i(TAG,"bellaLauncher convertFinalScreenToEmptyScreenIfNecessary panelCount: "+panelCount + ",pageCount: "+pageCount);
         // First we add the last page(s) to the finalScreens collection. The number of final pages
         // depends on the panel count.
         for (int pageIndex = pageCount - panelCount; pageIndex < pageCount; pageIndex++) {

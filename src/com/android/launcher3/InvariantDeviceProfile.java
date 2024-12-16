@@ -389,10 +389,27 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
 
     private void initGrid(Context context, Info displayInfo, DisplayOption displayOption,
             @DeviceType int deviceType) {
+  
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        // DisplayMetrics metrics = displayInfo.metrics;
         GridOption closestProfile = displayOption.grid;
-        numRows = closestProfile.numRows;
-        numColumns = closestProfile.numColumns;
+        try {
+                float density = metrics.density;
+                float iconSizeT =  displayOption.iconSizes[0];
+                float iconPixel = iconSizeT *  density;
+                int heightPixels = metrics.heightPixels;
+                int widthPixels = metrics.widthPixels;
+                numRows = (int) ((heightPixels *  0.5) / iconPixel);
+                numColumns = (int) ((widthPixels *  0.5) / iconPixel);    
+                Log.i(TAG, "bellaLauncher numRows=" + numRows + "  numColumns=" + numColumns + ",heightPixels: "+heightPixels+",widthPixels: "+widthPixels+",iconSizeT "+iconSizeT + ",iconPixel "+iconPixel);
+        } catch (Exception e) {
+                e.printStackTrace();
+                numRows =closestProfile.numRows;
+                numColumns = closestProfile.numColumns;
+                Log.e(TAG, "bellaLauncher numRows=" + numRows + "  numColumns=" + numColumns + " ,e "+e.toString());
+        }
+        // numRows = 8;//closestProfile.numRows;
+        // numColumns = 20;//closestProfile.numColumns;
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
         dbFile = closestProfile.dbFile;
         defaultLayoutId = closestProfile.defaultLayoutId;
@@ -464,6 +481,9 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
         transientTaskbarIconSize = displayOption.transientTaskbarIconSize;
 
         startAlignTaskbar = displayOption.startAlignTaskbar;
+
+        Log.i(TAG, "bellaLauncher maxIconSize=" + maxIconSize + "  allAppsIconSize=" + allAppsIconSize + ",allAppsCellSize: "+allAppsCellSize+",minCellSize: "+minCellSize);
+
 
         // If the partner customization apk contains any grid overrides, apply them
         // Supported overrides: numRows, numColumns, iconSize

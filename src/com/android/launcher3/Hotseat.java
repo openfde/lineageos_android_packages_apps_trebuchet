@@ -55,15 +55,17 @@ public class Hotseat extends CellLayout implements Insettable {
 
     public Hotseat(Context context) {
         this(context, null);
+        this.setVisibility(View.GONE);
     }
 
     public Hotseat(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        this.setVisibility(View.GONE);
     }
 
     public Hotseat(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
+        this.setVisibility(View.GONE);
         mQsb = LayoutInflater.from(context).inflate(R.layout.search_container_hotseat, this, false);
         addView(mQsb);
     }
@@ -179,30 +181,30 @@ public class Hotseat extends CellLayout implements Insettable {
 
     @Override
     public void setInsets(Rect insets) {
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        DeviceProfile grid = mActivity.getDeviceProfile();
+        // FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+        // DeviceProfile grid = mActivity.getDeviceProfile();
 
-        if (grid.isVerticalBarLayout()) {
-            mQsb.setVisibility(View.GONE);
-            lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            if (grid.isSeascape()) {
-                lp.gravity = Gravity.LEFT;
-                lp.width = grid.hotseatBarSizePx + insets.left;
-            } else {
-                lp.gravity = Gravity.RIGHT;
-                lp.width = grid.hotseatBarSizePx + insets.right;
-            }
-        } else {
-            mQsb.setVisibility(View.VISIBLE);
-            lp.gravity = Gravity.BOTTOM;
-            lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
-            lp.height = grid.hotseatBarSizePx;
-        }
+        // if (grid.isVerticalBarLayout()) {
+        //     mQsb.setVisibility(View.GONE);
+        //     lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        //     if (grid.isSeascape()) {
+        //         lp.gravity = Gravity.LEFT;
+        //         lp.width = grid.hotseatBarSizePx + insets.left;
+        //     } else {
+        //         lp.gravity = Gravity.RIGHT;
+        //         lp.width = grid.hotseatBarSizePx + insets.right;
+        //     }
+        // } else {
+        //     mQsb.setVisibility(View.VISIBLE);
+        //     lp.gravity = Gravity.BOTTOM;
+        //     lp.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        //     lp.height = grid.hotseatBarSizePx;
+        // }
 
-        Rect padding = grid.getHotseatLayoutPadding(getContext());
-        setPadding(padding.left, padding.top, padding.right, padding.bottom);
-        setLayoutParams(lp);
-        InsettableFrameLayout.dispatchInsets(this, insets);
+        // Rect padding = grid.getHotseatLayoutPadding(getContext());
+        // setPadding(padding.left, padding.top, padding.right, padding.bottom);
+        // setLayoutParams(lp);
+        // InsettableFrameLayout.dispatchInsets(this, insets);
     }
 
     public void setWorkspace(Workspace<?> w) {
@@ -215,26 +217,26 @@ public class Hotseat extends CellLayout implements Insettable {
         // We allow horizontal workspace scrolling from within the Hotseat. We do this by delegating
         // touch intercept the Workspace, and if it intercepts, delegating touch to the Workspace
         // for the remainder of the this input stream.
-        int yThreshold = getMeasuredHeight() - getPaddingBottom();
-        if (mWorkspace != null && ev.getY() <= yThreshold) {
-            mSendTouchToWorkspace = mWorkspace.onInterceptTouchEvent(ev);
-            return mSendTouchToWorkspace;
-        }
+        // int yThreshold = getMeasuredHeight() - getPaddingBottom();
+        // if (mWorkspace != null && ev.getY() <= yThreshold) {
+        //     mSendTouchToWorkspace = mWorkspace.onInterceptTouchEvent(ev);
+        //     return mSendTouchToWorkspace;
+        // }
         return false;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // See comment in #onInterceptTouchEvent
-        if (mSendTouchToWorkspace) {
-            final int action = event.getAction();
-            switch (action & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    mSendTouchToWorkspace = false;
-            }
-            return mWorkspace.onTouchEvent(event);
-        }
+        // if (mSendTouchToWorkspace) {
+        //     final int action = event.getAction();
+        //     switch (action & MotionEvent.ACTION_MASK) {
+        //         case MotionEvent.ACTION_UP:
+        //         case MotionEvent.ACTION_CANCEL:
+        //             mSendTouchToWorkspace = false;
+        //     }
+        //     return mWorkspace.onTouchEvent(event);
+        // }
         // Always let touch follow through to Workspace.
         return false;
     }

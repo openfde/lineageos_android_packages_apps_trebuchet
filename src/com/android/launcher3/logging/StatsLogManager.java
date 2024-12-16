@@ -158,6 +158,17 @@ public class StatsLogManager implements ResourceBasedOverride {
         @UiEvent(doc = "User tapped or long pressed on settings icon inside launcher settings.")
         LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS(463),
 
+        @UiEvent(doc = "User rearray icon.(rearray).")
+        LAUNCHER_DESKTOP_ICON_TAP_REARRAY(1368),
+
+        @UiEvent(doc = "User new dir")
+        LAUNCHER_DESKTOP_ICON_TAP_NEW_DIR(1369),
+
+        @UiEvent(doc = "User new doc")
+        LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC(1370),
+
+        @UiEvent(doc = "User new paste")
+        LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE(1371),
         @UiEvent(doc = "User tapped or long pressed on widget tray icon inside launcher settings.")
         LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS(464),
 
@@ -780,8 +791,7 @@ public class StatsLogManager implements ResourceBasedOverride {
         LAUNCHER_LATENCY_STARTUP_VIEW_INFLATION(1364),
 
         @UiEvent(doc = "The duration of asynchronous loading workspace")
-        LAUNCHER_LATENCY_STARTUP_WORKSPACE_LOADER_ASYNC(1367),
-        ;
+        LAUNCHER_LATENCY_STARTUP_WORKSPACE_LOADER_ASYNC(1367);
 
         private final int mId;
 
