@@ -231,6 +231,7 @@ public class ModelWriter {
      */
     public void addItemToDatabase(final ItemInfo item,
             int container, int screenId, int cellX, int cellY) {
+        Log.i(TAG,"bella_insert addItemToDatabase item "+item);
         updateItemInfoProps(item, container, screenId, cellX, cellY);
 
         final ContentResolver cr = mContext.getContentResolver();

@@ -19,6 +19,7 @@ import static com.android.launcher3.Utilities.EXTRA_WALLPAPER_FLAVOR;
 import static com.android.launcher3.Utilities.EXTRA_WALLPAPER_OFFSET;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.IGNORE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_REARRAY;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_REFRESH;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_DIR;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE;
@@ -210,7 +211,17 @@ public class OptionsPopupView extends ArrowPopup
                 LAUNCHER_DESKTOP_ICON_TAP_REARRAY,
                 OptionsPopupView::startRearray));
 
+        // options.add(new OptionItem(R.string.desktop_icon_refresh, R.drawable.ic_apps,
+        //         LAUNCHER_DESKTOP_ICON_TAP_REFRESH,
+        //         OptionsPopupView::startRefresh));        
+
         show(launcher, target, options);
+    }
+
+    public static boolean startRefresh(View view) {
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        launcher.refresh();
+        return true;
     }
 
     public static boolean startRearray(View view) {
