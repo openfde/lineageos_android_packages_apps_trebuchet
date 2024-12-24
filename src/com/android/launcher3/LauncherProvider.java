@@ -230,6 +230,9 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
+        String packageName = FileUtils.getPackageNameByAppName(getContext(),initialValues.get("title").toString());
+        initialValues.put("packageName",packageName);
+        
         FileUtils.createLinuxDesktopFile(initialValues);
     
         createDbIfNotExists();

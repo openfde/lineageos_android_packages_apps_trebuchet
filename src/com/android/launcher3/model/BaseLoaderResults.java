@@ -225,9 +225,10 @@ public abstract class BaseLoaderResults {
 
             for(ItemInfo item : filteredList){
                 if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
-                    // Log.i(TAG, "Launcher_workspaceItems  ----------------  item "+ item);
                     ContentValues initialValues = new ContentValues();
                     initialValues.put("title",item.title.toString());
+                    String packageName = FileUtils.getPackageNameByAppName(mApp.getContext(),item.title.toString());
+                    initialValues.put("packageName",packageName);
                     initialValues.put("itemType",item.itemType);
                     FileUtils.createLinuxDesktopFile(initialValues);
                 }

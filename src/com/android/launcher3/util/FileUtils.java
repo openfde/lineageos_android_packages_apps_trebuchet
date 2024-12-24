@@ -99,7 +99,7 @@ public class FileUtils {
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
 
-    public static boolean isOpenLinuxApp = false ;
+    public static boolean isOpenLinuxApp = true ;
 
 public static void createDesktopDir(String path){
         File file = new File(path);
@@ -316,17 +316,34 @@ public static Point findNextFreePoint(Context context){
         return result;
     }
 
+    public static String getPackageNameByAppName(Context context, String appName) {
+        PackageManager packageManager = context.getPackageManager();
+        List<ApplicationInfo> apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        for (ApplicationInfo app : apps) {
+            String appLabel = (String) packageManager.getApplicationLabel(app);  // 获取应用的显示名称
+            if (appLabel != null && appLabel.equalsIgnoreCase(appName)) {
+                return app.packageName;  
+            }
+        }
+        return null;  
+    }
 
     public static void createLinuxDesktopFile(ContentValues initialValues){
         // desktop linux app temp delete 
-        if(!isOpenLinuxApp){
-            return ;
-        }
+        // if(!isOpenLinuxApp){
+        //     return ;
+        // }
+        // Log.i(TAG,"bella...insert....2......... "+initialValues.toString());
         createDesktopDir(PATH_ID_DESKTOP);
         if(initialValues !=null){
-            Log.i(TAG,"bella...insert....3......... "+initialValues.toString());
             try{
                 String title  = initialValues.get("title").toString();
+                if(initialValues.get("packageName") == null){
+                    Log.e(TAG,"bella packageName is null  ");
+                    return ;
+                }
+                String packageName  = initialValues.get("packageName").toString();
                 int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
     
                 if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
@@ -338,21 +355,24 @@ public static Point findNextFreePoint(Context context){
                 if(!ff.exists()){
                     documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/Desktop/";  
                 }
-                String pathDesktop = documentId+title+"_fde.desktop";
+      
+                String pathDesktop = documentId+""+ packageName+"_fde.desktop";
                 File file = new File(pathDesktop);
                 if(file.exists()){
                     Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
                     return ;
                 }
                 Path desktopFilePath = Paths.get(pathDesktop);
-                String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.openfde/pic/"+title+".png";
+
+                String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/applications/"+title+".png" ;
                 File filePic = new File(picPath);
-                if(!filePic.exists()){
-                    Log.i(TAG,"bella...insert.............picPath: "+picPath);
+                String linuxPath = "/home/openfde/.local/share/"+"applications/"+title+".png";
+                File linuxPic = new File(linuxPath);
+                if(!linuxPic.exists()){
+                    Log.i(TAG,"bella...insert.............picPath: "+picPath +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
                 }else{
                     //if pic exists ,return 
                 }    
-    
     
                 List<String> lines = List.of(
                     "[Desktop Entry]",
@@ -360,8 +380,8 @@ public static Point findNextFreePoint(Context context){
                     "Name="+title,
                     "Name[zh_CN]="+title,
                     "Categories="+itemType,
-                    "Exec=/usr/bin/fde_utils start",
-                    "Icon="+picPath
+                    "Exec=fde_launch "+packageName,
+                    "Icon="+linuxPic
                 );
          
                 // 写入.desktop文件
