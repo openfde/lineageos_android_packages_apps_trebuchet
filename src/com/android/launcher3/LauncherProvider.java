@@ -345,7 +345,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.i(TAG,"bella....delete............. "+selection);
+        Log.i(TAG,"bella....delete............. "+selection + ",uri "+uri);
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
 

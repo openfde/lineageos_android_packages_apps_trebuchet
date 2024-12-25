@@ -237,6 +237,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import com.android.launcher3.model.data.MessageEvent;
 /**
  * Default launcher application.
  */
@@ -397,7 +400,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     protected void onCreate(Bundle savedInstanceState) {
 
         FileUtils.setSystemProperty("launcher_time",System.currentTimeMillis()+"");
- 
+        EventBus.getDefault().register(this);
 
         //close animator_duration_scale
         // Settings.Global.putFloat(getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 0);
@@ -421,6 +424,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/"); 
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/pic/"); 
+        FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.local/share/icons/"); 
 
         bindService();
 
@@ -1347,7 +1351,6 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 mWorkspace.onNoCellFound(layout);
                 return;
             }
-
             getModelWriter().addItemToDatabase(info, container, screenId, cellXY[0], cellXY[1]);
             mWorkspace.addInScreen(view, info);
         } else {
@@ -1632,8 +1635,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     @Override
     public void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
         ACTIVITY_TRACKER.onActivityDestroyed(this);
-
         unregisterReceiver(mScreenOffReceiver);
         mWorkspace.removeFolderListeners();
         PluginManagerWrapper.INSTANCE.get(this).removePluginListener(this);
@@ -3157,10 +3160,6 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
        
     }
 
-    public void selectOpenType(String method,String title){
-        gotoDocApp(method,title);
-    }
-
     public boolean isShowPasteDlg(){
         // OptionsPopupView.requestFocus();
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -3179,6 +3178,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             }
         }
        return false ;
+    }
+
+    @Subscribe
+    public void onMessageEvent(MessageEvent event) {
+        String method = event.getMethod();
+        String message = event.getMessage() ;
+        Log.i(TAG," onMessageEvent message "+message + ",method "+method);
+        gotoDocApp(method,message);
     }
 
 }

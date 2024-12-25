@@ -410,6 +410,7 @@ public class HotseatPredictionController implements DragController.DragListener,
             return;
         }
         WorkspaceItemInfo workspaceItemInfo = new WorkspaceItemInfo((WorkspaceItemInfo) info);
+        Log.i(TAG,"bella...pinPrediction  "+info);
         mLauncher.getModelWriter().addItemToDatabase(workspaceItemInfo,
                 LauncherSettings.Favorites.CONTAINER_HOTSEAT, workspaceItemInfo.screenId,
                 workspaceItemInfo.cellX, workspaceItemInfo.cellY);

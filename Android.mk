@@ -28,6 +28,11 @@ LOCAL_UNINSTALLABLE_MODULE := true
 LOCAL_SDK_VERSION := 27
 include $(BUILD_PREBUILT)
 
+
+LOCAL_MODULE := eventbus
+LOCAL_SRC_FILES := libs/eventbus.jar
+
+
 #
 # Build rule for Launcher3 dependencies lib.
 #
@@ -45,6 +50,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     LauncherPluginLib \
     launcher_log_protos_lite \
+	eventbus \
     libGoogleFeed
 
 LOCAL_SRC_FILES := \

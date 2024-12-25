@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+
 android_library {
     name: "launcher-aosp-tapl",
     static_libs: [
@@ -20,6 +22,7 @@ android_library {
         "androidx.test.rules",
         "androidx.test.uiautomator_uiautomator",
         "SystemUISharedLib",
+		"eventbus"
     ],
     srcs: [
         "tests/tapl/**/*.java",

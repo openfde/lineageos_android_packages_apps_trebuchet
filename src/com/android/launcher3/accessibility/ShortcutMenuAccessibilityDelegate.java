@@ -32,7 +32,7 @@ import com.android.launcher3.notification.NotificationMainView;
 import com.android.launcher3.shortcuts.DeepShortcutView;
 
 import java.util.ArrayList;
-
+import android.util.Log;
 /**
  * Extension of {@link LauncherAccessibilityDelegate} with actions specific to shortcuts in
  * deep shortcuts menu.
@@ -70,6 +70,7 @@ public class ShortcutMenuAccessibilityDelegate extends LauncherAccessibilityDele
             Runnable onComplete = new Runnable() {
                 @Override
                 public void run() {
+                    Log.i("TAG","bella...performAction "+info);
                     mLauncher.getModelWriter().addItemToDatabase(info,
                             LauncherSettings.Favorites.CONTAINER_DESKTOP,
                             screenId, coordinates[0], coordinates[1]);
