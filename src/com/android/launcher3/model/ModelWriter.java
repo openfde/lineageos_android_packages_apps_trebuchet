@@ -274,6 +274,7 @@ public class ModelWriter {
      * Removes the specified items from the database
      */
     public void deleteItemsFromDatabase(final Collection<? extends ItemInfo> items) {
+        Log.i(TAG,"bella_delete deleteItemsFromDatabase item "+items);
         ModelVerifier verifier = new ModelVerifier();
         FileLog.d(TAG, "removing items from db " + items.stream().map(
                 (item) -> item.getTargetComponent() == null ? ""

@@ -231,12 +231,6 @@ public class LauncherProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         Log.i(TAG,"bella_insert initialValues "+initialValues);
-        String packageName = FileUtils.getPackageNameByAppName(getContext(),initialValues.get("title").toString());
-        Log.i(TAG,"bella_insert packageName "+packageName);
-        if(packageName != null){
-            initialValues.put("packageName",packageName);
-            FileUtils.createLinuxDesktopFile(initialValues);
-        }
 
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri);
@@ -254,6 +248,13 @@ public class LauncherProvider extends ContentProvider {
         onAddOrDeleteOp(db);
         uri = ContentUris.withAppendedId(uri, rowId);
         reloadLauncherIfExternal();
+
+        String packageName = FileUtils.getPackageNameByAppName(getContext(),initialValues.get("title").toString());
+        Log.i(TAG,"bella_insert packageName "+packageName);
+        if(packageName != null){
+            initialValues.put("packageName",packageName);
+            FileUtils.createLinuxDesktopFile(initialValues);
+        }
         return uri;
     }
 

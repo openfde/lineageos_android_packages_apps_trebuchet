@@ -321,7 +321,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
                 if(strTitle.contains(".desktop")){
                  Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(strTitle);
                  if(FileUtils.isChineseLanguage(getContext())){
-                     strTitle = map.get("nameZh").toString();
+                    if(map.get("nameZh") !=null){
+                        strTitle = map.get("nameZh").toString();
+                    }else{
+                        strTitle = "unknow";
+                    }
                   }else{
                      strTitle = map.get("name").toString();
                   }

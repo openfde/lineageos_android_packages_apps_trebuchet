@@ -454,17 +454,21 @@ public static Point findNextFreePoint(Context context){
         Map<String,Object> map = null;
         try{
             map = new HashMap<>();
-            String name = mp.get("Name").toString();
-            String exec = mp.get("Exec").toString();
-            String icon = mp.get("Icon").toString();
-            map.put("name",name);
-            map.put("exec",exec);
-            map.put("icon",icon);
-         
+            if(mp.get("Name") !=null){
+                map.put("name",mp.get("Name").toString());
+            }
+            
+            if(mp.get("Exec") !=null){
+                map.put("exec",mp.get("Exec").toString());
+            }
+            if(mp.get("Icon") !=null){
+                map.put("icon",mp.get("Icon").toString());
+            }
+                     
             if(mp.get("Name[zh_CN]") != null ){
                 map.put("nameZh",mp.get("Name[zh_CN]").toString());
             }else{
-                map.put("nameZh",name); 
+                map.put("nameZh",mp.get("Name").toString()); 
             }
         }catch(Exception e){
             e.printStackTrace();

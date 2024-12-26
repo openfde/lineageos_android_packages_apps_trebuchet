@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import android.util.Log;
 
 public final class IconPackSettingsFragment extends RadioSettingsFragment {
     private static final IntentFilter PKG_UPDATE_INTENT = new IntentFilter();
@@ -52,6 +53,7 @@ public final class IconPackSettingsFragment extends RadioSettingsFragment {
     private BroadcastReceiver broadCastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("TAG", "bella IconPackSettingsFragment Changes to Wellbeing package: intent = [" + intent + "]");
             reloadPreferences();
         }
     };

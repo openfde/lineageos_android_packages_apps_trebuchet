@@ -3184,7 +3184,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     public void onMessageEvent(MessageEvent event) {
         String method = event.getMethod();
         String message = event.getMessage() ;
-        Log.i(TAG," onMessageEvent message "+message + ",method "+method);
+        Log.i(TAG,"1 onMessageEvent message "+message + ",method "+method);
         gotoDocApp(method,message);
     }
 
