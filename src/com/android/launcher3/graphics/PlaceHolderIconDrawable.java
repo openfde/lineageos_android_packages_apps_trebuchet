@@ -41,8 +41,9 @@ public class PlaceHolderIconDrawable extends FastBitmapDrawable {
         super(info);
 
         mProgressPath = getShapePath();
-        mPaint.setColor(compositeColors(
-                Themes.getAttrColor(context, R.attr.loadingIconColor), info.color));
+        // mPaint.setColor(compositeColors(
+        //         Themes.getAttrColor(context, R.attr.loadingIconColor), info.color));
+        mPaint.setColor(R.color.red);
     }
 
     @Override

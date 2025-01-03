@@ -240,6 +240,10 @@ import android.widget.LinearLayout;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import com.android.launcher3.model.data.MessageEvent;
+import android.content.ContentValues;
+import android.os.Looper;
+
+
 /**
  * Default launcher application.
  */
@@ -2490,6 +2494,33 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             }
         }
         workspace.requestLayout();
+
+        for(ItemInfo item : items){
+            if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
+                String packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
+                gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
+            }
+        }
+
+        Handler handler = new Handler(Looper.getMainLooper());
+            handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                for(ItemInfo item : items){
+                    if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
+                        ContentValues initialValues = new ContentValues();
+                        initialValues.put("title",item.title.toString());
+                        String packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
+                        initialValues.put("packageName",packageName);
+                        initialValues.put("itemType",item.itemType);
+                        FileUtils.createLinuxDesktopFile(initialValues);
+                    }
+                }
+            }
+        }, 10* 1000);
+
+       
+
     }
 
     public  ItemInfo findNextCoordinate(ItemInfo item) {
@@ -3090,7 +3121,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         public void onServiceConnected(ComponentName name, IBinder service) {
             // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
             idocAidl = IDocAidlInterface.Stub.asInterface(service);
-            gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
+            // gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
             gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
             addDesktopFiles();
                    

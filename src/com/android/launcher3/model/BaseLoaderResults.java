@@ -223,16 +223,16 @@ public abstract class BaseLoaderResults {
             .collect(Collectors.toList());
             Log.i(TAG, "Launcher_workspaceItems  mWorkspaceItems "+ mWorkspaceItems.size()  + " ,otherWorkspaceItems  "+otherWorkspaceItems );
 
-            for(ItemInfo item : filteredList){
-                if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
-                    ContentValues initialValues = new ContentValues();
-                    initialValues.put("title",item.title.toString());
-                    String packageName = FileUtils.getPackageNameByAppName(mApp.getContext(),item.title.toString());
-                    initialValues.put("packageName",packageName);
-                    initialValues.put("itemType",item.itemType);
-                    FileUtils.createLinuxDesktopFile(initialValues);
-                }
-            }
+            // for(ItemInfo item : filteredList){
+            //     if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
+            //         ContentValues initialValues = new ContentValues();
+            //         initialValues.put("title",item.title.toString());
+            //         String packageName = FileUtils.getPackageNameByAppName(mApp.getContext(),item.title.toString());
+            //         initialValues.put("packageName",packageName);
+            //         initialValues.put("itemType",item.itemType);
+            //         FileUtils.createLinuxDesktopFile(initialValues);
+            //     }
+            // }
 
             currentWorkspaceItems.clear();
             currentWorkspaceItems.addAll(filteredList);
