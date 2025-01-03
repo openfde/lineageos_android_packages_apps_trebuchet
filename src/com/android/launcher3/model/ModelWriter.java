@@ -231,6 +231,7 @@ public class ModelWriter {
      */
     public void addItemToDatabase(final ItemInfo item,
             int container, int screenId, int cellX, int cellY) {
+        Log.i(TAG,"bella_insert addItemToDatabase item "+item);
         updateItemInfoProps(item, container, screenId, cellX, cellY);
 
         final ContentResolver cr = mContext.getContentResolver();
@@ -273,6 +274,7 @@ public class ModelWriter {
      * Removes the specified items from the database
      */
     public void deleteItemsFromDatabase(final Collection<? extends ItemInfo> items) {
+        Log.i(TAG,"bella_delete deleteItemsFromDatabase item "+items);
         ModelVerifier verifier = new ModelVerifier();
         FileLog.d(TAG, "removing items from db " + items.stream().map(
                 (item) -> item.getTargetComponent() == null ? ""

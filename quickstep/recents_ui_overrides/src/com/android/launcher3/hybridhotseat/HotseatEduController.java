@@ -41,7 +41,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-
+import android.util.Log;
 /**
  * Controller class for managing user onboaridng flow for hybrid hotseat
  */
@@ -113,6 +113,7 @@ public class HotseatEduController {
         if (!putIntoFolder.isEmpty()) {
             ItemInfo firstItem = putIntoFolder.get(0);
             FolderInfo folderInfo = new FolderInfo();
+            Log.i("TAG","bella...migrateToFolder  "+folderInfo);
             mLauncher.getModelWriter().addItemToDatabase(folderInfo, firstItem.container,
                     firstItem.screenId, firstItem.cellX, firstItem.cellY);
             folderInfo.setTitle("", mLauncher.getModelWriter());

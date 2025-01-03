@@ -205,6 +205,7 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
     @Override
     public void onShortcutsChanged(String packageName, List<ShortcutInfo> shortcuts,
             UserHandle user) {
+         Log.i(TAG, "bella onShortcutsChanged..................packageName "+packageName);
         enqueueModelUpdateTask(new ShortcutsChangedTask(packageName, shortcuts, user, true));
     }
 

@@ -72,6 +72,8 @@ import android.provider.DocumentsContract;
 import com.android.launcher3.util.FileUtils;
 import java.util.Map;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
+import org.greenrobot.eventbus.EventBus;
+import com.android.launcher3.model.data.MessageEvent;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -288,11 +290,19 @@ public class ItemClickHandler {
         startAppShortcutOrInfoActivity(v, shortcut, launcher, sourceContainer);
     }
 
-    public static void appOpenLinuxType(Launcher launcher,ItemInfo item){
+    public static void appOpenLinuxType(Launcher launcher,ItemInfo item,String type ){
+       try{
         Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
         String name = map.get("name").toString();
         String exec = map.get("exec").toString();
-        launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###type###"+item.title.toString());
+        if(name.equals("OpenFDE")){
+            Toast.makeText(launcher, "OpenFde is open.", Toast.LENGTH_SHORT).show();
+            return ;
+        }
+        EventBus.getDefault().post(new MessageEvent(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###"+type+"###"+item.title.toString()));
+       }catch(Exception e){
+            e.printStackTrace();
+       }
    }
 
     public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){
@@ -330,14 +340,6 @@ public class ItemClickHandler {
             intent = promiseAppInfo.getMarketIntent(launcher);
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
             String title = item.title.toString() ;
-            // String path = "%2fDesktop%2f"+title +"%2f";
-            // String uriPath = "content://com.android.externalstorage.documents/document/primary:" + path;
-            // Uri uri = Uri.parse(uriPath);
-            // Log.i(TAG,"bella Launcher uriPath "+uriPath + " , path "+path);
-            // intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            // intent.addCategory(Intent.CATEGORY_OPENABLE);
-            // intent.setType("*/*");
-            // intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
             launcher.gotoDocApp(FileUtils.OPEN_DIR,title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
@@ -346,21 +348,7 @@ public class ItemClickHandler {
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
             Log.i(TAG, "ITEM_TYPE_LINUX_APP: " + item);
-            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
-            String name = map.get("name").toString();
-            String exec = map.get("exec").toString();
-           // launcher.gotoDocApp(FileUtils.OPEN_LINUX_APP,name+"###"+exec);
-            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open###"+item.title.toString());
-            
-            // Intent inte = new Intent();
-            // ComponentName componentName = new ComponentName("com.termux.x11", "com.termux.x11.AppListActivity");
-            // inte.setComponent(componentName);
-            // inte.putExtra("App", name);
-            // inte.putExtra("Path", exec);
-            // inte.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            // launcher.startActivity(inte);
-
-            
+            appOpenLinuxType(launcher,item,"open");
             return ;
         }else {
             intent = item.getIntent();

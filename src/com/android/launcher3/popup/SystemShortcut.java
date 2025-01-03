@@ -212,7 +212,7 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
         @Override
         public void onClick(View view) {
            dismissTaskMenuView(mTarget);
-           ItemClickHandler.appOpenLinuxType( Launcher.getLauncher(view.getContext()),mItemInfo);
+           ItemClickHandler.appOpenLinuxType( Launcher.getLauncher(view.getContext()),mItemInfo,"type");
         }
     }
 

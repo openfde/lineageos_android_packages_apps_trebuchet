@@ -160,8 +160,8 @@ public final class WellbeingModel {
     }
 
     protected void onWellbeingProviderChanged(Intent intent) {
-        if (DEBUG || mIsInTest) {
-            Log.d(TAG, "Changes to Wellbeing package: intent = [" + intent + "]");
+        if (true) {
+            Log.d(TAG, "bella Changes to Wellbeing package: intent = [" + intent + "]");
         }
         restartObserver();
     }

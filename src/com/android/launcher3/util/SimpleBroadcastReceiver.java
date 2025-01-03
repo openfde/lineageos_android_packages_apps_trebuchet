@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import java.util.function.Consumer;
-
+import android.util.Log;
 public class SimpleBroadcastReceiver extends BroadcastReceiver {
 
     private final Consumer<Intent> mIntentConsumer;
@@ -32,6 +32,7 @@ public class SimpleBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("TAG", "bella SimpleBroadcastReceiver Changes to Wellbeing package: intent = [" + intent + "]");
         mIntentConsumer.accept(intent);
     }
 

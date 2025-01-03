@@ -230,8 +230,8 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        FileUtils.createLinuxDesktopFile(initialValues);
-    
+        Log.i(TAG,"bella_insert initialValues "+initialValues);
+
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri);
 
@@ -241,15 +241,20 @@ public class LauncherProvider extends ContentProvider {
                 return null;
             }
         }
-
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         addModifiedTime(initialValues);
         final int rowId = dbInsertAndCheck(mOpenHelper, db, args.table, null, initialValues);
         if (rowId < 0) return null;
         onAddOrDeleteOp(db);
-
         uri = ContentUris.withAppendedId(uri, rowId);
         reloadLauncherIfExternal();
+
+        String packageName = FileUtils.getPackageNameByAppName(getContext(),initialValues.get("title").toString());
+        Log.i(TAG,"bella_insert packageName "+packageName);
+        if(packageName != null){
+            initialValues.put("packageName",packageName);
+            FileUtils.createLinuxDesktopFile(initialValues);
+        }
         return uri;
     }
 
@@ -341,7 +346,7 @@ public class LauncherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.i(TAG,"bella....delete............. "+selection);
+        Log.i(TAG,"bella....delete............. "+selection + ",uri "+uri);
         createDbIfNotExists();
         SqlArguments args = new SqlArguments(uri, selection, selectionArgs);
 

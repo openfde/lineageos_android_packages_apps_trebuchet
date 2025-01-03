@@ -41,7 +41,10 @@ import com.android.launcher3.util.PackageManagerHelper;
 import java.util.ArrayList;
 import java.util.List;
 import android.util.Log;
-
+import com.android.launcher3.Launcher;
+import com.android.launcher3.util.FileUtils;
+import org.greenrobot.eventbus.EventBus;
+import com.android.launcher3.model.data.MessageEvent;
 /**
  * Task to add auto-created workspace items.
  */
@@ -161,6 +164,13 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                                 ((WorkspaceItemInfo) itemInfo).usingLowResIcon());
                     }
                 }
+
+                if(itemInfo.getTargetComponent() != null  && itemInfo.getTargetComponent().getPackageName() !=null){
+                    EventBus.getDefault().post(new MessageEvent(FileUtils.OP_CREATE_ANDROID_ICON,itemInfo.getTargetComponent().getPackageName()));
+                }else{
+                    Log.i(TAG,"AddWorkspaceItemsTask itemInfo "+itemInfo);
+                }
+                
 
                 // Add the shortcut to the db
                 getModelWriter().addItemToDatabase(itemInfo,

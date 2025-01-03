@@ -46,6 +46,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
+import android.graphics.drawable.BitmapDrawable;
 
 public class FastBitmapDrawable extends Drawable {
 
@@ -322,6 +323,7 @@ public class FastBitmapDrawable extends Drawable {
      */
     public static FastBitmapDrawable newIcon(Context context, ItemInfoWithIcon info) {
         FastBitmapDrawable drawable = newIcon(context, info.bitmap);
+       
         if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_dir);
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
@@ -397,14 +399,22 @@ public class FastBitmapDrawable extends Drawable {
                         bitmap = BitmapFactory.decodeFile(icon);
                         Log.e("bella","FastBitmapDrawable   : "+absolutePath+ "  file not exists: ");
                     }
+
                 
                 }
-                
+
             }
            
-    
-            BitmapInfo bitmapInfo = new BitmapInfo(bitmap,0);
-            drawable = newIcon(context, bitmapInfo);
+            // Bitmap bitmapT = FileUtils.addTextWatermark(bitmap, "Linux");   
+            // BitmapInfo bitmapInfo = new BitmapInfo(bitmapT,0);
+            // drawable = newIcon(context, bitmapInfo);
+            // Bitmap bitmap = FileUtils.drawableToBitmap(drawable);
+            bitmap  = FileUtils.scaleBitmap(bitmap,42,42);
+            Bitmap b2 = FileUtils.vectorToBitmap(context, R.mipmap.bg_linux);
+            b2  = FileUtils.scaleBitmap(b2,80,80);
+            Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);  
+            BitmapInfo bi = new BitmapInfo(b,0);
+            drawable = newIcon(context, bi);
         }
 
         // FastBitmapDrawable drawable = newIcon(context, info.bitmap);

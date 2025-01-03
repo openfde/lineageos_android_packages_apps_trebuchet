@@ -335,7 +335,10 @@ public class StatsLogManager implements ResourceBasedOverride {
         LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC(654),
 
         @UiEvent(doc = "User new paste")
-        LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE(655);
+        LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE(655),
+
+        @UiEvent(doc = "User refresh icon.(refresh).")
+        LAUNCHER_DESKTOP_ICON_TAP_REFRESH(656);
 
         
 
