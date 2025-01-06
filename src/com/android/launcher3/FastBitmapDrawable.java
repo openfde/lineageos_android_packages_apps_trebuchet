@@ -354,7 +354,7 @@ public class FastBitmapDrawable extends Drawable {
             if(map !=null && map.get("icon") !=null){
                 String icon = map.get("icon").toString();
                 String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID() + icon ;
-
+                Log.i("bella","1 FastBitmapDrawable  newIcon  icon : "+icon  + " , absoluteIcon "+absoluteIcon);
                 File file = new File(absoluteIcon);
 
                 if(file.exists() &&  !icon.contains(".svg") ){
@@ -369,7 +369,9 @@ public class FastBitmapDrawable extends Drawable {
                     if(icon.contains(".svg")){
                         File tempFile = new File(absoluteIcon);
                         if(tempFile.exists()){
-                            fileName = tempFile.getName().replace(".svg",".png");
+                              fileName = tempFile.getName();
+                        //    fileName = tempFile.getName().replace(".svg",".png");
+                            // bitmap = FileUtils.svgToBitmap(context,absoluteIcon);
                         }else{
                             fileName = icon.replace(".svg",".png");
                         }
@@ -389,7 +391,12 @@ public class FastBitmapDrawable extends Drawable {
                         Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
                         File fi = new File(absolutePath);
                         if(fi.exists()){
-                            bitmap = BitmapFactory.decodeFile(absolutePath);
+                            if(absolutePath.contains("svg")){
+                                Log.i("bella","2 FastBitmapDrawable    absolutePath : "+absolutePath);
+                                bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(context,absolutePath));
+                            }else{
+                                bitmap = BitmapFactory.decodeFile(absolutePath);
+                            }
                         }else{
                             bitmap = BitmapFactory.decodeFile(icon);
                             Log.e("bella","FastBitmapDrawable "+absolutePath+"  is not exist  newIcon_no : file not exists: "  );   
@@ -409,12 +416,24 @@ public class FastBitmapDrawable extends Drawable {
             // BitmapInfo bitmapInfo = new BitmapInfo(bitmapT,0);
             // drawable = newIcon(context, bitmapInfo);
             // Bitmap bitmap = FileUtils.drawableToBitmap(drawable);
-            bitmap  = FileUtils.scaleBitmap(bitmap,42,42);
+            // bitmap  = FileUtils.scaleBitmap(bitmap,42,42);
             Bitmap b2 = FileUtils.vectorToBitmap(context, R.mipmap.bg_linux);
             b2  = FileUtils.scaleBitmap(b2,80,80);
-            Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);  
-            BitmapInfo bi = new BitmapInfo(b,0);
-            drawable = newIcon(context, bi);
+            // Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);  
+            // BitmapInfo bi = new BitmapInfo(b,0);
+            // drawable = newIcon(context, bi);
+
+
+            if(bitmap != null ){
+                bitmap  = FileUtils.scaleBitmap(bitmap,42,42);
+                Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);
+                BitmapInfo bi = new BitmapInfo(b,0);
+                drawable = newIcon(context, bi);
+            }else{
+                bitmap  = b2;
+                BitmapInfo bi = new BitmapInfo(bitmap,0);
+                drawable = newIcon(context, bi);
+            }
         }
 
         // FastBitmapDrawable drawable = newIcon(context, info.bitmap);
