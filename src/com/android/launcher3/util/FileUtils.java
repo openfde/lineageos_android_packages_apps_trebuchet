@@ -61,6 +61,12 @@ import android.graphics.Rect;
 import android.graphics.BitmapFactory;
 import android.widget.TextView;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.PictureDrawable;
+import android.graphics.Picture;
+import android.util.Xml;
+import org.xmlpull.v1.XmlPullParser;
+import java.io.InputStream;
+import com.android.launcher3.svg.SVG;
 
 
 public class FileUtils {
@@ -713,5 +719,31 @@ public static Point findNextFreePoint(Context context){
     public static  Bitmap scaleBitmap(Bitmap originalBitmap, int newWidth, int newHeight) {
         return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
     }
+
+ // 从 assets 文件夹加载 SVG 文件
+ public static SVG loadSvgFromAssets(Context context,String fileName) {
+    try {
+        InputStream inputStream = new FileInputStream(new File(fileName));//context.getAssets().open(fileName);
+        return SVG.getFromInputStream(inputStream);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
+// 将 SVG 转换为 Bitmap
+public static Bitmap svgToBitmap(SVG svg) {
+    // 获取 SVG 的宽度和高度
+    int width = (int) svg.getDocumentWidth();
+    int height = (int) svg.getDocumentHeight();
+    // 创建一个 Bitmap
+    Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
+
+    // 使用 Canvas 将 SVG 渲染到 Bitmap 上
+    Canvas canvas = new Canvas(bitmap);
+    svg.renderToCanvas(canvas);
+
+    return bitmap;
+}
 
 }
