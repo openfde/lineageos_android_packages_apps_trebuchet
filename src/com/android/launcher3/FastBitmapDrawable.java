@@ -343,7 +343,7 @@ public class FastBitmapDrawable extends Drawable {
             }else{
                 resId =  R.mipmap.icon_unkown;
             }
-            Log.i("bella"," newIcon  fileType : "+fileType  + " , info "+info );
+            // Log.i("bella"," newIcon  fileType : "+fileType  + " , info "+info );
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),resId);
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,R.color.default_shadow_color_no_alpha);
             drawable = newIcon(context, bitmapInfo);
@@ -358,7 +358,7 @@ public class FastBitmapDrawable extends Drawable {
                 File file = new File(absoluteIcon);
 
                 if(file.exists() &&  !icon.contains(".svg") ){
-                    Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
+                    // Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
                     bitmap = BitmapFactory.decodeFile(absoluteIcon);
                 }else{
                     ///usr/share/icons/hicolor/32x32/apps
@@ -382,17 +382,17 @@ public class FastBitmapDrawable extends Drawable {
                     // String absolutePath = FileUtils.findFileInDirectory(directory,fileName);
                     String absolutePath = FileUtils.findLinuxIconPath(fileName);
 
-                    Log.i("bella","FastBitmapDrawable  pathParent : "+pathParent  + " , absolutePath "+absolutePath  + ",fileName "+fileName);
+                    // Log.i("bella","FastBitmapDrawable  pathParent : "+pathParent  + " , absolutePath "+absolutePath  + ",fileName "+fileName);
 
                     if(absolutePath != null){
                         if(!absolutePath.contains(".")){
                             absolutePath = absolutePath +".png";
                         }
-                        Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
+                        // Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
                         File fi = new File(absolutePath);
                         if(fi.exists()){
                             if(absolutePath.contains("svg")){
-                                Log.i("bella","2 FastBitmapDrawable    absolutePath : "+absolutePath);
+                                // Log.i("bella","2 FastBitmapDrawable    absolutePath : "+absolutePath);
                                 bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(context,absolutePath));
                             }else{
                                 bitmap = BitmapFactory.decodeFile(absolutePath);

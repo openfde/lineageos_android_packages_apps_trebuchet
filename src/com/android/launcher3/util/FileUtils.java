@@ -338,7 +338,7 @@ public static Point findNextFreePoint(Context context){
         // if(!isOpenLinuxApp){
         //     return ;
         // }
-        Log.i(TAG,"bella...insert....2......... "+initialValues.toString());
+        // Log.i(TAG,"bella...insert....2......... "+initialValues.toString());
         createDesktopDir(PATH_ID_DESKTOP);
         if(initialValues !=null){
             try{
@@ -368,7 +368,7 @@ public static Point findNextFreePoint(Context context){
                 String pathDesktop = documentId+""+ md5+"_fde.desktop";
                 File file = new File(pathDesktop);
                 if(file.exists()){
-                    Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                    // Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
                     return ;
                 }
                 Path desktopFilePath = Paths.get(pathDesktop);
@@ -377,7 +377,7 @@ public static Point findNextFreePoint(Context context){
                 File filePic = new File(picPath);
                 String homeDir = getLinuxHomeDir();
                 String linuxPath = homeDir+"/.local/share/icons/"+md5+".png";
-                Log.i(TAG,"bella...homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
+                // Log.i(TAG,"bella...homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
                 File linuxPic = new File(linuxPath);
                 if(!linuxPic.exists()){
                     Log.i(TAG,"bella...insert.............md5: "+md5 +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);

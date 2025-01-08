@@ -98,6 +98,8 @@ public class ItemClickHandler {
     private static void onClick(View v, String sourceContainer) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
+        
+        boolean hasFocus = v.hasFocus();        
         Object tag = v.getTag();
         Launcher launcher = Launcher.getLauncher(v.getContext());
         launcher.gotoDocApp(FileUtils.CLICK_BLANK,"");
@@ -110,7 +112,7 @@ public class ItemClickHandler {
      
         long currentTime = System.currentTimeMillis();
         long subTime = currentTime - lastClickTime;
-        if (subTime  < DOUBLE_CLICK_TIME_DELTA) {
+        if (subTime  < DOUBLE_CLICK_TIME_DELTA || hasFocus) {
             //double click   
             v.setFocusableInTouchMode(false);
             v.clearFocus();

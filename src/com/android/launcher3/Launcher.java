@@ -2347,7 +2347,6 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
                 File file = new File(filePath);
                 if(!file.exists()){
-
                     deleteFavorites(info);
                     continue;
                 }
@@ -2390,13 +2389,13 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         Workspace workspace = mWorkspace;
         int newItemsScreenId = -1;
 
-        Log.d(TAG, "bindItems: items size  "+items.size() + ",toString "+items.toString());
+        // Log.d(TAG, "bindItems: items size  "+items.size() + ",toString "+items.toString());
         
         int end = items.size();
 
         for (int i = 0; i < end; i++) {
              ItemInfo item = items.get(i);
-            Log.d(TAG, "bindItems: loading default c.itemType "+item.itemType  + " ,end "+end + " ,title "+item.title + " ,dumpProperties "+item.toString());
+            // Log.d(TAG, "bindItems: loading default c.itemType "+item.itemType  + " ,end "+end + " ,title "+item.title + " ,dumpProperties "+item.toString());
 
             // Short circuit if we are loading dock items for a configuration which has no dock
             if (item.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT &&

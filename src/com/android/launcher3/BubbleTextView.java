@@ -312,7 +312,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
     private void applyIconAndLabel(ItemInfoWithIcon info) {
         FastBitmapDrawable iconDrawable = newIcon(getContext(), info);
         mDotParams.color = IconPalette.getMutedColor(info.bitmap.color, 0.54f);
-        Log.i(TAG,"applyIconAndLabel .... info "+info ); 
+        // Log.i(TAG,"applyIconAndLabel .... info "+info ); 
 
         setIcon(iconDrawable);
         if (mShouldShowLabel) {
