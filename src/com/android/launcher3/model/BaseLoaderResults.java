@@ -212,7 +212,7 @@ public abstract class BaseLoaderResults {
 
             Executor mainExecutor = mUiExecutor;
 
-            Log.i(TAG, "Launcher_workspaceItems  currentWorkspaceItems "+ currentWorkspaceItems.size()  + " ,currentWorkspaceItems  "+currentWorkspaceItems );
+            // Log.i(TAG, "Launcher_workspaceItems  currentWorkspaceItems "+ currentWorkspaceItems.size()  + " ,currentWorkspaceItems  "+currentWorkspaceItems );
 
             // Load items on the current page.
             // List<ItemInfo> filteredList = currentWorkspaceItems.stream()
@@ -221,7 +221,7 @@ public abstract class BaseLoaderResults {
             // int count = filteredList.size();//currentWorkspaceItems.size() + otherWorkspaceItems.size() ;
              List<ItemInfo> filteredList = currentWorkspaceItems.stream()
             .collect(Collectors.toList());
-            Log.i(TAG, "Launcher_workspaceItems  mWorkspaceItems "+ mWorkspaceItems.size()  + " ,otherWorkspaceItems  "+otherWorkspaceItems );
+            // Log.i(TAG, "Launcher_workspaceItems  mWorkspaceItems "+ mWorkspaceItems.size()  + " ,otherWorkspaceItems  "+otherWorkspaceItems );
 
             // for(ItemInfo item : filteredList){
             //     if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){

@@ -40,7 +40,7 @@ public interface WorkspaceLayoutManager {
     default void addInScreenFromBind(View child, ItemInfo info) {
         int x = info.cellX;
         int y = info.cellY;
-        Log.i(TAG,"addInScreenFromBind  info "+info);
+        // Log.i(TAG,"addInScreenFromBind  info "+info);
         if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT
                 || info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION) {
             int screenId = info.screenId;
@@ -73,7 +73,7 @@ public interface WorkspaceLayoutManager {
     default void addInScreen(View child, int container, int screenId, int x, int y,
             int spanX, int spanY) {
         screenId = 0;
-        Log.d(TAG, "addInScreen() called with: child = [" + child + "], container = [" + container + "], screenId = [" + screenId + "], x = [" + x + "], y = [" + y + "], spanX = [" + spanX + "], spanY = [" + spanY + "]");
+        // Log.d(TAG, "addInScreen() called with: child = [" + child + "], container = [" + container + "], screenId = [" + screenId + "], x = [" + x + "], y = [" + y + "], spanX = [" + spanX + "], spanY = [" + spanY + "]");
         if (container == LauncherSettings.Favorites.CONTAINER_DESKTOP) {
             if (getScreenWithId(screenId) == null) {
                 Log.e(TAG, "Skipping child, screenId " + screenId + " not found");
