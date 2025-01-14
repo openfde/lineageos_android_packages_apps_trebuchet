@@ -421,6 +421,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
             boolean bindAllCallbacks = wasRunning || !bindDirectly || newCallbacks.length == 0;
             final Callbacks[] callbacksList = bindAllCallbacks ? getCallbacks() : newCallbacks;
 
+            Log.i(TAG, "startLoader  wasRunning: " + wasRunning + ", bindDirectly: "+bindDirectly + ",bindAllCallbacks: "+bindAllCallbacks);
+
             if (callbacksList.length > 0) {
                 // Clear any pending bind-runnables from the synchronized load process.
                 for (Callbacks cb : callbacksList) {

@@ -297,6 +297,9 @@ import java.util.Set;
 import java.io.File;
 import java.util.Arrays;
 import android.graphics.Point;
+import android.app.Instrumentation;
+import android.view.WindowManager;
+
 /**
  * Default launcher application.
  */
@@ -439,7 +442,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
-
         FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
         bindService();
         FileUtils.createDesktopDir( FileUtils.getRootDir() + "/.openfde/"); 
@@ -2246,6 +2248,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             CellPos presenterPos = getCellPosMapper().mapModelToPresenter(item);
             if (item.container == CONTAINER_DESKTOP) {
                 item = findNextCoordinate(item);
+
                 // CellLayout cl = mWorkspace.getScreenWithId(presenterPos.screenId);
                 // if (cl != null && cl.isOccupied(presenterPos.cellX, presenterPos.cellY)) {
                 //     Object tag = cl.getChildAt(presenterPos.cellX, presenterPos.cellY).getTag();
@@ -3128,10 +3131,23 @@ public class Launcher extends StatefulActivity<LauncherState>
         Log.i(TAG," bindService bindFlag: "+bindFlag);
     }
 
+    private void simulateKeyPress(int keyCode) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Instrumentation instrumentation = new Instrumentation();
+                instrumentation.sendKeyDownUpSync(keyCode);  
+            }
+        }).start();
+     }
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             // ipcAidl = IMyAidlInterface.Stub.asInterface(service);
+            // simulateKeyPress(KeyEvent.KEYCODE_POWER);
+            // simulateKeyPress(KeyEvent.KEYCODE_WAKEUP);
+
             idocAidl = IDocAidlInterface.Stub.asInterface(service);
             if(FileUtils.isOpenLinuxApp){
              gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
@@ -3169,9 +3185,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                                 if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
                                     addDesktopFile(method,params);
                                     bindWorkspace();
+                                    getModel().forceReload();
                                 }else if("RENAME".equals(method)){
                                     String[] arrFileName = params.split("###");
-                                    DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
+                                    DbUtils.updateTitleFromDatabase(getModel().getModelDbController(),arrFileName[0],arrFileName[1]);
                                     bindWorkspace();
                                     getModel().forceReload();
                                 }
@@ -3242,7 +3259,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
     
     public void insertFavorites(ItemInfo info){
-        Log.d(TAG, "addDesktopFiles: insertFavorites ItemInfo "+info);
+        Log.d(TAG, "addDesktopFiles: insertFavorites ItemInfo: "+info);
         getModelWriter().insertItemToDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY);
     }
 
@@ -3257,9 +3274,9 @@ public class Launcher extends StatefulActivity<LauncherState>
 
 
     public void addDesktopFile(String method,String fileName){
-        Point point = FileUtils.findNextFreePoint(this);
+        Point point = FileUtils.findNextFreePoint(this,getModel().getModelDbController());
         WorkspaceItemInfo info = new WorkspaceItemInfo();
-        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");
         info.title = fileName;
         info.container = -100;
         info.screenId = 0;
@@ -3278,21 +3295,18 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
       public List<WorkspaceItemInfo> addDesktopFiles(){
-        List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(this);
+        List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(getModel().getModelDbController());
         int count = 0;
         if(listApps !=null){
             count = listApps.size();
-        }
-    
+        }    
      //   String documentId = FileUtils.PATH_ID_DESKTOP;
         String documentId =  FileUtils.getRootDir() +"/桌面/";  
         File ff = new File(documentId);
         if(!ff.exists()){
             documentId =  FileUtils.getRootDir() + "/Desktop/";  
         }
-
-        List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(this);
-
+        List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(getModel().getModelDbController());
         if(listTexts !=null){
             for(Map<String,Object> mp : listTexts){
                 String fName = mp.get("title").toString();
@@ -3310,7 +3324,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         int scale  =  FileUtils.getScreenRows(this);
         if(files !=null){
             Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-            Log.d(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
+            Log.i(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
         
             List<WorkspaceItemInfo> list = new ArrayList();
             int index = 0;
@@ -3330,7 +3344,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 info.cellX = xindex + y/scale;
                 info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
 
-                Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
+                Log.i(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
 
                 if(f.getName().contains("_fde.desktop")){
                     continue;

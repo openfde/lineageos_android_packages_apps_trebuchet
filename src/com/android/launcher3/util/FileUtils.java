@@ -53,6 +53,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import android.webkit.MimeTypeMap;
+import com.android.launcher3.model.ModelDbController;
 
 
 public class FileUtils {
@@ -220,7 +221,7 @@ public static int getScreenColumns(Context context){
 /**
  * find next free point
  */
-public static Point findNextFreePoint(Context context){
+public static Point findNextFreePoint(Context context,ModelDbController dbController){
     int numRows  =  getScreenRows(context);
     int numColumns  =  getScreenColumns(context);
 
@@ -228,11 +229,11 @@ public static Point findNextFreePoint(Context context){
     outer: 
     for(int i = 0 ; i < numColumns ; i++ ){
         for(int j = 0 ; j < numRows ; j++){
-            // if(DbUtils.queryFilesByPointFromDatabase(context,i,j) == null){
-            //     point.x = i ;
-            //     point.y = j ;
-            //     break outer;
-            // }
+            if(DbUtils.queryFilesByPointFromDatabase(dbController,i,j) == null){
+                point.x = i ;
+                point.y = j ;
+                break outer;
+            }
         }
     }
     Log.i(TAG, "queryAllFilesFromDatabase: x:  "+point.x + " , y: "+point.y);

@@ -15,266 +15,276 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
 import android.content.ContentValues;
+import com.android.launcher3.model.LoaderCursor;
+import com.android.launcher3.model.ModelDbController;
 
 
 public class DbUtils {
     protected static final String TAG = "DbUtils";
 
 
-    public static List<Map<String,Object>> queryFilesByPointFromDatabase(Context context,int x, int y){
+    public static List<Map<String,Object>> queryFilesByPointFromDatabase(ModelDbController dbController,int x, int y){
         String selection = "cellX = ? and cellY = ? ";
         String[] selectionArgs = {String.valueOf(x),String.valueOf(y)};
     
         List<Map<String,Object>> list = null;
     
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
         // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
     
-        // if(list == null ){
-        //     Log.i(TAG, "queryFilesByPointFromDatabase is null "+ ",cellX: "+x + ", cellY: "+y);
-        // }else{
-        // }
+        if(list == null ){
+            Log.i(TAG, "queryFilesByPointFromDatabase is null "+ ",cellX: "+x + ", cellY: "+y);
+        }else{
+        }
     
         return list ;
     }
     
     
-    public static List<Map<String,Object>> queryAllFilesFromDatabase(Context context){
+    public static List<Map<String,Object>> queryAllFilesFromDatabase(ModelDbController dbController){
         String[] selectionArgs = null;
         String selection = null;
     
         List<Map<String,Object>> list = null;
     
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
         // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
     
-        // if(list == null ){
-        //     Log.i(TAG, "queryAllFilesFromDatabase is null");
-        // }else{
-        // }
+        if(list == null ){
+            Log.i(TAG, "queryAllFilesFromDatabase is null");
+        }else{
+        }
     
         return list ;
     }
     
-    public  List<Map<String,Object>> queryAllDesktopFilesFromDatabase(Context context){
+    public  List<Map<String,Object>> queryAllDesktopFilesFromDatabase(ModelDbController dbController){
         String[] selectionArgs = {"8","9","10"};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
         List<Map<String,Object>> list = null;
     
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
         // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
     
-        // if(list == null ){
-        //     Log.i(TAG, "queryAllDesktopFilesFromDatabase is null");
-        // }else{
-        // }
+        if(list == null ){
+            Log.i(TAG, "queryAllDesktopFilesFromDatabase is null");
+        }else{
+        }
     
         return list ;
     }
     
     
-    public static List<Map<String,Object>> queryAllNotDesktopFilesFromDatabase(Context context){
+    public static List<Map<String,Object>> queryAllNotDesktopFilesFromDatabase(ModelDbController dbController){
         String[] selectionArgs = {"0","1","2","3","4","5","6","7"};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
         List<Map<String,Object>> list = null;
-    
+        
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
         // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
     
-        // if(list == null ){
-        //     Log.i(TAG, "queryAllNotDesktopFilesFromDatabase is null");
-        // }else{
-        // }
+        if(list == null ){
+            Log.i(TAG, "queryAllNotDesktopFilesFromDatabase is null");
+        }else{
+        }
     
         return list ;
     }
 
 
-    public static List<Map<String,Object>> queryDesktopTextFilesFromDatabase(Context context){
-        String[] selectionArgs = {"8","9"};
+    public static List<Map<String,Object>> queryDesktopTextFilesFromDatabase(ModelDbController dbController){
+        String[] selectionArgs = {"18","19"};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
         List<Map<String,Object>> list = null;
     
-        // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
+        //Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
     
-        // if(list == null ){
-        //     Log.i(TAG, "queryDesktopTextFilesFromDatabase is null");
-        // }
+        if(list == null ){
+            Log.i(TAG, "queryDesktopTextFilesFromDatabase is null");
+        }
         return list ;
     }
 
 
-    public static List<Map<String,Object>> queryItemsFromDatabase(Context context,String fileName){
+    public static List<Map<String,Object>> queryItemsFromDatabase(ModelDbController dbController,String fileName){
         String selection = "title = ?";
         String[] selectionArgs = {fileName};
         List<Map<String,Object>> list = null;
 
-        // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
 
-        // if(list == null ){
-        //     Log.i(TAG, "queryItemsFromDatabase is null");
-        // }else{
-        //     Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
-        // }
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
+        // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
+
+        if(list == null ){
+            Log.i(TAG, "queryItemsFromDatabase is null");
+        }else{
+            Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
+        }
 
         return list ;
     }
 
-    public static List<Map<String,Object>> queryItemsFromDatabase(Context context,ItemInfo item){
+    public static List<Map<String,Object>> queryItemsFromDatabase(ModelDbController dbController,ItemInfo item){
         String selection = "title = ?";
         String[] selectionArgs = {item.title.toString()};
         List<Map<String,Object>> list = null;
 
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
         // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        // if (cursor != null && cursor.moveToFirst()) {
-        //     list = new ArrayList<>();
-        //     do {
-        //         int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-        //         String title = cursor.getString(cursor.getColumnIndex("title"));
-        //         int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-        //         int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-        //         int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-        //         Map<String,Object> mp = new HashMap<>();
-        //         mp.put("_id",_id);
-        //         mp.put("title",title);
-        //         mp.put("itemType",itemType);
-        //         mp.put("cellX",cellX);
-        //         mp.put("cellY",cellY);
-        //         list.add(mp);
-        //     } while (cursor.moveToNext());
-        // }
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
 
-        // if(list == null ){
-        //     Log.i(TAG, "queryItemsFromDatabase is null");
-        // }else{
-        //     Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
-        // }
+        if(list == null ){
+            Log.i(TAG, "queryItemsFromDatabase is null");
+        }else{
+            Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
+        }
 
         return list ;
     }
 
 
-    public static void updateTitleFromDatabase(Context context,String titleOld,String titleNew){
+    public static void updateTitleFromDatabase(ModelDbController dbController,String titleOld,String titleNew){
         Log.i(TAG, "updateTitleFromDatabase is titleOld: "+titleOld + " ,titleNew:  "+titleNew);
-        // String selection = "title = ?";
-        // String[] selectionArgs = {titleOld};
+        String selection = "title = ?";
+        String[] selectionArgs = {titleOld};
 
-        // ContentValues values = new ContentValues();
-        // values.put("title",titleNew);
-        // int res = context.getContentResolver().update(LauncherSettings.Favorites.CONTENT_URI, values,
-        // selection, selectionArgs);
-
-        // Log.i(TAG, "updateTitleFromDatabase is res: "+res);
+        ContentValues values = new ContentValues();
+        values.put("title",titleNew);
+        
+        int res = dbController.update(LauncherSettings.Favorites.TABLE_NAME, values,selection, selectionArgs);
+        // int res = context.getContentResolver().update(LauncherSettings.Favorites.CONTENT_URI, values,selection, selectionArgs);
+        Log.i(TAG, "updateTitleFromDatabase is res: "+res);
     }
 
 
-    public static void deleteTitleFromDatabase(Context context,String title){
-        Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
+    // public static void deleteTitleFromDatabase(Context context,String title){
+    //     Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
         // String selection = "title = ?";
         // String[] selectionArgs = {title};
         // int res = context.getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,selection, selectionArgs);
         // Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
-    }
+    // }
     
 }
