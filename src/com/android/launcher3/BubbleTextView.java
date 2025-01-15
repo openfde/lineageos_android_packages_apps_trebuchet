@@ -324,7 +324,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
                     if(map.get("nameZh") !=null){
                         strTitle = map.get("nameZh").toString();
                     }else{
-                        strTitle = "unknow";
+                        // strTitle = "unknow";
                     }
                   }else{
                      strTitle = map.get("name").toString();

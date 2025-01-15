@@ -532,6 +532,18 @@ public static Point findNextFreePoint(Context context){
         }
     }
 
+    public static String getSystemProperty(String key, String defaultValue) {
+        String value = defaultValue;
+        try {
+            Class<?> systemProperties = Class.forName("android.os.SystemProperties");
+            Method get = systemProperties.getMethod("get", String.class, String.class);
+            value = (String) get.invoke(null, key, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
+
     public static boolean isAppInstalled(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
         try {
@@ -733,9 +745,12 @@ public static Point findNextFreePoint(Context context){
 
 // 将 SVG 转换为 Bitmap
 public static Bitmap svgToBitmap(SVG svg) {
+    if(svg == null ){
+        return null ;
+    }
     // 获取 SVG 的宽度和高度
-    int width = (int) svg.getDocumentWidth();
-    int height = (int) svg.getDocumentHeight();
+    // int width = (int) svg.getDocumentWidth();
+    // int height = (int) svg.getDocumentHeight();
     // 创建一个 Bitmap
     Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
 
@@ -745,5 +760,28 @@ public static Bitmap svgToBitmap(SVG svg) {
 
     return bitmap;
 }
+
+public static Map<String, String> parseDesktopFile(String filePath) {
+    Map<String, String> entries = new HashMap<>();
+    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            if (line.startsWith("#") || line.isEmpty()) {
+                continue;
+            }
+            int equalsIndex = line.indexOf('=');
+            if (equalsIndex > 0) {
+                String key = line.substring(0, equalsIndex).trim();
+                String value = line.substring(equalsIndex + 1).trim();
+                entries.put(key, value);
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return entries;
+}
+
 
 }
