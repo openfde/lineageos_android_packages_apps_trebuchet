@@ -351,64 +351,82 @@ public class FastBitmapDrawable extends Drawable {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_linux);
             String title = info.title.toString();
             Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
-            if(map !=null && map.get("icon") !=null){
-                String icon = map.get("icon").toString();
-                String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID() + icon ;
-                Log.i("bella","1 FastBitmapDrawable  newIcon  icon : "+icon  + " , absoluteIcon "+absoluteIcon);
-                File file = new File(absoluteIcon);
 
-                if(file.exists() &&  !icon.contains(".svg") ){
-                    // Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
-                    bitmap = BitmapFactory.decodeFile(absoluteIcon);
-                }else{
-                    ///usr/share/icons/hicolor/32x32/apps
-                    String pathParent = "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/" ;
-                    File directory = new File(pathParent);  // 获取应用私有文件目录
+            if(map !=null ){
+                // String icon = map.get("icon").toString();
+                String name = map.get("name").toString().replaceAll(" ", "_");
+                String IconPath = FileUtils.getSystemProperty(name ,"-1");
+                Log.i("bella","FastBitmapDrawable name : "+name  + " , IconPath "+IconPath + ",title "+title );
         
-                    String fileName = "";
-                    if(icon.contains(".svg")){
-                        File tempFile = new File(absoluteIcon);
-                        if(tempFile.exists()){
-                              fileName = tempFile.getName();
-                        //    fileName = tempFile.getName().replace(".svg",".png");
-                            // bitmap = FileUtils.svgToBitmap(context,absoluteIcon);
-                        }else{
-                            fileName = icon.replace(".svg",".png");
-                        }
+                if("-1".equals(IconPath) ){
+
+                }else{
+                    String icon = "/volumes"+"/"+FileUtils.getLinuxUUID() + IconPath;
+                    File f = new File(icon);
+                    Log.i("bella","FastBitmapDrawable exists : "+f.exists());
+                    if(IconPath.contains(".svg") ){
+                        bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(context,icon));
                     }else{
-                        fileName =  icon+".png";
-                    }
-                   
-                    // String absolutePath = FileUtils.findFileInDirectory(directory,fileName);
-                    String absolutePath = FileUtils.findLinuxIconPath(fileName);
-
-                    // Log.i("bella","FastBitmapDrawable  pathParent : "+pathParent  + " , absolutePath "+absolutePath  + ",fileName "+fileName);
-
-                    if(absolutePath != null){
-                        if(!absolutePath.contains(".")){
-                            absolutePath = absolutePath +".png";
-                        }
-                        // Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
-                        File fi = new File(absolutePath);
-                        if(fi.exists()){
-                            if(absolutePath.contains("svg")){
-                                // Log.i("bella","2 FastBitmapDrawable    absolutePath : "+absolutePath);
-                                bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(context,absolutePath));
-                            }else{
-                                bitmap = BitmapFactory.decodeFile(absolutePath);
-                            }
-                        }else{
-                            bitmap = BitmapFactory.decodeFile(icon);
-                            Log.e("bella","FastBitmapDrawable "+absolutePath+"  is not exist  newIcon_no : file not exists: "  );   
-                        }
-                      
-                    }else{
-                        bitmap = BitmapFactory.decodeFile(icon);
-                        Log.e("bella","FastBitmapDrawable   : "+absolutePath+ "  file not exists: ");
-                    }
-
-                
+                        bitmap = BitmapFactory.decodeFile(icon); 
+                    }    
                 }
+               
+
+                // Log.i("bella","FastBitmapDrawable title : "+title  + " , IconPath "+IconPath + ",name "+name);
+                // String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID() + icon ;
+                // Log.i("bella","1 FastBitmapDrawable  newIcon  icon : "+icon  + " , absoluteIcon "+absoluteIcon);
+                // File file = new File(absoluteIcon);
+
+                // if(file.exists() &&  !icon.contains(".svg") ){
+                //     // Log.i("bella","FastBitmapDrawable  newIcon  title : "+title  + " , absoluteIcon "+absoluteIcon  + ",icon "+icon);
+                //     bitmap = BitmapFactory.decodeFile(absoluteIcon);
+                // }else{
+                //     ///usr/share/icons/hicolor/32x32/apps
+                //     String pathParent = "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/" ;
+                //     File directory = new File(pathParent);  // 获取应用私有文件目录
+        
+                //     String fileName = "";
+                //     if(icon.contains(".svg")){
+                //         File tempFile = new File(absoluteIcon);
+                //         if(tempFile.exists()){
+                //               fileName = tempFile.getName();
+                //         //    fileName = tempFile.getName().replace(".svg",".png");
+                //             // bitmap = FileUtils.svgToBitmap(context,absoluteIcon);
+                //         }else{
+                //             fileName = icon.replace(".svg",".png");
+                //         }
+                //     }else{
+                //         fileName =  icon+".png";
+                //     }
+                   
+                //     // String absolutePath = FileUtils.findFileInDirectory(directory,fileName);
+                //     String absolutePath = FileUtils.findLinuxIconPath(fileName);
+
+                //     // Log.i("bella","FastBitmapDrawable  pathParent : "+pathParent  + " , absolutePath "+absolutePath  + ",fileName "+fileName);
+
+                //     if(absolutePath != null){
+                //         if(!absolutePath.contains(".")){
+                //             absolutePath = absolutePath +".png";
+                //         }
+                //         // Log.i("bella","FastBitmapDrawable absolutePath : "+absolutePath);
+                //         File fi = new File(absolutePath);
+                //         if(fi.exists()){
+                //             if(absolutePath.contains("svg")){
+                //                 // Log.i("bella","2 FastBitmapDrawable    absolutePath : "+absolutePath);
+                //                 bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(context,absolutePath));
+                //             }else{
+                //                 bitmap = BitmapFactory.decodeFile(absolutePath);
+                //             }
+                //         }else{
+                //             bitmap = BitmapFactory.decodeFile(icon);
+                //             Log.e("bella","FastBitmapDrawable "+absolutePath+"  is not exist  newIcon_no : file not exists: "  );   
+                //         }
+                      
+                //     }else{
+                //         bitmap = BitmapFactory.decodeFile(icon);
+                //         Log.e("bella","FastBitmapDrawable   : "+absolutePath+ "  file not exists: ");
+                //     }
+                // }
 
             }
            
