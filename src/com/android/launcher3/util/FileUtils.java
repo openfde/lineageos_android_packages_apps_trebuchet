@@ -108,6 +108,10 @@ public static String getRootDir(){
     return "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir() ;
 }    
 
+public static String getRootDesktopDir(){
+    return "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/" ;
+}   
+
 public static void createDesktopDir(String path){
         File file = new File(path);
         if(!file.exists()){
@@ -190,7 +194,7 @@ public static void createShortcut(Context mContext, String packageName ,String n
  * get desktop count
  */
 public static int getDesktopFileCount (){
-    String documentId = FileUtils.PATH_ID_DESKTOP; 
+    String documentId = FileUtils.PATH_ID_DESKTOP; //getRootDesktopDir();//
     File parent = new File(documentId);
     File[] files = parent.listFiles();
     if(files !=null){

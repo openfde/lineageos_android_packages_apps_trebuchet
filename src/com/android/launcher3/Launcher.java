@@ -3290,84 +3290,92 @@ public class Launcher extends StatefulActivity<LauncherState>
         }else{
             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY; 
         }
-        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        int id = 300 + (info.cellX * 1000) + (info.cellY * 10);
+        Log.d(TAG, "addDesktopFile id  "+id + ",info.cellX "+info.cellX + ",info.cellY: "+info.cellY );
+        info.id =  id ;
         insertFavorites(info);
     }
 
-      public List<WorkspaceItemInfo> addDesktopFiles(){
-        List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(getModel().getModelDbController());
-        int count = 0;
-        if(listApps !=null){
-            count = listApps.size();
-        }    
-     //   String documentId = FileUtils.PATH_ID_DESKTOP;
-        String documentId =  FileUtils.getRootDir() +"/桌面/";  
-        File ff = new File(documentId);
-        if(!ff.exists()){
-            documentId =  FileUtils.getRootDir() + "/Desktop/";  
-        }
-        List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(getModel().getModelDbController());
-        if(listTexts !=null){
-            for(Map<String,Object> mp : listTexts){
-                String fName = mp.get("title").toString();
-                Log.d(TAG, "addDesktopFiles fName  "+fName );
-                File f = new File(documentId + fName);
-                if(!f.exists()){
-                    // mBgDataModel.removeItem(mContext, item);
-                    getModelWriter().deleteTitleFromDatabase(fName);   
+      public void  addDesktopFiles(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(getModel().getModelDbController());
+                int count = 0;
+                if(listApps !=null){
+                    count = listApps.size();
+                }    
+                String documentId = FileUtils.PATH_ID_DESKTOP;
+                // String documentId =  FileUtils.getRootDir() +"/桌面/";  
+                // File ff = new File(documentId);
+                // if(!ff.exists()){
+                //     documentId =  FileUtils.getRootDir() + "/Desktop/";  
+                // }
+                List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(getModel().getModelDbController());
+                if(listTexts !=null){
+                    for(Map<String,Object> mp : listTexts){
+                        String fName = mp.get("title").toString();
+                        Log.d(TAG, "addDesktopFiles fName  "+fName );
+                        File f = new File(documentId + fName);
+                        if(!f.exists()){
+                            // mBgDataModel.removeItem(mContext, item);
+                            getModelWriter().deleteTitleFromDatabase(fName);   
+                        }
+                    }
                 }
-            }
-        }
-
-        File parent = new File(documentId);
-        File[] files = parent.listFiles();
-        int scale  =  FileUtils.getScreenRows(this);
-        if(files !=null){
-            Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-            Log.i(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
         
-            List<WorkspaceItemInfo> list = new ArrayList();
-            int index = 0;
-            int xindex = count / scale;
-            int yindex = count % scale; 
-            for(File f : files){
-                WorkspaceItemInfo info = new WorkspaceItemInfo();
-                info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
-                info.title = f.getName();
-                info.container = -100;
-                info.screenId = 0;
-                Intent intent = new Intent();
-                intent.setPackage("com.android.launcher3");
-                info.intent = intent;
-                int y = yindex + index ;
-                info.cellY = y%scale ;
-                info.cellX = xindex + y/scale;
-                info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
-
-                Log.i(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
-
-                if(f.getName().contains("_fde.desktop")){
-                    continue;
-                }else if(f.getName().contains(".desktop")){
-                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
-                    // desktop linux app temp delete 
-                    // if(!FileUtils.isOpenLinuxApp){
-                    //     continue;
-                    // }
-                }else if(f.isDirectory()){
-                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                File parent = new File(documentId);
+                File[] files = parent.listFiles();
+                int scale  =  FileUtils.getScreenRows(Launcher.this);
+                if(files !=null){
+                    Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+                    Log.i(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
+                
+                    List<WorkspaceItemInfo> list = new ArrayList();
+                    int index = 0;
+                    int xindex = count / scale;
+                    int yindex = count % scale; 
+                    for(File f : files){
+                        WorkspaceItemInfo info = new WorkspaceItemInfo();
+                        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+                        info.title = f.getName();
+                        info.container = -100;
+                        info.screenId = 0;
+                        Intent intent = new Intent();
+                        intent.setPackage("com.android.launcher3");
+                        info.intent = intent;
+                        int y = yindex + index ;
+                        info.cellY = y%scale ;
+                        info.cellX = xindex + y/scale;
+                        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        
+                        Log.i(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex);
+        
+                        if(f.getName().contains("_fde.desktop")){
+                            continue;
+                        }else if(f.getName().contains(".desktop")){
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                            // desktop linux app temp delete 
+                            // if(!FileUtils.isOpenLinuxApp){
+                            //     continue;
+                            // }
+                        }else if(f.isDirectory()){
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                        }else{
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+                        }
+                        list.add(info);
+                        index++;
+                        insertOrUpdateFavorites(info);
+                    }
+                    // return list ;
                 }else{
-                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+                    Log.d(TAG, "bindItems: files is null  " );
                 }
-                list.add(info);
-                index++;
-                insertOrUpdateFavorites(info);
+                // return null ;
             }
-            return list ;
-        }else{
-            Log.d(TAG, "bindItems: files is null  " );
-        }
-        return null ;
+        }).start();
+     
     }
 
     public void bindWorkspace(){
@@ -3382,7 +3390,11 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     public void removeView(int x, int y){
-        mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));
+        try{
+            mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void rearray(Context context){

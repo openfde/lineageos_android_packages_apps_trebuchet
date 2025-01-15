@@ -365,7 +365,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
                for(ItemInfo ii : tempItems) {
                     if(ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY  || ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
-                        String documentId =  FileUtils.getRootDir() + "/桌面/";  
+                        // String documentId =  FileUtils.getRootDir() + "/桌面/";  
+                        String documentId = FileUtils.PATH_ID_DESKTOP;
                         File f = new File(documentId + ii.getTitle());
                         if(f.exists()){
                             workspaceItems.add(ii);
