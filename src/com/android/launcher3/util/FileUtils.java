@@ -783,5 +783,14 @@ public static Map<String, String> parseDesktopFile(String filePath) {
     return entries;
 }
 
+public static boolean containsChinese(String str) {
+    if (str == null || str.isEmpty()) {
+        return false;
+    }
+    // is Chinese
+    String regex = "[\\u4e00-\\u9fa5]";
+    return str.matches(".*" + regex + ".*");
+}
+
 
 }
