@@ -355,8 +355,17 @@ public class FastBitmapDrawable extends Drawable {
             if(map !=null ){
                 // String icon = map.get("icon").toString();
                 String name = map.get("name").toString().replaceAll(" ", "_");
-                String IconPath = FileUtils.getSystemProperty(name ,"-1");
-                Log.i("bella","FastBitmapDrawable name : "+name  + " , IconPath "+IconPath + ",title "+title );
+                String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
+                int lastIndex = exec.lastIndexOf('/');
+                String key = name ;
+                if(FileUtils.containsChinese(name)){
+                    if(lastIndex > 0){
+                        key = exec.substring(lastIndex+1);
+                     }
+                }
+                String IconPath = FileUtils.getSystemProperty(key ,"-1");
+
+                Log.i("bella","FastBitmapDrawable name : "+name  + " , IconPath "+IconPath + ",key "+key );
         
                 if("-1".equals(IconPath) ){
 
