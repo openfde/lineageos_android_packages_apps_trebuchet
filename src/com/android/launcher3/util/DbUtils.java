@@ -157,7 +157,7 @@ public class DbUtils {
 
 
     public static List<Map<String,Object>> queryDesktopTextFilesFromDatabase(Context context){
-        String[] selectionArgs = {"8","9"};
+        String[] selectionArgs = {"8","9","10"};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
         List<Map<String,Object>> list = null;
