@@ -183,19 +183,19 @@ public static void createShortcut(Context mContext, String packageName ,String n
 }
 
 
-/**
- * get desktop count
- */
-public static int getDesktopFileCount (){
-    String documentId = FileUtils.PATH_ID_DESKTOP; 
-    File parent = new File(documentId);
-    File[] files = parent.listFiles();
-    if(files !=null){
-        return files.length;
-    }else{
-        return 0 ;
-    }
-}
+// /**
+//  * get desktop count
+//  */
+// public static int getDesktopFileCount (){
+//     String documentId = FileUtils.PATH_ID_DESKTOP; 
+//     File parent = new File(documentId);
+//     File[] files = parent.listFiles();
+//     if(files !=null){
+//         return files.length;
+//     }else{
+//         return 0 ;
+//     }
+// }
 
 /**
  * rows count  --- 9 
@@ -600,6 +600,18 @@ public static Point findNextFreePoint(Context context){
         }
     }
 
+    public static  File[] getAllDesktopFiles(){
+        String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
+        }
+        // String documentId = FileUtils.PATH_ID_DESKTOP; 
+        File parent = new File(documentId);
+        File[] files = parent.listFiles();
+        return files;
+    }
+
     public static String getMD5(String input) {
         try {
             // 创建一个 MessageDigest 实例，指定使用 MD5 算法
@@ -660,31 +672,36 @@ public static Point findNextFreePoint(Context context){
 
      // 在Bitmap上添加图片水印
      private static Bitmap addImageWatermark(Bitmap source, int watermarkResId, Context context) {
-        int width = source.getWidth();
-        int height = source.getHeight();
-
-        // 创建一个新的Bitmap，大小与原始Bitmap相同
-        Bitmap watermarkBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-        // 创建画布并将原图绘制到画布上
-        Canvas canvas = new Canvas(watermarkBitmap);
-        canvas.drawBitmap(source, 0, 0, null);
-
-        // 获取水印图片
-        Bitmap watermarkImage = BitmapFactory.decodeResource(context.getResources(), watermarkResId);
-
-        // 设置水印图片的大小（可选）
-        int watermarkWidth = width / 4;  // 水印宽度为原图的1/4
-        int watermarkHeight = watermarkImage.getHeight() * watermarkWidth / watermarkImage.getWidth();  // 保持宽高比
-
-        // 设置水印图片的位置（右下角）
-        float left = width - watermarkWidth - 20f;  // 距离右侧20像素
-        float top = height - watermarkHeight - 20f;  // 距离底部20像素
-
-        // 在Bitmap上绘制水印图片
-        canvas.drawBitmap(Bitmap.createScaledBitmap(watermarkImage, watermarkWidth, watermarkHeight, true), left, top, null);
-
-        return watermarkBitmap;
+        try{
+            int width = source.getWidth();
+            int height = source.getHeight();
+    
+            // 创建一个新的Bitmap，大小与原始Bitmap相同
+            Bitmap watermarkBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    
+            // 创建画布并将原图绘制到画布上
+            Canvas canvas = new Canvas(watermarkBitmap);
+            canvas.drawBitmap(source, 0, 0, null);
+    
+            // 获取水印图片
+            Bitmap watermarkImage = BitmapFactory.decodeResource(context.getResources(), watermarkResId);
+    
+            // 设置水印图片的大小（可选）
+            int watermarkWidth = width / 4;  // 水印宽度为原图的1/4
+            int watermarkHeight = watermarkImage.getHeight() * watermarkWidth / watermarkImage.getWidth();  // 保持宽高比
+    
+            // 设置水印图片的位置（右下角）
+            float left = width - watermarkWidth - 20f;  // 距离右侧20像素
+            float top = height - watermarkHeight - 20f;  // 距离底部20像素
+    
+            // 在Bitmap上绘制水印图片
+            canvas.drawBitmap(Bitmap.createScaledBitmap(watermarkImage, watermarkWidth, watermarkHeight, true), left, top, null);
+    
+            return watermarkBitmap;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return null ;
     }
 
     // public void setBitmapToTextView(Context context,TextView textView, Bitmap bitmap) {
@@ -694,38 +711,53 @@ public static Point findNextFreePoint(Context context){
     // }
 
     public static Bitmap vectorToBitmap(Context context, int drawableId) {
+      try{
         Drawable drawable = context.getResources().getDrawable(drawableId, null);
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+      return null ;
     }
 
     public static  Bitmap overlayBitmaps(Bitmap bitmap1, Bitmap bitmap2) {
-        // 创建一个与第一个 Bitmap 相同大小的空白 Bitmap
-        Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
-        // 创建 Canvas，将第一个 Bitmap 作为底图
-        Canvas canvas = new Canvas(overlayBitmap);
-        canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
-        // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
-        canvas.drawBitmap(bitmap2, (bitmap1.getWidth()-bitmap2.getWidth())/2, (bitmap1.getHeight()-bitmap2.getHeight())/2, null);  // 将 bitmap2 绘制到 canvas 上
-        // 将叠加后的 Bitmap 设置到 ImageView
-        return overlayBitmap ;
+       try{
+            // 创建一个与第一个 Bitmap 相同大小的空白 Bitmap
+            Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
+            // 创建 Canvas，将第一个 Bitmap 作为底图
+            Canvas canvas = new Canvas(overlayBitmap);
+            canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
+            // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
+            canvas.drawBitmap(bitmap2, (bitmap1.getWidth()-bitmap2.getWidth())/2, (bitmap1.getHeight()-bitmap2.getHeight())/2, null);  // 将 bitmap2 绘制到 canvas 上
+            // 将叠加后的 Bitmap 设置到 ImageView
+            return overlayBitmap ;
+       }catch(Exception e){
+            e.printStackTrace();
+       }
+       return null ;
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
-        int width = drawable.getIntrinsicWidth();
-        int height = drawable.getIntrinsicHeight();
-        Bitmap bitmap = Bitmap.createBitmap(
-                width,
-                height,
-                drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565
-        );
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, width, height);
-        drawable.draw(canvas);
-        return bitmap;
+        try{
+            int width = drawable.getIntrinsicWidth();
+            int height = drawable.getIntrinsicHeight();
+            Bitmap bitmap = Bitmap.createBitmap(
+                    width,
+                    height,
+                    drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565
+            );
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(canvas);
+            return bitmap;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null ;
     }
 
     public static  Bitmap scaleBitmap(Bitmap originalBitmap, int newWidth, int newHeight) {
