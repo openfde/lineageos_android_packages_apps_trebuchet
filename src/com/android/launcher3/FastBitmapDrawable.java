@@ -387,7 +387,7 @@ public class FastBitmapDrawable extends Drawable {
             Bitmap b2 = FileUtils.vectorToBitmap(context, R.mipmap.bg_linux);
             b2  = FileUtils.scaleBitmap(b2,80,80);
             if(bitmap != null ){
-                bitmap  = FileUtils.scaleBitmap(bitmap,42,42);
+                bitmap  = FileUtils.scaleBitmap(bitmap,48,48);
                 Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);
                 BitmapInfo bi = new BitmapInfo(b,0);
                 drawable = newIcon(context, bi);
