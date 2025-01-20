@@ -2341,7 +2341,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         // android.os.Process.killProcess(android.os.Process.myPid());
         Intent intent = getIntent();
         finish();
-        startActivity(intent);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(intent);
+            }
+        }, 1000);
+     
     }
 
     public void rearray(Context context){
@@ -2534,17 +2541,17 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                         }
                     }
     
-                    File[] files = FileUtils.getAllDesktopFiles();
-                    if(files == null ) return ;
-                    for(File f : files){
-                        if(f.getName().contains("_fde.desktop")){
-                            boolean found = listMd5.stream().anyMatch(item -> f.getName().contains(item));
-                            Log.i(TAG,"bella_delete packageName "+f.getName() + ",found "+found);
-                            if(!found){
-                                f.delete();
-                            }
-                        }
-                    }
+                    // File[] files = FileUtils.getAllDesktopFiles();
+                    // if(files == null ) return ;
+                    // for(File f : files){
+                    //     if(f.getName().contains("_fde.desktop")){
+                    //         boolean found = listMd5.stream().anyMatch(item -> f.getName().contains(item));
+                    //         Log.i(TAG,"bella_delete packageName "+f.getName() + ",found "+found);
+                    //         if(!found){
+                    //             f.delete();
+                    //         }
+                    //     }
+                    // }
                    
                 }catch(Exception e){
                     e.printStackTrace();
