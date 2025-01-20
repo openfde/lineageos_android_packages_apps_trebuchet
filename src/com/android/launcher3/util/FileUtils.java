@@ -755,8 +755,12 @@ public static Bitmap svgToBitmap(SVG svg) {
     Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
 
     // 使用 Canvas 将 SVG 渲染到 Bitmap 上
-    Canvas canvas = new Canvas(bitmap);
-    svg.renderToCanvas(canvas);
+    try{
+        Canvas canvas = new Canvas(bitmap);
+        svg.renderToCanvas(canvas);
+    }catch(Exception e){
+        e.printStackTrace();
+    }
 
     return bitmap;
 }
