@@ -81,6 +81,7 @@ import java.util.Arrays;
 import java.util.Map;
 import com.android.launcher3.util.DbUtils;
 
+
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
  * LauncherModel object held in a static. Also provide APIs for updating the database state
@@ -165,6 +166,14 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
     public void onPackagesRemoved(UserHandle user, String... packages) {
         int op = PackageUpdatedTask.OP_REMOVE;
         FileLog.d(TAG, "package removed received " + TextUtils.join(",", packages));
+        try{
+            for (String packageName : packages) {
+                FileUtils.deleteLinuxDesktopFile(packageName);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
         enqueueModelUpdateTask(new PackageUpdatedTask(op, user, packages));
     }
 

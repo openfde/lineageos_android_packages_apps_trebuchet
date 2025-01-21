@@ -825,5 +825,19 @@ public static boolean containsChinese(String str) {
     return str.matches(".*" + regex + ".*");
 }
 
+public  static void deleteLinuxDesktopFile(String packageName){
+   try{
+        String documentId =  getAllDesktopPath();
+        String md5 = getMD5(packageName);
+        String pathDesktop = documentId+""+ md5+"_fde.desktop";
+        File file = new File(pathDesktop);
+        if(file.exists()){
+            file.delete();
+        }
+   }catch(Exception e){
+        e.printStackTrace();
+   }
+}
+
 
 }
