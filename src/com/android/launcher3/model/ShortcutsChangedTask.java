@@ -31,6 +31,7 @@ import com.android.launcher3.util.MultiHashMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import android.util.Log;
 
 /**
  * Handles changes due to shortcut manager updates (deep shortcut changes)
@@ -41,6 +42,9 @@ public class ShortcutsChangedTask extends BaseModelUpdateTask {
     private final List<ShortcutInfo> mShortcuts;
     private final UserHandle mUser;
     private final boolean mUpdateIdMap;
+
+    static final String TAG = "ShortcutsChangedTask";
+
 
     public ShortcutsChangedTask(String packageName, List<ShortcutInfo> shortcuts,
             UserHandle user, boolean updateIdMap) {
@@ -57,6 +61,10 @@ public class ShortcutsChangedTask extends BaseModelUpdateTask {
         HashSet<ShortcutKey> removedKeys = new HashSet<>();
         MultiHashMap<ShortcutKey, WorkspaceItemInfo> keyToShortcutInfo = new MultiHashMap<>();
         HashSet<String> allIds = new HashSet<>();
+
+        // Launcher launcher = Launcher.getLauncher(context);
+        Log.i(TAG, "bella ShortcutsChangedTask..................mPackageName "+mPackageName);
+
 
         for (ItemInfo itemInfo : dataModel.itemsIdMap) {
             if (itemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {

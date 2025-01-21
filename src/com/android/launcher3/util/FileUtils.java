@@ -349,16 +349,12 @@ public static Point findNextFreePoint(Context context){
                 }
                 String packageName  = initialValues.get("packageName").toString();
                 int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
-    
+                Log.i(TAG,"bella..createLinuxDesktopFile packageName "+packageName + ",itemType: "+itemType);
                 if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
                     return ;
                 }
     
-                String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
-                File ff = new File(documentId);
-                if(!ff.exists()){
-                    documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
-                }
+                String documentId =  getAllDesktopPath();
       
                 // String subPackageName = packageName;
                 // if(packageName.length() > 10){
@@ -418,11 +414,7 @@ public static Point findNextFreePoint(Context context){
     }
 
     public static Map<String,Object> getLinuxContentString(String fileName){
-        String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
-        File ff = new File(documentId);
-        if(!ff.exists()){
-            documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
-        }
+        String documentId = FileUtils.getAllDesktopPath();
         String filePath = documentId +fileName;
         String startChar = "[Desktop";  // 
         Map<String,Object> map = null;
@@ -601,15 +593,20 @@ public static Point findNextFreePoint(Context context){
     }
 
     public static  File[] getAllDesktopFiles(){
+        String documentId =  getAllDesktopPath();
+        // String documentId = FileUtils.PATH_ID_DESKTOP; 
+        File parent = new File(documentId);
+        File[] files = parent.listFiles();
+        return files;
+    }
+
+    public static  String getAllDesktopPath(){
         String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
         File ff = new File(documentId);
         if(!ff.exists()){
             documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
         }
-        // String documentId = FileUtils.PATH_ID_DESKTOP; 
-        File parent = new File(documentId);
-        File[] files = parent.listFiles();
-        return files;
+       return documentId ;
     }
 
     public static String getMD5(String input) {
