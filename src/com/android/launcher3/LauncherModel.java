@@ -353,8 +353,8 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
                ArrayList<ItemInfo> tempItems = mBgDataModel.workspaceItems;
                ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
                for(ItemInfo ii : tempItems) {
-                    if(ii.itemType == 8  || ii.itemType == 9){
-                        String documentId =  "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/桌面/";  
+                    if(ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY  || ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                        String documentId =  FileUtils.getAllDesktopPath();  
                         File f = new File(documentId + ii.getTitle());
                         if(f.exists()){
                             workspaceItems.add(ii);
