@@ -2508,57 +2508,81 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         }
         workspace.requestLayout();
 
-        for(ItemInfo item : items){
-            if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
-                String packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
-                gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
-            }
-        }
-
-        Handler handler = new Handler(Looper.getMainLooper());
-            handler.postDelayed(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try{
-                    List<String> listMd5 = new ArrayList<>();
                     for(ItemInfo item : items){
                         if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
-                            ContentValues initialValues = new ContentValues();
-                            initialValues.put("title",item.title.toString());
-                            String packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
-                            if(packageName !=null){
-                                initialValues.put("packageName",packageName);
-                                initialValues.put("itemType",item.itemType);
-                                FileUtils.createLinuxDesktopFile(initialValues);
-    
-                                String md5 = FileUtils.getMD5(packageName);
-                                listMd5.add(md5);
-    
+                            String packageName = "";
+                            if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
+                                packageName = item.getTargetComponent().getPackageName();    
+                            }else{
+                                Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+                                packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                             }
-                            Log.i(TAG,"bella_insert packageName "+packageName);
-                        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-                            //
+                            gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
                         }
                     }
-    
-                    // File[] files = FileUtils.getAllDesktopFiles();
-                    // if(files == null ) return ;
-                    // for(File f : files){
-                    //     if(f.getName().contains("_fde.desktop")){
-                    //         boolean found = listMd5.stream().anyMatch(item -> f.getName().contains(item));
-                    //         Log.i(TAG,"bella_delete packageName "+f.getName() + ",found "+found);
-                    //         if(!found){
-                    //             f.delete();
-                    //         }
-                    //     }
-                    // }
-                   
                 }catch(Exception e){
                     e.printStackTrace();
                 }
-                
             }
-        }, 10* 1000);
+        }).start();
+
+       
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(() -> {
+            new Thread(() -> {
+                try {
+                    List<String> listMd5 = new ArrayList<>();
+                    for (ItemInfo item : items) {
+                        if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
+                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
+                            ContentValues initialValues = new ContentValues();
+                            initialValues.put("title", item.title.toString());
+                            String packageName = "";
+                            if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
+                                packageName = item.getTargetComponent().getPackageName();    
+                            }else{
+                                Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+                                packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
+                            }
+                            if (packageName != null) {
+                                initialValues.put("packageName", packageName);
+                                initialValues.put("itemType", item.itemType);
+                                FileUtils.createLinuxDesktopFile(initialValues);
+                                String md5 = FileUtils.getMD5(packageName);
+                                listMd5.add(md5);
+                                Log.i(TAG, "bella_insert packageName " + packageName);
+                            }
+                           
+                        } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
+                            // Handle Linux app item type if needed
+                        }
+                    }
+        
+                    // Optionally clean up desktop files not in the listMd5
+                    // File[] files = FileUtils.getAllDesktopFiles();
+                    // if (files != null) {
+                    //     for (File f : files) {
+                    //         if (f.getName().contains("_fde.desktop")) {
+                    //             boolean found = listMd5.stream().anyMatch(item -> f.getName().contains(item));
+                    //             Log.i(TAG, "bella_delete packageName " + f.getName() + ", found " + found);
+                    //             if (!found) {
+                    //                 f.delete();
+                    //             }
+                    //         }
+                    //     }
+                    // }
+        
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }, 10 * 1000);
 
        
 
