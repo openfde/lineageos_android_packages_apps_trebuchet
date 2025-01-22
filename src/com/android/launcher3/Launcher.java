@@ -2186,8 +2186,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                             Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
             
                             if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
-                                boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
-                                Log.d(TAG, "addDesktopFiles-- found: "+found);
+                                if(listTexts !=null){
+                                    boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
+                                    Log.d(TAG, "addDesktopFiles-- found: "+found);
+                                }
                                 continue;
                             }else if(f.getName().contains(".desktop")){
                                 info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
