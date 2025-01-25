@@ -2137,17 +2137,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             @Override
             public void run() {
                 try{
-                    List<Map<String,Object>>  listApps = DbUtils.queryAllNotDesktopFilesFromDatabase(Launcher.this);
+                    List<Map<String,Object>>  listIcons = DbUtils.queryAllIconFromDatabase(Launcher.this);
                     int count = 0;
-                    if(listApps !=null){
-                        count = listApps.size();
+                    if(listIcons !=null){
+                        count = listIcons.size();
                     }
                 
-                 //   String documentId = FileUtils.PATH_ID_DESKTOP;
                     String documentId =  FileUtils.getAllDesktopPath();
-            
                     List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(Launcher.this);
-            
                     if(listTexts !=null){
                         for(Map<String,Object> mp : listTexts){
                             String fName = mp.get("title").toString();
@@ -2164,46 +2161,53 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                     int scale  =  FileUtils.getScreenRows(Launcher.this);
                     if(files !=null){
                         Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-                        Log.d(TAG, "addDesktopFiles: files size  "+files.length + ",count "+count );
-                    
                         int index = 0;
                         int xindex = count / scale;
                         int yindex = count % scale; 
                         for(File f : files){
-                            WorkspaceItemInfo info = new WorkspaceItemInfo();
-                            info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
-                            info.title = f.getName();
-                            info.container = -100;
-                            info.screenId = 0;
-                            Intent intent = new Intent();
-                            intent.setPackage("com.android.launcher3");
-                            info.intent = intent;
-                            int y = yindex + index ;
-                            info.cellY = y%scale ;
-                            info.cellX = xindex + y/scale;
-                            info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
-            
-                            Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
-            
-                            if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
-                                if(listTexts !=null){
-                                    boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
-                                    Log.d(TAG, "addDesktopFiles-- found: "+found);
+                            List<Map<String,Object>>  icons = DbUtils.queryDesktopFileInDatabase(Launcher.this,f.getName());
+                            if(icons == null ){
+                                Log.d(TAG, "addDesktopFiles: listIcons is null "+files.length + ",count "+count +" ,fname: "+f.getName() );
+
+                                WorkspaceItemInfo info = new WorkspaceItemInfo();
+                                info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+                                info.title = f.getName();
+                                info.container = -100;
+                                info.screenId = 0;
+                                Intent intent = new Intent();
+                                intent.setPackage("com.android.launcher3");
+                                info.intent = intent;
+                                int y = yindex + index ;
+                                info.cellY = y%scale ;
+                                info.cellX = xindex + y/scale;
+                                info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+                
+                                Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
+                
+                                if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
+                                    if(listTexts !=null){
+                                        // boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
+                                        // Log.d(TAG, "addDesktopFiles-- found: "+found);
+                                    }
+                                    continue;
+                                }else if(f.getName().contains(".desktop")){
+                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                                    // desktop linux app temp delete 
+                                    // if(!FileUtils.isOpenLinuxApp){
+                                    //     continue;
+                                    // }
+                                }else if(f.isDirectory()){
+                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                                }else{
+                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
                                 }
-                                continue;
-                            }else if(f.getName().contains(".desktop")){
-                                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
-                                // desktop linux app temp delete 
-                                // if(!FileUtils.isOpenLinuxApp){
-                                //     continue;
-                                // }
-                            }else if(f.isDirectory()){
-                                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                                index++;
+                                insertOrUpdateFavorites(info);
+    
                             }else{
-                                info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
-                            }
-                            index++;
-                            insertOrUpdateFavorites(info);
+                                Log.d(TAG, "addDesktopFiles: listIcons is exists  "+files.length + ",count "+count + ",fname "+f.getName());
+                            }    
+                           
                         }
                     }else{
                         Log.d(TAG, "bindItems: files is null  " );
@@ -2551,11 +2555,13 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                                 packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                             }
                             if (packageName != null) {
-                                initialValues.put("packageName", packageName);
-                                initialValues.put("itemType", item.itemType);
-                                FileUtils.createLinuxDesktopFile(initialValues);
-                                String md5 = FileUtils.getMD5(packageName);
-                                listMd5.add(md5);
+                                if(!"com.fde.x11".equals(packageName)){
+                                    initialValues.put("packageName", packageName);
+                                    initialValues.put("itemType", item.itemType);
+                                    FileUtils.createLinuxDesktopFile(initialValues);
+                                    String md5 = FileUtils.getMD5(packageName);
+                                    listMd5.add(md5);
+                                }
                                 Log.i(TAG, "bella_insert packageName " + packageName);
                             }
                            

@@ -121,6 +121,36 @@ public class DbUtils {
         return list ;
     }
     
+
+    public static List<Map<String,Object>> queryAllIconFromDatabase(Context context){
+
+        List<Map<String,Object>> list = null;
+    
+        Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
+    
+        if(list == null ){
+            Log.i(TAG, "queryAllNotDesktopFilesFromDatabase is null");
+        }else{
+        }
+        return list ;
+    }
     
     public static List<Map<String,Object>> queryAllNotDesktopFilesFromDatabase(Context context){
         String[] selectionArgs = {"0","1","2","3","4","5","6","7"};
@@ -152,6 +182,42 @@ public class DbUtils {
         }else{
         }
     
+        return list ;
+    }
+
+
+    public static List<Map<String,Object>> queryDesktopFileInDatabase(Context context,String fileName){
+        String[] displayNames  = {"8","9","10"};
+        String[] selectionArgs = new String[displayNames.length + 1];
+        String selection = "title = ? and itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
+        selectionArgs[0] = fileName; // MIME_TYPE 的值
+        System.arraycopy(displayNames, 0, selectionArgs, 1, displayNames.length);
+        List<Map<String,Object>> list = null;
+        Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
+
+        if(list == null ){
+            Log.i(TAG, "queryItemsFromDatabase is null");
+        }else{
+            Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
+        }
+
         return list ;
     }
 
