@@ -356,15 +356,16 @@ public static Point findNextFreePoint(Context context){
     
                 String documentId =  getAllDesktopPath();
       
-                // String subPackageName = packageName;
-                // if(packageName.length() > 10){
-                //     subPackageName = packageName.replace("com.","");
-                // }
-                String md5 = getMD5(packageName);
+                String md5 =  getMD5(packageName);
                 String pathDesktop = documentId+""+ md5+"_fde.desktop";
                 File file = new File(pathDesktop);
                 if(file.exists()){
                     // Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                    file.delete();
+                }
+                pathDesktop = documentId+""+ packageName+"_fde.desktop";
+                file = new File(pathDesktop);
+                if(file.exists()){
                     return ;
                 }
                 Path desktopFilePath = Paths.get(pathDesktop);

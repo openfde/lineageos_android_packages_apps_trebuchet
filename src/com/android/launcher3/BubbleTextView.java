@@ -671,7 +671,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver, 
         // If we had already set an icon before, disable relayout as the icon size is the
         // same as before.
         mDisableRelayout = mIcon != null;
-        Log.i(TAG,"applyCompoundDrawables .... mLayoutHorizontal "+mLayoutHorizontal + " ,mIconSize: "+mIconSize);
+        // Log.i(TAG,"applyCompoundDrawables .... mLayoutHorizontal "+mLayoutHorizontal + " ,mIconSize: "+mIconSize);
         
         icon.setBounds(0, 0, mIconSize, mIconSize);
         if (mLayoutHorizontal) {

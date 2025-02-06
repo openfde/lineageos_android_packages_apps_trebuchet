@@ -214,6 +214,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.io.File;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import android.os.Environment;
 import androidx.core.content.ContextCompat;
 import androidx.core.app.ActivityCompat;
@@ -429,6 +433,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/"); 
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/pic/"); 
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.local/share/icons/"); 
+
 
         bindService();
 
@@ -2131,92 +2136,111 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         insertFavorites(info);
     }
 
+    public void refreshDesktopFiles(){
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return addDesktopFiles();
+        }, executorService);
 
-    public void addDesktopFiles(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    List<Map<String,Object>>  listIcons = DbUtils.queryAllIconFromDatabase(Launcher.this);
-                    int count = 0;
-                    if(listIcons !=null){
-                        count = listIcons.size();
-                    }
-                
-                    String documentId =  FileUtils.getAllDesktopPath();
-                    List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(Launcher.this);
-                    if(listTexts !=null){
-                        for(Map<String,Object> mp : listTexts){
-                            String fName = mp.get("title").toString();
-                            Log.d(TAG, "addDesktopFiles fName  "+fName );
-                            File f = new File(documentId + fName);
-                            if(!f.exists()){
-                                // mBgDataModel.removeItem(mContext, item);
-                                 DbUtils.deleteTitleFromDatabase(Launcher.this,fName);   
-                            }
-                        }
-                    }
-            
-                    File[] files = FileUtils.getAllDesktopFiles();
-                    int scale  =  FileUtils.getScreenRows(Launcher.this);
-                    if(files !=null){
-                        Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-                        int index = 0;
-                        int xindex = count / scale;
-                        int yindex = count % scale; 
-                        for(File f : files){
-                            List<Map<String,Object>>  icons = DbUtils.queryDesktopFileInDatabase(Launcher.this,f.getName());
-                            if(icons == null ){
-                                Log.d(TAG, "addDesktopFiles: listIcons is null "+files.length + ",count "+count +" ,fname: "+f.getName() );
+        future.thenAccept(result -> {
+            Log.d(TAG, "result  "+result );
+            if(1 == result){
+                getModel().forceReload();
+            }
+        });
 
-                                WorkspaceItemInfo info = new WorkspaceItemInfo();
-                                info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
-                                info.title = f.getName();
-                                info.container = -100;
-                                info.screenId = 0;
-                                Intent intent = new Intent();
-                                intent.setPackage("com.android.launcher3");
-                                info.intent = intent;
-                                int y = yindex + index ;
-                                info.cellY = y%scale ;
-                                info.cellX = xindex + y/scale;
-                                info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
-                
-                                Log.d(TAG, "addDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
-                
-                                if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
-                                    if(listTexts !=null){
-                                        // boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
-                                        // Log.d(TAG, "addDesktopFiles-- found: "+found);
-                                    }
-                                    continue;
-                                }else if(f.getName().contains(".desktop")){
-                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
-                                    // desktop linux app temp delete 
-                                    // if(!FileUtils.isOpenLinuxApp){
-                                    //     continue;
-                                    // }
-                                }else if(f.isDirectory()){
-                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
-                                }else{
-                                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
-                                }
-                                index++;
-                                insertOrUpdateFavorites(info);
-    
-                            }else{
-                                Log.d(TAG, "addDesktopFiles: listIcons is exists  "+files.length + ",count "+count + ",fname "+f.getName());
-                            }    
-                           
-                        }
-                    }else{
-                        Log.d(TAG, "bindItems: files is null  " );
+        executorService.shutdown();
+    }
+
+    public int addDesktopFiles(){
+        try{
+            // List<Map<String,Object>>  listIcons = DbUtils.queryAllIconFromDatabase(Launcher.this);
+            // int count = 0;
+            // if(listIcons !=null){
+            //     count = listIcons.size();
+            // }
+
+
+            // Point point = FileUtils.findNextFreePoint(this);
+            // info.cellY = point.y;
+            // info.cellX = point.x;
+        
+            String documentId =  FileUtils.getAllDesktopPath();
+            List<Map<String,Object>>  listTexts = DbUtils.queryDesktopTextFilesFromDatabase(Launcher.this);
+            if(listTexts !=null){
+                for(Map<String,Object> mp : listTexts){
+                    String fName = mp.get("title").toString();
+                    Log.d(TAG, "refreshDesktopFiles fName  "+fName );
+                    File f = new File(documentId + fName);
+                    if(!f.exists()){
+                        // mBgDataModel.removeItem(mContext, item);
+                         DbUtils.deleteTitleFromDatabase(Launcher.this,fName);   
                     }
-                }catch(Exception e){
-                    e.printStackTrace();
                 }
             }
-        }).start();
+    
+            File[] files = FileUtils.getAllDesktopFiles();
+            int scale  =  FileUtils.getScreenRows(Launcher.this);
+            if(files !=null){
+                Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
+                int index = 0;
+                // int xindex = count / scale;
+                // int yindex = count % scale; 
+                for(File f : files){
+                    List<Map<String,Object>>  icons = DbUtils.queryDesktopFileInDatabase(Launcher.this,f.getName());
+                    if(icons == null ){
+                        Log.d(TAG, "refreshDesktopFiles: listIcons is null "+files.length  +" ,fname: "+f.getName() );
+                        Point point = FileUtils.findNextFreePoint(this);
+                        WorkspaceItemInfo info = new WorkspaceItemInfo();
+                        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
+                        info.title = f.getName();
+                        info.container = -100;
+                        info.screenId = 0;
+                        Intent intent = new Intent();
+                        intent.setPackage("com.android.launcher3");
+                        info.intent = intent;
+                        // int y = yindex + index ;
+                        // info.cellY = y%scale ;
+                        // info.cellX = xindex + y/scale;
+                        info.cellY = point.y;
+                        info.cellX = point.x;
+                        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        
+                        // Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
+                        Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName());
+                        if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
+                            if(listTexts !=null){
+                                // boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
+                                // Log.d(TAG, "-- found: "+found);
+                            }
+                            continue;
+                        }else if(f.getName().contains(".desktop")){
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                            // desktop linux app temp delete 
+                            // if(!FileUtils.isOpenLinuxApp){
+                            //     continue;
+                            // }
+                        }else if(f.isDirectory()){
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
+                        }else{
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
+                        }
+                        index++;
+                        insertOrUpdateFavorites(info);
+                    }else{
+                        Log.d(TAG, "refreshDesktopFiles: listIcons is exists  "+files.length  + ",fname "+f.getName());
+                    }    
+                   
+                }
+                return 1;
+            }else{
+                Log.d(TAG, "bindItems: files is null  " );
+                return 0;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private void insertOrUpdateFavorites(ItemInfo info){
@@ -2343,16 +2367,26 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
 
     public void refresh(){
         // android.os.Process.killProcess(android.os.Process.myPid());
-        Intent intent = getIntent();
-        finish();
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            // getModel().rearray(Launcher.this);
+            return addDesktopFiles();
+        }, executorService);
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(intent);
+        future.thenAccept(result -> {
+            Log.d(TAG, "result  "+result );
+            executorService.shutdown();
+            if(1 == result){
+                Intent intent = getIntent();
+                finish();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(intent);
+                    }
+                }, 1000);
             }
-        }, 1000);
-     
+        });
     }
 
     public void rearray(Context context){
@@ -2516,13 +2550,14 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             @Override
             public void run() {
                 try{
+                    Log.i(TAG, "bella_insert OP_CREATE_ANDROID_ICON ");
                     for(ItemInfo item : items){
                         if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
                             String packageName = "";
                             if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
                                 packageName = item.getTargetComponent().getPackageName();    
                             }else{
-                                Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+                                // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
                                 packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                             }
                             gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
@@ -2540,6 +2575,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         handler.postDelayed(() -> {
             new Thread(() -> {
                 try {
+                    Log.i(TAG, "bella_insert createLinuxDesktopFile ");
                     List<String> listMd5 = new ArrayList<>();
                     for (ItemInfo item : items) {
                         if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
@@ -2551,7 +2587,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                             if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
                                 packageName = item.getTargetComponent().getPackageName();    
                             }else{
-                                Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+                                // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
                                 packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                             }
                             if (packageName != null) {
@@ -2562,7 +2598,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                                     String md5 = FileUtils.getMD5(packageName);
                                     listMd5.add(md5);
                                 }
-                                Log.i(TAG, "bella_insert packageName " + packageName);
+                                // Log.i(TAG, "bella_insert packageName " + packageName);
                             }
                            
                         } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
@@ -3194,7 +3230,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             idocAidl = IDocAidlInterface.Stub.asInterface(service);
             // gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
             gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
-            addDesktopFiles();
+            refreshDesktopFiles();
                    
             try{
                 idocAidl.register(new IDataChangedCallback.Stub(){
@@ -3205,13 +3241,9 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                             @Override
                             public void run() {
                                 if("PASTE".equals(params) ){
-                                    //addDesktopFile();
-                                    addDesktopFiles();
-                                    bindWorkspace();
-                                    //getModel().forceReload();
-                                } else if("REFRESH_DESKTOP".equals(params)){
-                                    addDesktopFiles();
-                                }          
+                                    refreshDesktopFiles();
+                                    // bindWorkspace();
+                                }         
                             }
                         });           
                     }
@@ -3230,7 +3262,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                                     DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
                                     //bindWorkspace();
                                     getModel().forceReload();
-                                }
+                                }else if("UPDATE_DESKTOP".equals(method)){
+                                    refreshDesktopFiles();
+                                    // getModel().refreshDeskFileList(Launcher.this);
+                                }   
                             }
                         });
                        

@@ -328,11 +328,10 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         }
     }
 
-    public void addDeskFileList(Context context){
+    public void refreshDeskFileList(Context context){
         Launcher launcher = Launcher.getLauncher(context);
-        // List<WorkspaceItemInfo> list = launcher.addDesktopFiles();
         ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
-
+        Log.i(TAG, "workspaceItems.......Launcher...........size  "+workspaceItems.size());
     }
 
     public List<ItemInfo> rearray(Context context){

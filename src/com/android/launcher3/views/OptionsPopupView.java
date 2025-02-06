@@ -211,9 +211,9 @@ public class OptionsPopupView extends ArrowPopup
                 LAUNCHER_DESKTOP_ICON_TAP_REARRAY,
                 OptionsPopupView::startRearray));
 
-        // options.add(new OptionItem(R.string.desktop_icon_refresh, R.drawable.ic_apps,
-        //         LAUNCHER_DESKTOP_ICON_TAP_REFRESH,
-        //         OptionsPopupView::startRefresh));        
+        options.add(new OptionItem(R.string.desktop_icon_refresh, R.drawable.ic_refresh,
+                LAUNCHER_DESKTOP_ICON_TAP_REFRESH,
+                OptionsPopupView::startRefresh));        
 
         show(launcher, target, options);
     }
