@@ -97,7 +97,10 @@ import java.util.Locale;
 import com.android.launcher3.R;
 import com.android.launcher3.util.FileUtils;
 import android.util.Log;
-
+import java.io.File;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -457,6 +460,56 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             Log.i(TAG,"bellaLauncher applyIconAndLabel  fileName: "+fileName + " ,fileType  "+fileType);
             bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
             iconDrawable = new FastBitmapDrawable(bitmap);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.icon_linux);
+            String title = info.title.toString();
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
+            if(map !=null && !map.isEmpty()){
+                // String icon = map.get("icon").toString();
+               try{
+                String name = map.get("name").toString().replaceAll(" ", "_");
+                String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
+                int lastIndex = exec.lastIndexOf('/');
+                String key = name ;
+                if(FileUtils.containsChinese(name)){
+                    if(lastIndex > 0){
+                        key = exec.substring(lastIndex+1);
+                     }
+                }
+                String IconPath = FileUtils.getSystemProperty(key ,"-1");
+
+                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key );
+        
+                if("-1".equals(IconPath) ){
+
+                }else{
+                    String icon = "/volumes"+"/"+FileUtils.getLinuxUUID() + IconPath;
+                    File f = new File(icon);
+                    Log.i("bella","FastBitmapDrawable exists : "+f.exists());
+                    if(IconPath.contains(".svg") ){
+                        bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(getContext(),icon));
+                    }else{
+                        bitmap = BitmapFactory.decodeFile(icon); 
+                    }    
+                }
+               }catch(Exception e){
+                  e.printStackTrace();
+               }
+            }
+            Bitmap b2 = FileUtils.vectorToBitmap(getContext(), R.mipmap.bg_linux);
+            b2  = FileUtils.scaleBitmap(b2,80,80);
+            if(bitmap != null ){
+                bitmap  = FileUtils.scaleBitmap(bitmap,48,48);
+                Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);
+                // BitmapInfo bi = new BitmapInfo(b,0);
+                // iconDrawable = newIcon(getContext(), bi);
+                iconDrawable = new FastBitmapDrawable(b);
+            }else{
+                bitmap  = b2;
+                // BitmapInfo bi = new BitmapInfo(bitmap,0);
+                // iconDrawable = newIcon(getContext(), bi);
+                iconDrawable = new FastBitmapDrawable(bitmap);
+            }
         }
         mDotParams.appColor = iconDrawable.getIconColor();
         mDotParams.dotColor = Themes.getAttrColor(getContext(), R.attr.notificationDotColor);

@@ -52,9 +52,23 @@ import android.text.TextUtils;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.BitmapFactory;
+import android.widget.TextView;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.PictureDrawable;
+import android.graphics.Picture;
+import android.util.Xml;
+import org.xmlpull.v1.XmlPullParser;
+import java.io.InputStream;
+import com.android.launcher3.svg.SVG;
 import android.webkit.MimeTypeMap;
 import com.android.launcher3.model.ModelDbController;
-
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -102,7 +116,7 @@ public class FileUtils {
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
 
-    public static boolean isOpenLinuxApp = false ;
+    public static boolean isOpenLinuxApp = true ;
 
 public static String getRootDir(){
     return "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir() ;
@@ -139,20 +153,6 @@ private static String getUniqueFileName(String documentId,String fileName ) {
     } while (newFile.exists());
 
     return newName;
-}
-
-public static Bitmap drawableToBitmap(Drawable drawable) {
-    int width = drawable.getIntrinsicWidth();
-    int height = drawable.getIntrinsicHeight();
-    Bitmap bitmap = Bitmap.createBitmap(
-            width,
-            height,
-            drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565
-    );
-    Canvas canvas = new Canvas(bitmap);
-    drawable.setBounds(0, 0, width, height);
-    drawable.draw(canvas);
-    return bitmap;
 }
     
 public static Drawable getAppIcon(Context context, String packageName) {
@@ -226,13 +226,13 @@ public static int getScreenColumns(Context context){
  * find next free point
  */
 public static Point findNextFreePoint(Context context,ModelDbController dbController){
-    int numRows  =  getScreenRows(context);
-    int numColumns  =  getScreenColumns(context);
-
+    int numRows  =  getScreenRows(context);//8
+    int numColumns  =  getScreenColumns(context);//16
+    Log.i(TAG, "queryAllFilesFromDatabase: numRows:  "+numRows + " , numColumns: "+numColumns);
     Point point = new Point(-1,-1);
     outer: 
-    for(int i = 0 ; i < numColumns ; i++ ){
-        for(int j = 0 ; j < numRows ; j++){
+    for(int j = 0 ; j < numRows ; j++){ 
+        for(int i = 0 ; i < numColumns ; i++ ){
             if(DbUtils.queryFilesByPointFromDatabase(dbController,i,j) == null){
                 point.x = i ;
                 point.y = j ;
@@ -240,7 +240,7 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
             }
         }
     }
-    Log.i(TAG, "queryAllFilesFromDatabase: x:  "+point.x + " , y: "+point.y);
+    // Log.i(TAG, "queryAllFilesFromDatabase: x:  "+point.x + " , y: "+point.y);
     return point ;
 }
 
@@ -327,43 +327,66 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         return result;
     }
 
+    public static String getPackageNameByAppName(Context context, String appName) {
+        PackageManager packageManager = context.getPackageManager();
+        List<ApplicationInfo> apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
+        for (ApplicationInfo app : apps) {
+            String appLabel = (String) packageManager.getApplicationLabel(app);  // 获取应用的显示名称
+            if (appLabel != null && appLabel.equalsIgnoreCase(appName)) {
+                return app.packageName;  
+            }
+        }
+        return null;  
+    }
     public static void createLinuxDesktopFile(ContentValues initialValues){
         // desktop linux app temp delete 
-        if(!isOpenLinuxApp){
-            return ;
-        }
+        // if(!isOpenLinuxApp){
+        //     return ;
+        // }
         createDesktopDir(PATH_ID_DESKTOP);
         if(initialValues !=null){
-            Log.i(TAG,"bellaLauncher...insert....3......... "+initialValues.toString());
             try{
                 String title  = initialValues.get("title").toString();
+                if(initialValues.get("packageName") == null){
+                    Log.e(TAG,"bella packageName is null  ");
+                    return ;
+                }
+                String packageName  = initialValues.get("packageName").toString();
                 int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
-    
+                Log.i(TAG,"bella..createLinuxDesktopFile packageName "+packageName + ",itemType: "+itemType);
                 if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
                     return ;
                 }
     
-                String documentId =  FileUtils.getRootDir()+"/桌面/";  
-                File ff = new File(documentId);
-                if(!ff.exists()){
-                    documentId =  FileUtils.getRootDir()+"/Desktop/";  
-                }
-                String pathDesktop = documentId+title+"_fde.desktop";
+                String documentId =  getAllDesktopPath();
+      
+                String md5 =  getMD5(packageName);
+                String pathDesktop = documentId+""+ md5+"_fde.desktop";
                 File file = new File(pathDesktop);
                 if(file.exists()){
-                    Log.i(TAG,"bellaLauncher...pathDesktop is exists :  "+pathDesktop);
+                    // Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                    file.delete();
+                }
+                md5 = packageName;
+                pathDesktop = documentId+""+ packageName+"_fde.desktop";
+                file = new File(pathDesktop);
+                if(file.exists()){
                     return ;
                 }
                 Path desktopFilePath = Paths.get(pathDesktop);
-                String picPath = FileUtils.getRootDir()+"/.openfde/pic/"+title+".png";
+
+                String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/"+md5+".png" ;
                 File filePic = new File(picPath);
-                if(!filePic.exists()){
-                    Log.i(TAG,"bellaLauncher...insert.............picPath: "+picPath);
+                String homeDir = getLinuxHomeDir();
+                String linuxPath = homeDir+"/.local/share/icons/"+md5+".png";
+                // Log.i(TAG,"bella...homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
+                File linuxPic = new File(linuxPath);
+                if(!linuxPic.exists()){
+                    Log.i(TAG,"bella...insert.............md5: "+md5 +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
                 }else{
                     //if pic exists ,return 
                 }    
-    
     
                 List<String> lines = List.of(
                     "[Desktop Entry]",
@@ -371,8 +394,8 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
                     "Name="+title,
                     "Name[zh_CN]="+title,
                     "Categories="+itemType,
-                    "Exec=/usr/bin/fde_utils start",
-                    "Icon="+picPath
+                    "Exec=fde_launch "+packageName,
+                    "Icon="+linuxPic
                 );
          
                 // 写入.desktop文件
@@ -398,16 +421,13 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
     }
 
     public static Map<String,Object> getLinuxContentString(String fileName){
-        String documentId =  FileUtils.getRootDir()+"/桌面/";  
-        File ff = new File(documentId);
-        if(!ff.exists()){
-            documentId =  FileUtils.getRootDir()+"/Desktop/";  
-        }
+        String documentId = FileUtils.getAllDesktopPath();
         String filePath = documentId +fileName;
         String startChar = "[Desktop";  // 
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = null;
         try {
             // 读取文件内容
+            map = new HashMap<>();
             String content = readFile(filePath);
             // 查找以指定字开头的段落
 
@@ -435,19 +455,24 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
 
     public  static Map<String,Object> getLinuxDesktopFileContent(String fileName ){
         Map<String,Object> mp = getLinuxContentString(fileName);
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map = null;
         try{
-            String name = mp.get("Name").toString();
-            String exec = mp.get("Exec").toString();
-            String icon = mp.get("Icon").toString();
-            map.put("name",name);
-            map.put("exec",exec);
-            map.put("icon",icon);
-         
+            map = new HashMap<>();
+            if(mp.get("Name") !=null){
+                map.put("name",mp.get("Name").toString());
+            }
+            
+            if(mp.get("Exec") !=null){
+                map.put("exec",mp.get("Exec").toString());
+            }
+            if(mp.get("Icon") !=null){
+                map.put("icon",mp.get("Icon").toString());
+            }
+                     
             if(mp.get("Name[zh_CN]") != null ){
                 map.put("nameZh",mp.get("Name[zh_CN]").toString());
             }else{
-                map.put("nameZh",name); 
+                map.put("nameZh",mp.get("Name").toString()); 
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -506,6 +531,17 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         }
     }
 
+    public static String getSystemProperty(String key, String defaultValue) {
+        String value = defaultValue;
+        try {
+            Class<?> systemProperties = Class.forName("android.os.SystemProperties");
+            Method get = systemProperties.getMethod("get", String.class, String.class);
+            value = (String) get.invoke(null, key, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
     public static boolean isAppInstalled(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
         try {
@@ -562,15 +598,237 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         }
     }
 
-
-    
-    public static String getMimeType(File file) {
-        String mimeType = null;
-        String extension = MimeTypeMap.getFileExtensionFromUrl(file.getAbsolutePath());
-        if (extension != null) {
-            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-        }
-        return mimeType;
+    public static  File[] getAllDesktopFiles(){
+        String documentId =  getAllDesktopPath();
+        // String documentId = FileUtils.PATH_ID_DESKTOP; 
+        File parent = new File(documentId);
+        File[] files = parent.listFiles();
+        return files;
     }
+
+    public static  String getAllDesktopPath(){
+        String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
+        }
+       return documentId ;
+    }
+
+    public static String getMD5(String input) {
+        try {
+            // 创建一个 MessageDigest 实例，指定使用 MD5 算法
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+    
+            // 计算 MD5 值，得到一个字节数组
+            byte[] hashBytes = digest.digest(input.getBytes());
+    
+            // 转换字节数组为 16 进制字符串
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xFF & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return "a"+ hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Bitmap addTextWatermark(Bitmap source, String watermarkText) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+
+        // 创建一个新的Bitmap，大小与原始Bitmap相同
+        Bitmap watermarkBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        // 创建画布并将原图绘制到画布上
+        Canvas canvas = new Canvas(watermarkBitmap);
+        canvas.drawBitmap(source, 0, 0, null);
+
+        // 设置水印文本样式
+        Paint paint = new Paint();
+        paint.setColor(Color.BLUE);  // 设置水印文本颜色
+        //paint.setAlpha(100);  // 设置透明度，100代表半透明
+        paint.setTextSize(14f);  // 设置文本大小
+        paint.setAntiAlias(true);  // 设置抗锯齿
+
+        // 获取水印文本的边界框，用于计算文本位置
+        Rect textBounds = new Rect();
+        paint.getTextBounds(watermarkText, 0, watermarkText.length(), textBounds);
+        int textWidth = textBounds.width();
+        int textHeight = textBounds.height();
+
+        // 设置文本的位置（右下角）
+        float x = (width - textWidth)/2;//width - textWidth - 20f;  // 距离右侧20像素
+        float y = (height - textHeight)/2;//height - textHeight - 20f;  // 距离底部20像素
+
+        // 在Bitmap上绘制文本水印
+        canvas.drawText(watermarkText, x, y, paint);
+
+        return watermarkBitmap;
+    }
+
+     // 在Bitmap上添加图片水印
+     private static Bitmap addImageWatermark(Bitmap source, int watermarkResId, Context context) {
+        try{
+            int width = source.getWidth();
+            int height = source.getHeight();
+    
+            // 创建一个新的Bitmap，大小与原始Bitmap相同
+            Bitmap watermarkBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    
+            // 创建画布并将原图绘制到画布上
+            Canvas canvas = new Canvas(watermarkBitmap);
+            canvas.drawBitmap(source, 0, 0, null);
+    
+            // 获取水印图片
+            Bitmap watermarkImage = BitmapFactory.decodeResource(context.getResources(), watermarkResId);
+    
+            // 设置水印图片的大小（可选）
+            int watermarkWidth = width / 4;  // 水印宽度为原图的1/4
+            int watermarkHeight = watermarkImage.getHeight() * watermarkWidth / watermarkImage.getWidth();  // 保持宽高比
+    
+            // 设置水印图片的位置（右下角）
+            float left = width - watermarkWidth - 20f;  // 距离右侧20像素
+            float top = height - watermarkHeight - 20f;  // 距离底部20像素
+    
+            // 在Bitmap上绘制水印图片
+            canvas.drawBitmap(Bitmap.createScaledBitmap(watermarkImage, watermarkWidth, watermarkHeight, true), left, top, null);
+    
+            return watermarkBitmap;
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return null ;
+    }
+
+    // public void setBitmapToTextView(Context context,TextView textView, Bitmap bitmap) {
+    //     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
+    //     drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    //     textView.setCompoundDrawables(null,null,null,drawable);
+    // }
+
+    public static Bitmap vectorToBitmap(Context context, int drawableId) {
+      try{
+        Drawable drawable = context.getResources().getDrawable(drawableId, null);
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+      return null ;
+    }
+
+    public static  Bitmap overlayBitmaps(Bitmap bitmap1, Bitmap bitmap2) {
+       try{
+            // 创建一个与第一个 Bitmap 相同大小的空白 Bitmap
+            Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
+            // 创建 Canvas，将第一个 Bitmap 作为底图
+            Canvas canvas = new Canvas(overlayBitmap);
+            canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
+            // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
+            canvas.drawBitmap(bitmap2, (bitmap1.getWidth()-bitmap2.getWidth())/2, (bitmap1.getHeight()-bitmap2.getHeight())/2, null);  // 将 bitmap2 绘制到 canvas 上
+            // 将叠加后的 Bitmap 设置到 ImageView
+            return overlayBitmap ;
+       }catch(Exception e){
+            e.printStackTrace();
+       }
+       return null ;
+    }
+
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        try{
+            int width = drawable.getIntrinsicWidth();
+            int height = drawable.getIntrinsicHeight();
+            Bitmap bitmap = Bitmap.createBitmap(
+                    width,
+                    height,
+                    drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565
+            );
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(canvas);
+            return bitmap;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return null ;
+    }
+
+    public static  Bitmap scaleBitmap(Bitmap originalBitmap, int newWidth, int newHeight) {
+        return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
+    }
+
+ // 从 assets 文件夹加载 SVG 文件
+ public static SVG loadSvgFromAssets(Context context,String fileName) {
+    try {
+        InputStream inputStream = new FileInputStream(new File(fileName));//context.getAssets().open(fileName);
+        return SVG.getFromInputStream(inputStream);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
+// 将 SVG 转换为 Bitmap
+public static Bitmap svgToBitmap(SVG svg) {
+    if(svg == null ){
+        return null ;
+    }
+    // 获取 SVG 的宽度和高度
+    // int width = (int) svg.getDocumentWidth();
+    // int height = (int) svg.getDocumentHeight();
+    // 创建一个 Bitmap
+    Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
+
+    // 使用 Canvas 将 SVG 渲染到 Bitmap 上
+    try{
+        Canvas canvas = new Canvas(bitmap);
+        svg.renderToCanvas(canvas);
+    }catch(Exception e){
+        e.printStackTrace();
+    }
+
+    return bitmap;
+}
+
+public static Map<String, String> parseDesktopFile(String filePath) {
+    Map<String, String> entries = new HashMap<>();
+    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            if (line.startsWith("#") || line.isEmpty()) {
+                continue;
+            }
+            int equalsIndex = line.indexOf('=');
+            if (equalsIndex > 0) {
+                String key = line.substring(0, equalsIndex).trim();
+                String value = line.substring(equalsIndex + 1).trim();
+                entries.put(key, value);
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return entries;
+}
+
+public static boolean containsChinese(String str) {
+    if (str == null || str.isEmpty()) {
+        return false;
+    }
+    // is Chinese
+    String regex = "[\\u4e00-\\u9fa5]";
+    return str.matches(".*" + regex + ".*");
+}
 
 }

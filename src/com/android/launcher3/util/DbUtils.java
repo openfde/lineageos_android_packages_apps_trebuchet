@@ -93,7 +93,7 @@ public class DbUtils {
     }
     
     public  List<Map<String,Object>> queryAllDesktopFilesFromDatabase(ModelDbController dbController){
-        String[] selectionArgs = {"8","9","10"};
+        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP)};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
         List<Map<String,Object>> list = null;
@@ -163,7 +163,7 @@ public class DbUtils {
 
 
     public static List<Map<String,Object>> queryDesktopTextFilesFromDatabase(ModelDbController dbController){
-        String[] selectionArgs = {"18","19"};
+        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT)};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
         List<Map<String,Object>> list = null;
@@ -279,12 +279,47 @@ public class DbUtils {
     }
 
 
-    // public static void deleteTitleFromDatabase(Context context,String title){
-    //     Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
-        // String selection = "title = ?";
-        // String[] selectionArgs = {title};
-        // int res = context.getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,selection, selectionArgs);
-        // Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
-    // }
+    public static void deleteTitleFromDatabase(ModelDbController dbController,String title){
+        Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
+        String selection = "title = ?";
+        String[] selectionArgs = {title};
+        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+    }
     
+    public static List<Map<String,Object>> queryDesktopFileInDatabase(ModelDbController dbController,String fileName){
+        String[] displayNames  = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP)};
+        String[] selectionArgs = new String[displayNames.length + 1];
+        String selection = "title = ? and itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
+        selectionArgs[0] = fileName; // MIME_TYPE 的值
+        System.arraycopy(displayNames, 0, selectionArgs, 1, displayNames.length);
+        List<Map<String,Object>> list = null;
+        Cursor cursor  = dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                String title = cursor.getString(cursor.getColumnIndex("title"));
+                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Map<String,Object> mp = new HashMap<>();
+                mp.put("_id",_id);
+                mp.put("title",title);
+                mp.put("itemType",itemType);
+                mp.put("cellX",cellX);
+                mp.put("cellY",cellY);
+                list.add(mp);
+            } while (cursor.moveToNext());
+        }
+
+        if(list == null ){
+            Log.i(TAG, "queryItemsFromDatabase is null");
+        }else{
+            Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
+        }
+
+        return list ;
+    }
+
 }

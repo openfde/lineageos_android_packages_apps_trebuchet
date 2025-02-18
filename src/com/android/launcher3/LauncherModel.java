@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.launcher3;
 
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
@@ -93,11 +92,12 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Maintains in-memory state of the Launcher. It is expected that there should be only one
- * LauncherModel object held in a static. Also provide APIs for updating the database state
- * for the Launcher.
+ * Maintains in-memory state of the Launcher. It is expected that there should
+ * be only one LauncherModel object held in a static. Also provide APIs for
+ * updating the database state for the Launcher.
  */
 public class LauncherModel implements InstallSessionTracker.Callback {
+
     private static final boolean DEBUG_RECEIVER = false;
 
     static final String TAG = "Launcher.Model";
@@ -121,6 +121,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     // need to do a requery. This is only ever touched from the loader thread.
     private boolean mModelLoaded;
     private boolean mModelDestroyed = false;
+
     public boolean isModelLoaded() {
         synchronized (mLock) {
             return mModelLoaded && mLoaderTask == null && !mModelDestroyed;
@@ -135,8 +136,9 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     private final AllAppsList mBgAllAppsList;
 
     /**
-     * All the static data should be accessed on the background thread, A lock should be acquired
-     * on this object when accessing any data from this model.
+     * All the static data should be accessed on the background thread, A lock
+     * should be acquired on this object when accessing any data from this
+     * model.
      */
     @NonNull
     private final BgDataModel mBgDataModel = new BgDataModel();
@@ -232,7 +234,9 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     public void onBroadcastIntent(@NonNull final Intent intent) {
-        if (DEBUG_RECEIVER || sDebugTracing) Log.d(TAG, "onReceive intent=" + intent);
+        if (DEBUG_RECEIVER || sDebugTracing) {
+            Log.d(TAG, "onReceive intent=" + intent);
+        }
         final String action = intent.getAction();
         if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
             // If we have changed locale we need to clear out the labels in all apps/workspace.
@@ -250,6 +254,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
 
     /**
      * Called then there use a user event
+     *
      * @see UserCache#addUserEventListener
      */
     public void onUserEvent(UserHandle user, String action) {
@@ -283,8 +288,9 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     /**
-     * Reloads the workspace items from the DB and re-binds the workspace. This should generally
-     * not be called as DB updates are automatically followed by UI update
+     * Reloads the workspace items from the DB and re-binds the workspace. This
+     * should generally not be called as DB updates are automatically followed
+     * by UI update
      */
     public void forceReload() {
         synchronized (mLock) {
@@ -326,12 +332,13 @@ public class LauncherModel implements InstallSessionTracker.Callback {
 
     /**
      * Adds a callbacks to receive model updates
+     *
      * @return true if workspace load was performed synchronously
      */
     public boolean addCallbacksAndLoad(@NonNull final Callbacks callbacks) {
         synchronized (mLock) {
             addCallbacks(callbacks);
-            return startLoader(new Callbacks[] { callbacks });
+            return startLoader(new Callbacks[]{callbacks});
 
         }
     }
@@ -346,7 +353,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
         }
     }
 
-    public List<ItemInfo> rearray(Context context){
+    public List<ItemInfo> rearray(Context context) {
         // InstallShortcutReceiver.enableInstallQueue(InstallShortcutReceiver.FLAG_LOADER_RUNNING);
         synchronized (mLock) {
             // Don't bother to start the thread if we know it's not going to do anything
@@ -361,40 +368,40 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                 stopLoader();
 //                LoaderResults loaderResults = new LoaderResults(
 //                        mApp, mBgDataModel, mBgAllAppsList, callbacksList, mMainExecutor);
-               ArrayList<ItemInfo> tempItems = mBgDataModel.workspaceItems;
-               ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
-               for(ItemInfo ii : tempItems) {
-                    if(ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY  || ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                ArrayList<ItemInfo> tempItems = mBgDataModel.workspaceItems;
+                ArrayList<ItemInfo> workspaceItems = new ArrayList<>();
+                for (ItemInfo ii : tempItems) {
+                    if (ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || ii.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
                         // String documentId =  FileUtils.getRootDir() + "/桌面/";  
                         String documentId = FileUtils.PATH_ID_DESKTOP;
                         File f = new File(documentId + ii.getTitle());
-                        if(f.exists()){
+                        if (f.exists()) {
                             workspaceItems.add(ii);
-                        }else{
-                            documentId =  FileUtils.getRootDir()+"/Desktop/";  
+                        } else {
+                            documentId = FileUtils.getRootDir() + "/Desktop/";
                             f = new File(documentId + ii.getTitle());
-                            if(f.exists()){
+                            if (f.exists()) {
                                 workspaceItems.add(ii);
-                            }else{
-                                Log.i(TAG, "workspaceItems.............not exist:"+ii.title + " ,  "+ii +",documentId "+documentId);
+                            } else {
+                                Log.i(TAG, "workspaceItems.............not exist:" + ii.title + " ,  " + ii + ",documentId " + documentId);
                             }
                         }
-                    }else{
+                    } else {
                         workspaceItems.add(ii);
                     }
-               }
-               mBgDataModel.workspaceItems = workspaceItems;
-               Log.i(TAG, "workspaceItems..................size  "+workspaceItems.size());
+                }
+                mBgDataModel.workspaceItems = workspaceItems;
+                Log.i(TAG, "workspaceItems..................size  " + workspaceItems.size());
                 // Log.i(TAG, "workspaceItems "+workspaceItems.size());
-               Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
-               
+                Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
+
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
                 Launcher launcher = Launcher.getLauncher(context);
-                for (int i = 0 ;i < workspaceItems.size(); i++){
+                for (int i = 0; i < workspaceItems.size(); i++) {
                     ItemInfo info = workspaceItems.get(i);
-                    launcher.removeView(info.cellX , info.cellY);
-                    info.cellX = i/idp.numRows;
-                    info.cellY = i%idp.numRows;
+                    launcher.removeView(info.cellX, info.cellY);
+                    info.cellX = i % idp.numRows;
+                    info.cellY = i / idp.numRows;
                 }
 //                startLoaderForResults(loaderResults);
                 return workspaceItems;
@@ -404,7 +411,9 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     /**
-     * Starts the loader. Tries to bind {@params synchronousBindPage} synchronously if possible.
+     * Starts the loader. Tries to bind {@params synchronousBindPage}
+     * synchronously if possible.
+     *
      * @return true if the page could be bound synchronously.
      */
     public boolean startLoader() {
@@ -422,7 +431,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
             boolean bindAllCallbacks = wasRunning || !bindDirectly || newCallbacks.length == 0;
             final Callbacks[] callbacksList = bindAllCallbacks ? getCallbacks() : newCallbacks;
 
-            Log.i(TAG, "startLoader  wasRunning: " + wasRunning + ", bindDirectly: "+bindDirectly + ",bindAllCallbacks: "+bindAllCallbacks);
+            Log.i(TAG, "startLoader  wasRunning: " + wasRunning + ", bindDirectly: " + bindDirectly + ",bindAllCallbacks: " + bindAllCallbacks);
 
             if (callbacksList.length > 0) {
                 // Clear any pending bind-runnables from the synchronized load process.
@@ -461,6 +470,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
 
     /**
      * If there is already a loader task running, tell it to stop.
+     *
      * @return true if an existing loader was stopped.
      */
     private boolean stopLoader() {
@@ -477,7 +487,9 @@ public class LauncherModel implements InstallSessionTracker.Callback {
 
     /**
      * Loads the model if not loaded
-     * @param callback called with the data model upon successful load or null on model thread.
+     *
+     * @param callback called with the data model upon successful load or null
+     * on model thread.
      */
     public void loadAsync(@NonNull final Consumer<BgDataModel> callback) {
         synchronized (mLock) {
@@ -559,7 +571,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     /**
-     * Updates the icons and label of all pending icons for the provided package name.
+     * Updates the icons and label of all pending icons for the provided package
+     * name.
      */
     @Override
     public void onUpdateSessionDisplay(@NonNull final PackageUserKey key,
@@ -615,8 +628,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
 
     /**
      * Refreshes the cached shortcuts if the shortcut permission has changed.
-     * Current implementation simply reloads the workspace, but it can be optimized to
-     * use partial updates similar to {@link UserCache}
+     * Current implementation simply reloads the workspace, but it can be
+     * optimized to use partial updates similar to {@link UserCache}
      */
     public void validateModelDataOnResume() {
         MODEL_EXECUTOR.getHandler().removeCallbacks(mDataValidationCheck);
@@ -658,8 +671,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     /**
-     * A task to be executed on the current callbacks on the UI thread.
-     * If there is no current callbacks, the task is ignored.
+     * A task to be executed on the current callbacks on the UI thread. If there
+     * is no current callbacks, the task is ignored.
      */
     public interface CallbackTask {
 
@@ -667,7 +680,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     /**
-     * A runnable which changes/updates the data model of the launcher based on certain events.
+     * A runnable which changes/updates the data model of the launcher based on
+     * certain events.
      */
     public interface ModelUpdateTask extends Runnable {
 
@@ -753,8 +767,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     }
 
     /**
-     * Returns the ID for the last model load. If the load ID doesn't match for a transaction, the
-     * transaction should be ignored.
+     * Returns the ID for the last model load. If the load ID doesn't match for
+     * a transaction, the transaction should be ignored.
      */
     public int getLastLoadId() {
         return mLastLoadId;

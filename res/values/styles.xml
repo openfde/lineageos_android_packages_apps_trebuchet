@@ -445,4 +445,10 @@
         <item name="android:fontFamily">google-sans-text-medium</item>
         <item name="android:ellipsize">end</item>
     </style>
+
+    <declare-styleable name="SVGImageView">
+        <!-- Location of the SVG document. -->
+        <attr name="svg" format="reference|string"/>
+        <attr name="css" format="string"/>
+    </declare-styleable>
 </resources>
