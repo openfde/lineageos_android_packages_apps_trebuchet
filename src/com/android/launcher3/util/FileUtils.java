@@ -363,6 +363,7 @@ public static Point findNextFreePoint(Context context){
                     // Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
                     file.delete();
                 }
+                md5 = packageName;
                 pathDesktop = documentId+""+ packageName+"_fde.desktop";
                 file = new File(pathDesktop);
                 if(file.exists()){
