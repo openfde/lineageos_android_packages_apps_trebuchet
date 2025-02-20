@@ -423,34 +423,73 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
     public static Map<String,Object> getLinuxContentString(String fileName){
         String documentId = FileUtils.getAllDesktopPath();
         String filePath = documentId +fileName;
-        String startChar = "[Desktop";  // 
-        Map<String,Object> map = null;
-        try {
-            // 读取文件内容
-            map = new HashMap<>();
-            String content = readFile(filePath);
-            // 查找以指定字开头的段落
+        // String startChar = "[Desktop";  // 
+        // Map<String,Object> map = null;
+        // try {
+        //     // 读取文件内容
+        //     map = new HashMap<>();
+        //     String content = readFile(filePath);
+        //     // 查找以指定字开头的段落
 
-            int firstIndex  = content.indexOf("[Desktop");
-            int secondIndex = content.indexOf("[Desktop", firstIndex + 1);
-            // Log.i(TAG,"bella...firstIndex: "+firstIndex + ", secondIndex: "+secondIndex);
-            if(secondIndex != -1){
-                content = content.substring(firstIndex,secondIndex);
-            }
+        //     int firstIndex  = content.indexOf("[Desktop");
+        //     int secondIndex = content.indexOf("[Desktop", firstIndex + 1);
+        //     // Log.i(TAG,"bella...firstIndex: "+firstIndex + ", secondIndex: "+secondIndex);
+        //     if(secondIndex != -1){
+        //         content = content.substring(firstIndex,secondIndex);
+        //     }
         
-            String []paragraphs = content.split("\n");
-            for (String paragraph : paragraphs) {
-                int equalIndex = paragraph.indexOf('=');
-                if (equalIndex != -1) {
-                    String key = paragraph.substring(0, equalIndex).trim();
-                    String value = paragraph.substring(equalIndex + 1).trim();
-                    map.put(key, value);
+        //     String []paragraphs = content.split("\n");
+        //     for (String paragraph : paragraphs) {
+        //         int equalIndex = paragraph.indexOf('=');
+        //         if (equalIndex != -1) {
+        //             String key = paragraph.substring(0, equalIndex).trim();
+        //             String value = paragraph.substring(equalIndex + 1).trim();
+        //             map.put(key, value);
+        //         }
+        //     }
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+
+        Map<String, Object> entries = new HashMap<>();
+        boolean isDesktopEntrySection = false; // 标记是否在[Desktop Entry]部分
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+
+                // 检查是否进入[Desktop Entry]部分
+                if (line.equals("[Desktop Entry]")) {
+                    isDesktopEntrySection = true;
+                    continue; // 跳过当前行，继续读取下一行
+                } else if (line.startsWith("[")) {
+                    // 如果进入其他部分（如[Desktop Action]），则停止解析
+                    isDesktopEntrySection = false;
+                }
+
+                // 只在[Desktop Entry]部分解析字段
+                if (isDesktopEntrySection) {
+                    if (line.startsWith("Name=")) {
+                        entries.put("Name", line.substring(5));
+                    }else if (line.startsWith("Name[zh_CN]=")) {
+                        entries.put("Name[zh_CN]", line.substring(12));
+                    }else if (line.startsWith("Exec=")) {
+                        entries.put("Exec", line.substring(5));
+                    }else if (line.startsWith("Icon=")) {
+                        entries.put("Icon", line.substring(5));
+                    }else if (line.startsWith("Type=")) {
+                        entries.put("Type", line.substring(5));
+                    } else if (line.startsWith("Categories=")) {
+                        entries.put("Categories", line.substring(11));
+                    }
+                    // 可以根据需要解析其他字段
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return  map;
+        return entries;
     }
 
     public  static Map<String,Object> getLinuxDesktopFileContent(String fileName ){

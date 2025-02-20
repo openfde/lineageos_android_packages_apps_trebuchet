@@ -529,6 +529,11 @@ public class ItemInfo {
         this.title = title;
     }
 
+
+    public void setTitle(@Nullable final CharSequence title) {
+        this.title = title;
+    }
+
     private UserIconInfo getUserInfo() {
         UserCache userCache = UserCache.INSTANCE.getNoCreate();
         if (userCache == null) {

@@ -467,6 +467,12 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             if(map !=null && !map.isEmpty()){
                 // String icon = map.get("icon").toString();
                try{
+                if(FileUtils.isChineseLanguage(getContext())){
+                    info.setTitle(map.get("nameZh").toString());
+                }else{
+                    info.setTitle(map.get("name").toString());
+                }
+ 
                 String name = map.get("name").toString().replaceAll(" ", "_");
                 String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
                 int lastIndex = exec.lastIndexOf('/');
@@ -478,7 +484,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 }
                 String IconPath = FileUtils.getSystemProperty(key ,"-1");
 
-                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key );
+                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key +",title "+title );
         
                 if("-1".equals(IconPath) ){
 
