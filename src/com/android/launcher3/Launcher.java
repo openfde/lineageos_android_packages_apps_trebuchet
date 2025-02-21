@@ -2208,7 +2208,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         
                         // Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
                         Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName());
-                        if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
+                        String fTitle = f.getName().toLowerCase() ;
+                        if(f.getName().contains("_fde.desktop") ||  fTitle.startsWith("fde") || fTitle.startsWith("openfde") ){
                             if(listTexts !=null){
                                 // boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
                                 // Log.d(TAG, "-- found: "+found);
@@ -2377,14 +2378,15 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             Log.d(TAG, "result  "+result );
             executorService.shutdown();
             if(1 == result){
-                Intent intent = getIntent();
-                finish();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(intent);
-                    }
-                }, 1000);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                // Intent intent = getIntent();
+                // finish();
+                // handler.postDelayed(new Runnable() {
+                //     @Override
+                //     public void run() {
+                //         startActivity(intent);
+                //     }
+                // }, 1000);
             }
         });
     }
