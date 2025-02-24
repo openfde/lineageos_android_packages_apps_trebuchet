@@ -2209,7 +2209,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                         // Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
                         Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName());
                         String fTitle = f.getName().toLowerCase() ;
-                        if(f.getName().contains("_fde.desktop") ||  fTitle.startsWith("fde") || fTitle.startsWith("openfde") ){
+                        if(f.getName().contains("_fde.desktop") || ( (fTitle.startsWith("fde") || fTitle.startsWith("openfde"))&& f.getName().contains(".desktop") ) ){
                             if(listTexts !=null){
                                 // boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
                                 // Log.d(TAG, "-- found: "+found);
@@ -2571,65 +2571,63 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             }
         }).start();
 
-       
-
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(() -> {
-            new Thread(() -> {
-                try {
-                    Log.i(TAG, "bella_insert createLinuxDesktopFile ");
-                    List<String> listMd5 = new ArrayList<>();
-                    for (ItemInfo item : items) {
-                        if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
-                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
-                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
-                            ContentValues initialValues = new ContentValues();
-                            initialValues.put("title", item.title.toString());
-                            String packageName = "";
-                            if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
-                                packageName = item.getTargetComponent().getPackageName();    
-                            }else{
-                                // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
-                                packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
-                            }
-                            if (packageName != null) {
-                                if(!"com.fde.x11".equals(packageName)){
-                                    initialValues.put("packageName", packageName);
-                                    initialValues.put("itemType", item.itemType);
-                                    FileUtils.createLinuxDesktopFile(initialValues);
-                                    String md5 = FileUtils.getMD5(packageName);
-                                    listMd5.add(md5);
+        String shareDesktopStr = FileUtils.getSystemProperty("share_desktop","yes");
+        if("yes".equals(shareDesktopStr)){
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.postDelayed(() -> {
+                new Thread(() -> {
+                    try {
+                        Log.i(TAG, "bella_insert createLinuxDesktopFile ");
+                        List<String> listMd5 = new ArrayList<>();
+                        for (ItemInfo item : items) {
+                            if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
+                                item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+                                item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
+                                ContentValues initialValues = new ContentValues();
+                                initialValues.put("title", item.title.toString());
+                                String packageName = "";
+                                if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
+                                    packageName = item.getTargetComponent().getPackageName();    
+                                }else{
+                                    // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+                                    packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                                 }
-                                // Log.i(TAG, "bella_insert packageName " + packageName);
+                                if (packageName != null) {
+                                    if(!"com.fde.x11".equals(packageName)){
+                                        initialValues.put("packageName", packageName);
+                                        initialValues.put("itemType", item.itemType);
+                                        FileUtils.createLinuxDesktopFile(initialValues);
+                                        String md5 = FileUtils.getMD5(packageName);
+                                        listMd5.add(md5);
+                                    }
+                                    // Log.i(TAG, "bella_insert packageName " + packageName);
+                                }
+                               
+                            } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
+                                // Handle Linux app item type if needed
                             }
-                           
-                        } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
-                            // Handle Linux app item type if needed
                         }
+            
+                        // Optionally clean up desktop files not in the listMd5
+                        // File[] files = FileUtils.getAllDesktopFiles();
+                        // if (files != null) {
+                        //     for (File f : files) {
+                        //         if (f.getName().contains("_fde.desktop")) {
+                        //             boolean found = listMd5.stream().anyMatch(item -> f.getName().contains(item));
+                        //             Log.i(TAG, "bella_delete packageName " + f.getName() + ", found " + found);
+                        //             if (!found) {
+                        //                 f.delete();
+                        //             }
+                        //         }
+                        //     }
+                        // }
+            
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-        
-                    // Optionally clean up desktop files not in the listMd5
-                    // File[] files = FileUtils.getAllDesktopFiles();
-                    // if (files != null) {
-                    //     for (File f : files) {
-                    //         if (f.getName().contains("_fde.desktop")) {
-                    //             boolean found = listMd5.stream().anyMatch(item -> f.getName().contains(item));
-                    //             Log.i(TAG, "bella_delete packageName " + f.getName() + ", found " + found);
-                    //             if (!found) {
-                    //                 f.delete();
-                    //             }
-                    //         }
-                    //     }
-                    // }
-        
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }, 10 * 1000);
-
-       
-
+                }).start();
+            }, 10 * 1000);
+        }
     }
 
     public  ItemInfo findNextCoordinate(ItemInfo item) {
