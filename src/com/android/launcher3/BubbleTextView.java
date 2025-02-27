@@ -462,16 +462,21 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             iconDrawable = new FastBitmapDrawable(bitmap);
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.icon_linux);
-            String title = info.title.toString();
-            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
+            String appTitle = info.title.toString();
+            // if(info.appTitle  != null){
+            //     appTitle = info.appTitle.toString();
+            // }
+
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(appTitle);
+            Log.i(TAG,"bellaLauncher applyIconAndLabel   map  "+map);
             if(map !=null && !map.isEmpty()){
                 // String icon = map.get("icon").toString();
                try{
-                if(FileUtils.isChineseLanguage(getContext())){
-                    info.setTitle(map.get("nameZh").toString());
-                }else{
-                    info.setTitle(map.get("name").toString());
-                }
+                // if(FileUtils.isChineseLanguage(getContext())){
+                //     info.setTitle(map.get("nameZh").toString());
+                // }else{
+                //     info.setTitle(map.get("name").toString());
+                // }
  
                 String name = map.get("name").toString().replaceAll(" ", "_");
                 String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
@@ -484,7 +489,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 }
                 String IconPath = FileUtils.getSystemProperty(key ,"-1");
 
-                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key +",title "+title );
+                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key  );
         
                 if("-1".equals(IconPath) ){
 

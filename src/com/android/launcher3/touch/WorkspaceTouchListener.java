@@ -47,6 +47,7 @@ import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.TouchUtil;
+import android.util.Log;
 
 /**
  * Helper class to handle touch on empty space in workspace and show options popup on long press
@@ -89,9 +90,10 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
         mGestureDetector.onTouchEvent(ev);
 
         int action = ev.getActionMasked();
+        boolean handleLongPress = canHandleLongPress();
         if (action == ACTION_DOWN) {
             // Check if we can handle long press.
-            boolean handleLongPress = canHandleLongPress();
+            
 
             if (handleLongPress) {
                 // Check if the event is not near the edges

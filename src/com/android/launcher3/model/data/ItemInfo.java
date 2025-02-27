@@ -529,6 +529,9 @@ public class ItemInfo {
         this.title = title;
     }
 
+    public void setAppTitle(@Nullable final CharSequence appTitle) {
+        this.appTitle = appTitle;
+    }
 
     public void setTitle(@Nullable final CharSequence title) {
         this.title = title;

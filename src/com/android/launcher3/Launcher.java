@@ -304,10 +304,18 @@ import org.greenrobot.eventbus.Subscribe;
 import com.android.launcher3.model.data.MessageEvent;
 import android.content.ContentValues;
 import android.os.Looper;
-
+import android.net.Uri;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import android.content.pm.PackageManager;
+import android.provider.Settings;
+import android.os.Environment;
+import androidx.core.content.FileProvider;
+import com.android.quickstep.util.ImageActionUtils;
+
 
 /**
  * Default launcher application.
@@ -453,6 +461,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     protected void onCreate(Bundle savedInstanceState) {
         FileUtils.setSystemProperty("launcher_time",System.currentTimeMillis()+"");
         EventBus.getDefault().register(this);
+
 
         FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/"); 
@@ -2235,7 +2244,6 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     @Override
     public void bindItems(final List<ItemInfo> items, final boolean forceAnimateIcons) {
-        Log.i(TAG, "bella_insert bindItems  "+items.size());
         bindInflatedItems(items.stream().map(i -> Pair.create(
                 i, getItemInflater().inflateItem(i, getModelWriter()))).toList(),
                 forceAnimateIcons ? new AnimatorSet() : null);
@@ -3291,14 +3299,57 @@ public class Launcher extends StatefulActivity<LauncherState>
             @Override
             public void run() {
                 try{
-                    Log.i(TAG, "bellaLauncher gotoDocApp  method: " + method + ", title "+title);
+                    boolean isActivityRunning = FileUtils.isActivityRunning(Launcher.this,"com.android.documentsui","com.android.documentsui.ui.OpenLinuxAppActivity");
+                    Log.i(TAG, "bellaLauncher gotoDocApp  method: " + method + ", title "+title + ",isActivityRunning "+isActivityRunning);
                     idocAidl.basicIpcMethon(method,title);
                 }catch(Exception e){
                     e.printStackTrace();
                 }
             }
-        }).start();
-       
+        }).start();  
+    }
+
+    public void openAppListPage(){
+        // Intent intent = new Intent(Launcher.this,AppListActivity.class);
+        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // startActivity(intent);
+    }
+
+    public void openFile(String params){
+        if (!Environment.isExternalStorageManager()) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            intent.setData(Uri.parse("package:$packageName"));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }else{
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            // String path = "content://com.android.externalstorage.documents/document/primary:Desktop%2f"+params;
+            // Uri uri = Uri.parse(path);
+            String path = FileUtils.PATH_ID_DESKTOP+params;
+            File file = new File(path);
+            Uri uri = FileProvider.getUriForFile(Launcher.this,ImageActionUtils.AUTHORITY,file);
+            String mimeType = FileUtils.getMimeType(file);
+            Log.i(TAG,"basicIpcMethon.....path "+path + ",mimeType "+mimeType + ",uri "+uri);
+            if (mimeType == null) {
+                if (params.contains(".txt") || params.contains(".json")  || params.contains(".md")) {
+                    intent.setDataAndType(uri, "text/plain");
+                } else {
+                    intent.setDataAndType(uri, "application/*");
+                }
+            } else if (mimeType.contains("image")) {
+                intent.setDataAndType(uri, "image/*");
+            }else if(mimeType.contains("text") || mimeType.contains("plain") || mimeType.contains("json")){
+                intent.setDataAndType(uri, "text/plain");
+            }else{
+                intent.setDataAndType(uri, "application/*");
+            }
+            intent.putExtra("docTitle",params);
+            int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+            flags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+            flags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+            intent.setFlags(flags);
+            startActivity(intent);
+        }
     }
 
     public void selectOpenType(String method,String title){
@@ -3355,6 +3406,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         WorkspaceItemInfo info = new WorkspaceItemInfo();
         info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
         info.title = fileName;
+        info.appTitle = fileName;
         info.container = -100;
         info.screenId = 0;
         Intent intent = new Intent();
@@ -3419,6 +3471,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                         WorkspaceItemInfo info = new WorkspaceItemInfo();
                         info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
                         info.title = f.getName();
+                        info.appTitle = f.getName();
                         info.container = -100;
                         info.screenId = 0;
                         Intent intent = new Intent();
@@ -3433,7 +3486,8 @@ public class Launcher extends StatefulActivity<LauncherState>
         
                         // Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
                         Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName());
-                        if(f.getName().contains("_fde.desktop") || info.title.equals("openfde.desktop")){
+                        String fTitle = f.getName().toLowerCase() ;
+                        if(f.getName().contains("_fde.desktop") ||  fTitle.startsWith("fde") || fTitle.startsWith("openfde") ){
                             if(listTexts !=null){
                                 // boolean found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
                                 // Log.d(TAG, "-- found: "+found);
@@ -3499,14 +3553,15 @@ public class Launcher extends StatefulActivity<LauncherState>
             Log.d(TAG, "result  "+result );
             executorService.shutdown();
             if(1 == result){
-                Intent intent = getIntent();
-                finish();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(intent);
-                    }
-                }, 1000);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                // Intent intent = getIntent();
+                // finish();
+                // handler.postDelayed(new Runnable() {
+                //     @Override
+                //     public void run() {
+                //         startActivity(intent);
+                //     }
+                // }, 1000);
             }
         });
     }

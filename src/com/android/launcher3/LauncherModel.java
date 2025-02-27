@@ -391,17 +391,17 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                     }
                 }
                 mBgDataModel.workspaceItems = workspaceItems;
-                Log.i(TAG, "workspaceItems..................size  " + workspaceItems.size());
                 // Log.i(TAG, "workspaceItems "+workspaceItems.size());
                 Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
 
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+                Log.i(TAG, "workspaceItems.size  " + workspaceItems.size() + ",idp.numRows: "+idp.numRows + ",idp.numColumns: "+idp.numColumns);
                 Launcher launcher = Launcher.getLauncher(context);
                 for (int i = 0; i < workspaceItems.size(); i++) {
                     ItemInfo info = workspaceItems.get(i);
                     launcher.removeView(info.cellX, info.cellY);
-                    info.cellX = i % idp.numRows;
-                    info.cellY = i / idp.numRows;
+                    info.cellX = i % idp.numColumns;
+                    info.cellY = i / idp.numColumns; 
                 }
 //                startLoaderForResults(loaderResults);
                 return workspaceItems;

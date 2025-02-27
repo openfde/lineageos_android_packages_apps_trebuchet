@@ -260,6 +260,7 @@ public class LoaderTask implements Runnable {
             } finally {
                 Trace.endSection();
             }
+            
             logASplit("loadAllApps");
 
             if (FeatureFlags.CHANGE_MODEL_DELEGATE_LOADING_ORDER.get()) {

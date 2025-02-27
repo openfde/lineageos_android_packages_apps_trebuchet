@@ -69,6 +69,8 @@ import java.io.InputStream;
 import com.android.launcher3.svg.SVG;
 import android.webkit.MimeTypeMap;
 import com.android.launcher3.model.ModelDbController;
+import android.app.ActivityManager;
+
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -806,68 +808,101 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
     }
 
- // 从 assets 文件夹加载 SVG 文件
- public static SVG loadSvgFromAssets(Context context,String fileName) {
-    try {
-        InputStream inputStream = new FileInputStream(new File(fileName));//context.getAssets().open(fileName);
-        return SVG.getFromInputStream(inputStream);
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-    return null;
-}
-
-// 将 SVG 转换为 Bitmap
-public static Bitmap svgToBitmap(SVG svg) {
-    if(svg == null ){
-        return null ;
-    }
-    // 获取 SVG 的宽度和高度
-    // int width = (int) svg.getDocumentWidth();
-    // int height = (int) svg.getDocumentHeight();
-    // 创建一个 Bitmap
-    Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
-
-    // 使用 Canvas 将 SVG 渲染到 Bitmap 上
-    try{
-        Canvas canvas = new Canvas(bitmap);
-        svg.renderToCanvas(canvas);
-    }catch(Exception e){
-        e.printStackTrace();
+    // 从 assets 文件夹加载 SVG 文件
+    public static SVG loadSvgFromAssets(Context context,String fileName) {
+        try {
+            InputStream inputStream = new FileInputStream(new File(fileName));//context.getAssets().open(fileName);
+            return SVG.getFromInputStream(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    return bitmap;
-}
+    // 将 SVG 转换为 Bitmap
+    public static Bitmap svgToBitmap(SVG svg) {
+        if(svg == null ){
+            return null ;
+        }
+        // 获取 SVG 的宽度和高度
+        // int width = (int) svg.getDocumentWidth();
+        // int height = (int) svg.getDocumentHeight();
+        // 创建一个 Bitmap
+        Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
 
-public static Map<String, String> parseDesktopFile(String filePath) {
-    Map<String, String> entries = new HashMap<>();
-    try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-            line = line.trim();
-            if (line.startsWith("#") || line.isEmpty()) {
-                continue;
+        // 使用 Canvas 将 SVG 渲染到 Bitmap 上
+        try{
+            Canvas canvas = new Canvas(bitmap);
+            svg.renderToCanvas(canvas);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return bitmap;
+    }
+
+    public static Map<String, String> parseDesktopFile(String filePath) {
+        Map<String, String> entries = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("#") || line.isEmpty()) {
+                    continue;
+                }
+                int equalsIndex = line.indexOf('=');
+                if (equalsIndex > 0) {
+                    String key = line.substring(0, equalsIndex).trim();
+                    String value = line.substring(equalsIndex + 1).trim();
+                    entries.put(key, value);
+                }
             }
-            int equalsIndex = line.indexOf('=');
-            if (equalsIndex > 0) {
-                String key = line.substring(0, equalsIndex).trim();
-                String value = line.substring(equalsIndex + 1).trim();
-                entries.put(key, value);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return entries;
+    }
+
+    public static boolean containsChinese(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        // is Chinese
+        String regex = "[\\u4e00-\\u9fa5]";
+        return str.matches(".*" + regex + ".*");
+    }
+
+    public static  boolean isActivityRunning(Context context, String packageName, String className) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> runningTasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+        for (ActivityManager.RunningTaskInfo taskInfo : runningTasks) {
+            if (taskInfo.topActivity.getPackageName().equals(packageName) && 
+                taskInfo.topActivity.getClassName().equals(className)) {
+                return true;
             }
         }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-    return entries;
-}
-
-public static boolean containsChinese(String str) {
-    if (str == null || str.isEmpty()) {
         return false;
     }
-    // is Chinese
-    String regex = "[\\u4e00-\\u9fa5]";
-    return str.matches(".*" + regex + ".*");
-}
+
+    public static void openDocumentsUIApp(Context context){
+        Intent intent = new Intent();
+        ComponentName componentName = new ComponentName("com.android.documentsui", "com.android.documentsui.ui.OpenLinuxAppActivity");
+        intent.setComponent(componentName);
+        intent.putExtra("openParams", "openParams");
+        intent.putExtra("fdeModel", "shell");
+        intent.putExtra("openParams", "openParams###222###1111###333");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    public static String getMimeType(File file) {
+        String mimeType = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(file.getAbsolutePath());
+        if (extension != null) {
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return mimeType;
+    }
 
 }

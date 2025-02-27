@@ -411,7 +411,7 @@ public class ItemClickHandler {
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
             String  title = item.title.toString() ;
-            launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
+            launcher.openFile(title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
         
