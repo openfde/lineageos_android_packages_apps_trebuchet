@@ -322,4 +322,17 @@ public class DbUtils {
         return list ;
     }
 
+
+    public static int queryMaxIdFromDatabase(ModelDbController dbController){
+        String[] projection = {"MAX(_id) AS max_id"};
+        int maxId = 0;
+    
+        Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, projection, null, null, null);
+        // Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            maxId = cursor.getInt(cursor.getColumnIndex("max_id"));
+        }
+        return maxId ;
+    }
+
 }

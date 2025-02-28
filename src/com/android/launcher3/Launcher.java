@@ -3267,16 +3267,17 @@ public class Launcher extends StatefulActivity<LauncherState>
                             public void run() {
                                 if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
                                     addDesktopFile(method,params);
-                                    bindWorkspace();
+                                    getModel().forceReload();
+                                    // bindWorkspace();
                                 }else if("RENAME".equals(method)){
                                     String[] arrFileName = params.split("###");
                                     DbUtils.updateTitleFromDatabase(getModel().getModelDbController(),arrFileName[0],arrFileName[1]);
                                     //bindWorkspace();
                                     getModel().forceReload();
-                                }else if("UPDATE_DESKTOP".equals(method)){
+                                }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
                                     refreshDesktopFiles();
                                     // getModel().refreshDeskFileList(Launcher.this);
-                                }   
+                                } 
                             }
                         });
                        
@@ -3313,6 +3314,51 @@ public class Launcher extends StatefulActivity<LauncherState>
         // Intent intent = new Intent(Launcher.this,AppListActivity.class);
         // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // startActivity(intent);
+    }
+
+    public void openLinuxApp(String params){
+        String[] arrParams = params.split("###");
+        String name = arrParams[0].trim().replaceAll("%[FfUu]", "");
+        String exec = arrParams[1].trim().replaceAll("%[FfUu]", "");
+        String type = arrParams[2];
+        String fileName =  name+".desktop";
+        if(arrParams.length > 3){
+            fileName = arrParams[3];
+        }
+        String path = FileUtils.PATH_ID_DESKTOP+fileName;
+        File file = new File(path);
+        Uri uri = FileProvider.getUriForFile(Launcher.this,ImageActionUtils.AUTHORITY,file);
+        Intent shareIntent = new Intent(Intent.ACTION_VIEW);
+        shareIntent.setDataAndType(uri, "application/vnd.desktop");
+        shareIntent.putExtra("fromOther", "Launcher");
+        shareIntent.putExtra("vnc_activity_name", name);
+        shareIntent.putExtra("App", name);
+        shareIntent.putExtra("openParams", params);
+        shareIntent.putExtra("docTitle", fileName);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+        flags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+        flags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+        shareIntent.setFlags(flags);
+        startActivity(shareIntent);
+    }
+
+    public void renameFile(String params){
+        Intent intent = new Intent();
+        ComponentName componentName = new ComponentName("com.android.documentsui", "com.android.documentsui.ui.RenameDialogActivity");
+        intent.setComponent(componentName);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("oldFileName",params);
+        startActivity(intent);
+    }
+
+    public void openFileDir(String params){
+        Intent intent = new Intent();
+        ComponentName componentName = new ComponentName("com.android.documentsui", "com.android.documentsui.files.FilesActivity");
+        intent.setComponent(componentName);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("childPath",params);
+        startActivity(intent);
     }
 
     public void openFile(String params){
@@ -3419,7 +3465,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         }else{
             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY; 
         }
-        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        // info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+        int maxId = DbUtils.queryMaxIdFromDatabase(getModel().getModelDbController());
+        info.id = maxId + 1;
+        Log.w(TAG, "addDesktopFile maxId  "+maxId + ",info.id "+info.id );
         insertFavorites(info);
     }
 
@@ -3460,6 +3509,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             if(files !=null){
                 Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
                 int index = 0;
+                int maxId = DbUtils.queryMaxIdFromDatabase(getModel().getModelDbController());
+
                 // int xindex = count / scale;
                 // int yindex = count % scale; 
                 for(File f : files){
@@ -3482,10 +3533,11 @@ public class Launcher extends StatefulActivity<LauncherState>
                         // info.cellX = xindex + y/scale;
                         info.cellY = point.y;
                         info.cellX = point.x;
-                        info.id =  300 + (info.cellX * 1000) + (info.cellY * 10) ;
+                        info.id  = maxId + 1 + index ;
+                        // info.id = System.currentTimeMillis();     //300 + (info.cellX * 1000) + (info.cellY * 10) ;
         
                         // Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title +",index "+ index +",xindex  "+xindex +", yindex "+yindex + ",f.getName() "+f.getName());
-                        Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName());
+                        Log.d(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",info.id  "+info.id );
                         String fTitle = f.getName().toLowerCase() ;
                         if(f.getName().contains("_fde.desktop") ||  fTitle.startsWith("fde") || fTitle.startsWith("openfde") ){
                             if(listTexts !=null){

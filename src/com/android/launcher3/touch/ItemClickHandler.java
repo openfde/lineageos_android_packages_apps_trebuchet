@@ -393,11 +393,11 @@ public class ItemClickHandler {
 
    public static void renameFiletoClipboard(Launcher launcher,ItemInfo item){
     if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
-       launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
+    //    launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
     }else{
-       launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
+    //    launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
     }
-    // launcher.bindWorkspace();  
+    launcher.renameFile(item.title.toString());  
 }
 
     public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher) {
@@ -408,17 +408,19 @@ public class ItemClickHandler {
         if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
             String title = item.title.toString() ;
             launcher.gotoDocApp(FileUtils.OPEN_DIR,title);
+            launcher.openFileDir(title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT) {
             String  title = item.title.toString() ;
+            launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
             launcher.openFile(title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
-        
             Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
             String name = map.get("name").toString();
             String exec = map.get("exec").toString();
-            launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open###"+item.title.toString());
+            launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString());
+            // launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open###"+item.title.toString());
             return ;
         }
         if (item instanceof ItemInfoWithIcon itemInfoWithIcon) {
