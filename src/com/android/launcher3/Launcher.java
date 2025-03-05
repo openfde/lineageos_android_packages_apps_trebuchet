@@ -3547,6 +3547,18 @@ public class Launcher extends StatefulActivity<LauncherState>
                             continue;
                         }else if(f.getName().contains(".desktop")){
                             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                            Map<String,Object>mm = FileUtils.getLinuxContentString(f.getName());
+                            try{
+                                if(mm !=null && mm.containsKey("NoDisplay")){
+                                    String NoDisplay = mm.get("NoDisplay").toString(); 
+                                    if("true".equals(NoDisplay)){
+                                        continue;
+                                    }
+                                }
+                                   
+                            }catch(Exception e){
+                                e.printStackTrace();
+                            }
                             // desktop linux app temp delete 
                             // if(!FileUtils.isOpenLinuxApp){
                             //     continue;

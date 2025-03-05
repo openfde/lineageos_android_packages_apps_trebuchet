@@ -833,6 +833,9 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         }catch(Exception e){
             e.printStackTrace();
         }
+        if(width <= 0 || height <= 0){
+            width = height = 36;
+        }
         // 创建一个 Bitmap
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
