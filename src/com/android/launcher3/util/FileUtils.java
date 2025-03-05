@@ -824,11 +824,17 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         if(svg == null ){
             return null ;
         }
+        int width = 36 ;
+        int height = 36 ;
         // 获取 SVG 的宽度和高度
-        // int width = (int) svg.getDocumentWidth();
-        // int height = (int) svg.getDocumentHeight();
+        try{
+            width = (int) svg.getDocumentWidth();
+            height = (int) svg.getDocumentHeight();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         // 创建一个 Bitmap
-        Bitmap bitmap = Bitmap.createBitmap(36, 36, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
         // 使用 Canvas 将 SVG 渲染到 Bitmap 上
         try{
