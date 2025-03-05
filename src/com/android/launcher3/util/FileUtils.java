@@ -484,6 +484,8 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
                         entries.put("Type", line.substring(5));
                     } else if (line.startsWith("Categories=")) {
                         entries.put("Categories", line.substring(11));
+                    }else if (line.startsWith("NoDisplay=")) {
+                        entries.put("NoDisplay", line.substring(10));
                     }
                     // 可以根据需要解析其他字段
                 }
