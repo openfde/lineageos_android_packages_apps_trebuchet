@@ -788,6 +788,9 @@ public static Bitmap svgToBitmap(SVG svg) {
     }catch(Exception e){
         e.printStackTrace();
     }
+    if(width <= 0 || height <= 0){
+        width = height = 36;
+    }
     // 创建一个 Bitmap
     Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
     // 使用 Canvas 将 SVG 渲染到 Bitmap 上
