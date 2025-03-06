@@ -15,13 +15,11 @@
 */
 
 package com.android.launcher3.svg;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Paint;
@@ -34,7 +32,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import com.android.launcher3.R;
-
 /**
  * SVGImageView is a View widget that allows users to include SVG images in their layouts.
  * 
@@ -48,10 +45,11 @@ import com.android.launcher3.R;
  *   <dd>Optional extra CSS to apply when rendering the SVG</dd>
  * </dl>
  */
+@SuppressWarnings("JavaDoc")
 public class SVGImageView extends ImageView
 {
-   private SVG                  svg = null;
-   private final RenderOptions  renderOptions = new RenderOptions();
+   private SVG            svg = null;
+   private RenderOptions  renderOptions = new RenderOptions();
 
    private static Method  setLayerTypeMethod = null;
 
@@ -182,7 +180,7 @@ public class SVGImageView extends ImageView
    @Override
    public void setImageResource(int resourceId)
    {
-      new LoadResourceTask(this.getContext()).execute(resourceId);
+      new LoadResourceTask(getContext(), resourceId).execute();
    }
 
 
@@ -263,19 +261,19 @@ public class SVGImageView extends ImageView
    //===============================================================================================
 
 
-   @SuppressLint("StaticFieldLeak")
    private class LoadResourceTask extends AsyncTask<Integer, Integer, SVG>
    {
-      private final Context  context;
+      private Context  context;
+      private int      resourceId;
 
-      LoadResourceTask(Context context)
+      LoadResourceTask(Context context, int resourceId)
       {
          this.context = context;
+         this.resourceId = resourceId;
       }
 
       protected SVG  doInBackground(Integer... params)
       {
-         int  resourceId = params[0];
          try
          {
             return SVG.getFromResource(context, resourceId);
@@ -295,7 +293,6 @@ public class SVGImageView extends ImageView
    }
 
 
-   @SuppressLint("StaticFieldLeak")
    private class LoadURITask extends AsyncTask<InputStream, Integer, SVG>
    {
       protected SVG  doInBackground(InputStream... is)

@@ -496,7 +496,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 }else{
                     String icon = "/volumes"+"/"+FileUtils.getLinuxUUID() + IconPath;
                     File f = new File(icon);
-                    Log.i("bella","FastBitmapDrawable exists : "+f.exists());
+                    Log.i("bella","FastBitmapDrawable exists : "+f.exists() + ",icon "+icon);
                     if(IconPath.contains(".svg") ){
                         bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(getContext(),icon));
                     }else{

@@ -422,75 +422,45 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         return content.toString();
     }
 
+    public static Map<String, Map<String, Object>> parseDesktopFile(InputStream inputStream) throws IOException {
+        Map<String, Map<String, Object>> ini = new HashMap<>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        String currentSection = "";
+
+        while ((line = reader.readLine()) != null) {
+            line = line.trim();
+            if (line.startsWith(";") || line.isEmpty()) {
+                continue; // 跳过注释和空行
+            }
+            if (line.startsWith("[") && line.endsWith("]")) {
+                currentSection = line.substring(1, line.length() - 1);
+                ini.put(currentSection, new HashMap<>());
+            } else {
+                int equalsIndex = line.indexOf('=');
+                if (equalsIndex > 0) {
+                    String key = line.substring(0, equalsIndex).trim();
+                    String value = line.substring(equalsIndex + 1).trim();
+                    if (!currentSection.isEmpty()) {
+                        ini.get(currentSection).put(key, value);
+                    }
+                }
+            }
+        }
+        return ini;
+    }
+
     public static Map<String,Object> getLinuxContentString(String fileName){
         String documentId = FileUtils.getAllDesktopPath();
         String filePath = documentId +fileName;
-        // String startChar = "[Desktop";  // 
-        // Map<String,Object> map = null;
-        // try {
-        //     // 读取文件内容
-        //     map = new HashMap<>();
-        //     String content = readFile(filePath);
-        //     // 查找以指定字开头的段落
-
-        //     int firstIndex  = content.indexOf("[Desktop");
-        //     int secondIndex = content.indexOf("[Desktop", firstIndex + 1);
-        //     // Log.i(TAG,"bella...firstIndex: "+firstIndex + ", secondIndex: "+secondIndex);
-        //     if(secondIndex != -1){
-        //         content = content.substring(firstIndex,secondIndex);
-        //     }
-        
-        //     String []paragraphs = content.split("\n");
-        //     for (String paragraph : paragraphs) {
-        //         int equalIndex = paragraph.indexOf('=');
-        //         if (equalIndex != -1) {
-        //             String key = paragraph.substring(0, equalIndex).trim();
-        //             String value = paragraph.substring(equalIndex + 1).trim();
-        //             map.put(key, value);
-        //         }
-        //     }
-        // } catch (Exception e) {
-        //     e.printStackTrace();
-        // }
-
+       
+        File file = new File(filePath);
         Map<String, Object> entries = new HashMap<>();
-        boolean isDesktopEntrySection = false; // 标记是否在[Desktop Entry]部分
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-
-                // 检查是否进入[Desktop Entry]部分
-                if (line.equals("[Desktop Entry]")) {
-                    isDesktopEntrySection = true;
-                    continue; // 跳过当前行，继续读取下一行
-                } else if (line.startsWith("[")) {
-                    // 如果进入其他部分（如[Desktop Action]），则停止解析
-                    isDesktopEntrySection = false;
-                }
-
-                // 只在[Desktop Entry]部分解析字段
-                if (isDesktopEntrySection) {
-                    if (line.startsWith("Name=")) {
-                        entries.put("Name", line.substring(5));
-                    }else if (line.startsWith("Name[zh_CN]=")) {
-                        entries.put("Name[zh_CN]", line.substring(12));
-                    }else if (line.startsWith("Exec=")) {
-                        entries.put("Exec", line.substring(5));
-                    }else if (line.startsWith("Icon=")) {
-                        entries.put("Icon", line.substring(5));
-                    }else if (line.startsWith("Type=")) {
-                        entries.put("Type", line.substring(5));
-                    } else if (line.startsWith("Categories=")) {
-                        entries.put("Categories", line.substring(11));
-                    }else if (line.startsWith("NoDisplay=")) {
-                        entries.put("NoDisplay", line.substring(10));
-                    }
-                    // 可以根据需要解析其他字段
-                }
-            }
-        } catch (IOException e) {
+        try (InputStream is = new FileInputStream(file)) {
+            Map<String, Map<String, Object>> config = parseDesktopFile(is);
+            //String Name = config.get("Desktop Entry").get("Name");
+            entries = config.get("Desktop Entry");
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return entries;
@@ -789,8 +759,19 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
         try{
-            int width = drawable.getIntrinsicWidth();
-            int height = drawable.getIntrinsicHeight();
+            int width = 36 ;
+            int height = 36 ;
+            // 获取 SVG 的宽度和高度
+            try{
+                 width = drawable.getIntrinsicWidth();
+                 height = drawable.getIntrinsicHeight();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            if(width <= 0 || height <= 0){
+                width = height = 36;
+            }
+
             Bitmap bitmap = Bitmap.createBitmap(
                     width,
                     height,
@@ -852,27 +833,6 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
         return bitmap;
     }
 
-    public static Map<String, String> parseDesktopFile(String filePath) {
-        Map<String, String> entries = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.startsWith("#") || line.isEmpty()) {
-                    continue;
-                }
-                int equalsIndex = line.indexOf('=');
-                if (equalsIndex > 0) {
-                    String key = line.substring(0, equalsIndex).trim();
-                    String value = line.substring(equalsIndex + 1).trim();
-                    entries.put(key, value);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return entries;
-    }
 
     public static boolean containsChinese(String str) {
         if (str == null || str.isEmpty()) {

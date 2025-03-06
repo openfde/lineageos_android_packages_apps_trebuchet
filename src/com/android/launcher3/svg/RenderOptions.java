@@ -15,10 +15,8 @@
 */
 
 package com.android.launcher3.svg;
-
 import android.graphics.Canvas;
-
-import com.android.launcher3.svg.utils.RenderOptionsBase;
+import android.graphics.RectF;
 
 /**
  * A fluent builder class that creates a render configuration object for the
@@ -37,8 +35,16 @@ import com.android.launcher3.svg.utils.RenderOptionsBase;
  * @since 1.3
  */
 
-public class RenderOptions extends RenderOptionsBase
+public class RenderOptions
 {
+   CSSParser.Ruleset    css = null;
+   //String               id = null;
+   PreserveAspectRatio  preserveAspectRatio = null;
+   String               targetId = null;
+   SVG.Box              viewBox = null;
+   String               viewId = null;
+   SVG.Box              viewPort = null;
+
 
    /**
     * Create a new <code>RenderOptions</code> instance.  You can choose to use either this constructor,
@@ -46,7 +52,6 @@ public class RenderOptions extends RenderOptionsBase
     */
    public RenderOptions()
    {
-      super();
    }
 
 
@@ -66,31 +71,28 @@ public class RenderOptions extends RenderOptionsBase
     */
    public RenderOptions(RenderOptions other)
    {
-      super(other);
+      if (other == null)
+         return;
+      this.css = other.css;
+      //this.id = other.id;
+      this.preserveAspectRatio = other.preserveAspectRatio;
+      this.viewBox = other.viewBox;
+      this.viewId = other.viewId;
+      this.viewPort = other.viewPort;
    }
 
 
    /**
     * Specifies some additional CSS rules that will be applied during render in addition to
-    * any specified in the file itself. CSS will be parsed during SVG render.
+    * any specified in the file itself.
     * @param css CSS rules to apply
     * @return this same <code>RenderOptions</code> instance
     */
    public RenderOptions  css(String css)
    {
-      return (RenderOptions) super.css(css);
-   }
-
-
-   /**
-    * Specifies some additional CSS that will be applied during render in
-    * addition to any specified in the file itself.
-    * @param css CSS rules to apply
-    * @return this same <code>RenderOptions</code> instance
-    */
-   public RenderOptions  css(CSS css)
-   {
-      return (RenderOptions) super.css(css);
+      CSSParser  parser = new CSSParser(CSSParser.Source.RenderOptions);
+      this.css = parser.parse(css);
+      return this;
    }
 
 
@@ -100,21 +102,21 @@ public class RenderOptions extends RenderOptionsBase
     */
    public boolean hasCss()
    {
-      return super.hasCss();
+      return this.css != null && this.css.ruleCount() > 0;
    }
 
 
    /**
     * Specifies how the renderer should handle aspect ratio when rendering the SVG.
-    * If not specified, the default will be <code>PreserveAspectRatio.LETTERBOX</code>. This is
+    * If not sepecified, the default will be <code>PreserveAspectRatio.LETTERBOX</code>. This is
     * equivalent to the SVG default of <code>xMidYMid meet</code>.
     * @param preserveAspectRatio the new aspect ration value
     * @return this same <code>RenderOptions</code> instance
     */
-   @SuppressWarnings("UnusedReturnValue")
    public RenderOptions  preserveAspectRatio(PreserveAspectRatio preserveAspectRatio)
    {
-      return (RenderOptions) super.preserveAspectRatio(preserveAspectRatio);
+      this.preserveAspectRatio = preserveAspectRatio;
+      return this;
    }
 
 
@@ -124,7 +126,7 @@ public class RenderOptions extends RenderOptionsBase
     */
    public boolean hasPreserveAspectRatio()
    {
-      return super.hasPreserveAspectRatio();
+      return this.preserveAspectRatio != null;
    }
 
 
@@ -140,7 +142,8 @@ public class RenderOptions extends RenderOptionsBase
     */
    public RenderOptions  view(String viewId)
    {
-      return (RenderOptions) super.view(viewId);
+      this.viewId = viewId;
+      return this;
    }
 
 
@@ -150,7 +153,7 @@ public class RenderOptions extends RenderOptionsBase
     */
    public boolean hasView()
    {
-      return super.hasView();
+      return this.viewId != null;
    }
 
 
@@ -168,7 +171,8 @@ public class RenderOptions extends RenderOptionsBase
     */
    public RenderOptions  viewBox(float minX, float minY, float width, float height)
    {
-      return (RenderOptions) super.viewBox(minX, minY, width, height);
+      this.viewBox = new SVG.Box(minX, minY, width, height);
+      return this;
    }
 
 
@@ -178,7 +182,7 @@ public class RenderOptions extends RenderOptionsBase
     */
    public boolean hasViewBox()
    {
-      return super.hasViewBox();
+      return this.viewBox != null;
    }
 
 
@@ -195,7 +199,8 @@ public class RenderOptions extends RenderOptionsBase
     */
    public RenderOptions  viewPort(float minX, float minY, float width, float height)
    {
-      return (RenderOptions) super.viewPort(minX, minY, width, height);
+      this.viewPort = new SVG.Box(minX, minY, width, height);
+      return this;
    }
 
 
@@ -205,7 +210,7 @@ public class RenderOptions extends RenderOptionsBase
     */
    public boolean hasViewPort()
    {
-      return super.hasViewPort();
+      return this.viewPort != null;
    }
 
 
@@ -218,7 +223,8 @@ public class RenderOptions extends RenderOptionsBase
     */
    public RenderOptions  target(String targetId)
    {
-      return (RenderOptions) super.target(targetId);
+      this.targetId = targetId;
+      return this;
    }
 
 
@@ -228,7 +234,7 @@ public class RenderOptions extends RenderOptionsBase
     */
    public boolean hasTarget()
    {
-      return super.hasTarget();
+      return this.targetId != null;
    }
 
 

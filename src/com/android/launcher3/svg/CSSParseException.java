@@ -14,20 +14,19 @@
    limitations under the License.
 */
 
-package com.android.launcher3.svg.utils;
-
+package com.android.launcher3.svg;
 /*
  * Thrown by the CSS parser if a problem is found while parsing a CSS file.
  */
 
-public class CSSParseException extends Exception
+class CSSParseException extends Exception
 {
-   public CSSParseException(String msg)
+   CSSParseException(String msg)
    {
       super(msg);
    }
 
-   public CSSParseException(String msg, Exception cause)
+   CSSParseException(String msg, Exception cause)
    {
       super(msg, cause);
    }
