@@ -438,24 +438,46 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             flags |= FLAG_SKIP_USER_BADGE;
         }
         FastBitmapDrawable iconDrawable = info.newIcon(getContext(), flags);
-        Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(),R.mipmap.icon_unkown);
+        Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(),R.mipmap.ic_unkown);
         if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
-            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.icon_dir);
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.ic_doc_folder);
             iconDrawable = new FastBitmapDrawable(bitmap);
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ){
             String fileName = info.title.toString() ;
-            int resId =  R.mipmap.icon_doc;
+            int resId =  R.mipmap.ic_doc_document;
             String fileType = FileUtils.getFileTyle(fileName);
             if(fileType !=null){
-                 if(fileType.contains("png") || fileType.contains("jpg")){
-                    resId =  R.mipmap.icon_pic;
+                 if(fileType.contains("png") || fileType.contains("jpg")||fileType.contains("svg")){
+                    resId =  R.mipmap.ic_doc_image;
+                 }else if(fileType.contains("mp3") || fileType.contains("wav")|| fileType.contains("aac") || fileType.contains("flac") || fileType.contains("ogg")  ){
+                    resId =  R.mipmap.ic_doc_audio;
+                 }else if(fileType.contains("mp4") || fileType.contains("avi") || fileType.contains("mov") || fileType.contains("wmv") || fileType.contains("mpg") || fileType.contains("flv") || fileType.contains("3gp")   ){
+                    resId =  R.mipmap.ic_doc_video;
                  }else if(fileType.contains("txt") || fileType.contains("md") || fileType.contains("xml")  || fileType.contains("java")  || fileType.contains("htm") || fileType.contains("json")  ){
-                    resId =  R.mipmap.icon_doc;
+                    resId =  R.mipmap.ic_doc_document;
+                 }else if(fileType.contains("pdf") ){
+                    resId =  R.mipmap.ic_doc_pdf;
+                 } else if(fileType.contains("kt") ){
+                    resId =  R.mipmap.ic_kotlin;
+                 }else if(fileType.contains("sh") ){
+                    resId =  R.mipmap.ic_shell;
+                 }else if(fileType.contains("db") || fileType.contains("sql") ){
+                    resId =  R.mipmap.ic_sql;
+                 }else if(fileType.contains("apk") ){
+                    resId =  R.mipmap.ic_doc_apk;
+                 } else if(fileType.contains("ppt")){
+                    resId =  R.mipmap.ic_doc_powerpoint;
+                 } else if(fileType.contains("doc")){
+                    resId =  R.mipmap.ic_doc_word;
+                 } else if(fileType.contains("xls")){
+                    resId =  R.mipmap.ic_doc_excel;
+                 } else if(fileType.contains("rar")||fileType.contains("zip") ){
+                    resId =  R.mipmap.ic_doc_compressed;
                  } else{
-                    resId =  R.mipmap.icon_unkown;
+                    resId =  R.mipmap.ic_unkown;
                  } 
             }else{
-                resId =  R.mipmap.icon_unkown;
+                resId =  R.mipmap.ic_unkown;
             }
             Log.i(TAG,"bellaLauncher applyIconAndLabel  fileName: "+fileName + " ,fileType  "+fileType);
             bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
