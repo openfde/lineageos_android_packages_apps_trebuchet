@@ -2180,6 +2180,17 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
         try{
             listDeskTopLinux = NetUtils.getLinuxDesktopApp();
             List<Map<String,Object>>  listApps = DbUtils.queryDesktopLinuxAppInDatabase(Launcher.this);
+            if(listApps !=null){
+                //if db exists but linux not  exists . delete db data.
+                for(Map<String,Object> mp : listApps){
+                    String fName = mp.get("title").toString();
+                    boolean isExists = listDeskTopLinux.stream().anyMatch(item -> fName.contains(item.get("FileName").toString()));
+                    if(!isExists){
+                        DbUtils.deleteTitleFromDatabase(Launcher.this,fName);   
+                    }
+                }
+            }
+
             int index = 1;//DbUtils.queryMaxIdFromDatabase(Launcher.this);
             countLinuxApp = 0 ;
             if(listDeskTopLinux !=null ){
