@@ -348,6 +348,10 @@ public class LauncherSettings {
 
         public static final String METHOD_LOAD_DEFAULT_FAVORITES = "load_default_favorites";
 
+        public static final String METHOD_LOAD_DESKTOP_FILE = "load_desktop_file";
+
+        public static final String METHOD_LOAD_LINUX_APP = "load_linux_app";
+
         public static final String METHOD_REMOVE_GHOST_WIDGETS = "remove_ghost_widgets";
 
         public static final String METHOD_NEW_TRANSACTION = "new_db_transaction";

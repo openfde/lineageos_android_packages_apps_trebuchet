@@ -350,13 +350,13 @@ public class FastBitmapDrawable extends Drawable {
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_linux);
             String title = info.title.toString();
-            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(info.title.toString());
+            Map<String,Object> map = Launcher.getDesktopMap(title); //FileUtils.getLinuxDesktopFileContent(info.title.toString());
 
             if(map !=null && !map.isEmpty()){
                 // String icon = map.get("icon").toString();
                try{
-                String name = map.get("name").toString().replaceAll(" ", "_");
-                String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
+                String name = map.get("Name").toString().replaceAll(" ", "_");
+                String exec = map.get("Path").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
                 int lastIndex = exec.lastIndexOf('/');
                 String key = name ;
                 if(FileUtils.containsChinese(name)){
@@ -364,7 +364,8 @@ public class FastBitmapDrawable extends Drawable {
                         key = exec.substring(lastIndex+1);
                      }
                 }
-                String IconPath = FileUtils.getSystemProperty(key ,"-1");
+               // String IconPath = FileUtils.getSystemProperty(key ,"-1");
+                String IconPath = map.get("IconPath").toString();
 
                 Log.i("bella","FastBitmapDrawable name : "+name  + " , IconPath "+IconPath + ",key "+key );
         

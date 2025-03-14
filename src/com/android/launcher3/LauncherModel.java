@@ -80,6 +80,11 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Map;
 import com.android.launcher3.util.DbUtils;
+import com.android.launcher3.util.NetUtils;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import android.graphics.Point;
 
 /**
  * Maintains in-memory state of the Launcher. It is expected that there should be only one
@@ -328,10 +333,19 @@ public class LauncherModel extends LauncherApps.Callback implements InstallSessi
         }
     }
 
-    public void refreshDeskFileList(Context context){
-        Launcher launcher = Launcher.getLauncher(context);
-        ArrayList<ItemInfo> workspaceItems = mBgDataModel.workspaceItems;
-        Log.i(TAG, "workspaceItems.......Launcher...........size  "+workspaceItems.size());
+    private void insertOrUpdateFavorites(ItemInfo info){
+        enqueueModelUpdateTask(new BaseModelUpdateTask() {
+            @Override
+            public void execute(LauncherAppState app, BgDataModel dataModel, AllAppsList apps) {
+                List<Map<String,Object>> listData = DbUtils.queryItemsFromDatabase(mApp.getContext(),info);//getModelWriter().queryItemsFromDatabase(info);//
+                if(listData == null){
+                    getModelWriter().addItemToDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY);
+                }else{
+                    getModelWriter().modifyItemInDatabase(info,LauncherSettings.Favorites.CONTAINER_DESKTOP,0,info.cellX,info.cellY,1,1);
+                }  
+            }
+        });
+       
     }
 
     public List<ItemInfo> rearray(Context context){

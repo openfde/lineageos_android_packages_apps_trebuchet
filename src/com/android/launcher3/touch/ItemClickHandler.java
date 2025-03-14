@@ -294,9 +294,9 @@ public class ItemClickHandler {
 
     public static void appOpenLinuxType(Launcher launcher,ItemInfo item,String type ){
        try{
-        Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
-        String name = map.get("name").toString();
-        String exec = map.get("exec").toString();
+        Map<String,Object> map = Launcher.getDesktopMap(item.title.toString());  //FileUtils.getLinuxDesktopFileContent(item.title.toString());
+        String name = map.get("Name").toString();
+        String exec = map.get("Path").toString();
         if(name.equals("OpenFDE")){
             Toast.makeText(launcher, "OpenFde is open.", Toast.LENGTH_SHORT).show();
             return ;

@@ -242,13 +242,15 @@ public class LauncherProvider extends ContentProvider {
             }
         }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        db.beginTransaction();
         addModifiedTime(initialValues);
         final int rowId = dbInsertAndCheck(mOpenHelper, db, args.table, null, initialValues);
         if (rowId < 0) return null;
         onAddOrDeleteOp(db);
         uri = ContentUris.withAppendedId(uri, rowId);
         reloadLauncherIfExternal();
-
+        db.setTransactionSuccessful();
+        db.endTransaction();
         // String packageName = FileUtils.getPackageNameByAppName(getContext(),initialValues.get("title").toString());
         // Log.i(TAG,"bella_insert packageName "+packageName);
         // if(packageName != null){
@@ -422,6 +424,14 @@ public class LauncherProvider extends ContentProvider {
                 loadDefaultFavoritesIfNecessary();
                 return null;
             }
+            case LauncherSettings.Settings.METHOD_LOAD_DESKTOP_FILE: {
+                loadDesktopFile();
+                return null;
+            }
+            case LauncherSettings.Settings.METHOD_LOAD_LINUX_APP: {
+                loadLinuxApp();
+                return null;
+            }
             case LauncherSettings.Settings.METHOD_REMOVE_GHOST_WIDGETS: {
                 mOpenHelper.removeGhostWidgets(mOpenHelper.getWritableDatabase());
                 return null;
@@ -540,6 +550,15 @@ public class LauncherProvider extends ContentProvider {
                 .remove(mOpenHelper.getKey(EMPTY_DATABASE_CREATED)).commit();
     }
 
+
+    synchronized private void loadDesktopFile(){
+        Log.w(TAG, "loading loadDesktopFile");
+    }
+
+    synchronized private void loadLinuxApp(){
+        Log.w(TAG, "loading loadLinuxApp"); 
+    }
+
     /**
      * Loads the default workspace based on the following priority scheme:
      *   1) From the app restrictions
@@ -548,8 +567,8 @@ public class LauncherProvider extends ContentProvider {
      *   4) The default configuration for the particular device
      */
     synchronized private void loadDefaultFavoritesIfNecessary() {
+        Log.w(TAG, "loading loadDefaultFavoritesIfNecessary");
         SharedPreferences sp = Utilities.getPrefs(getContext());
-
         if (sp.getBoolean(mOpenHelper.getKey(EMPTY_DATABASE_CREATED), false)) {
             Log.d(TAG, "loading default workspace");
 

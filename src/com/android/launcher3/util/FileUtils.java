@@ -215,26 +215,65 @@ public static int getScreenColumns(Context context){
     return numColumns;
 }
 
+public static synchronized Point getMaxPoint(Context context){
+    List<Point> list = DbUtils.queryFilesByPointFromDatabase(context);
+    Point point = new Point(-1,-1);
+    if(list == null || list.size() == 0){
+        point = new Point(0,0); 
+    }else{
+        int size = list.size() ;
+        point = list.get(size-1);
+    }
+    return point;
+}
+
 /**
  * find next free point
  */
-public static Point findNextFreePoint(Context context){
+public  static synchronized Point findNextFreePoint(Context context){
     int numRows  =  getScreenRows(context);
     int numColumns  =  getScreenColumns(context);
 
-    Point point = new Point(-1,-1);
-    outer: 
-    for(int i = 0 ; i < numColumns ; i++ ){
-        for(int j = 0 ; j < numRows ; j++){
-            if(DbUtils.queryFilesByPointFromDatabase(context,i,j) == null){
-                point.x = i ;
-                point.y = j ;
-                break outer;
-            }
-        }
+    Point point = getMaxPoint(context);
+    Log.i(TAG, "queryFilesByPointFromDatabase: numColumns:  "+numColumns + " , numRows: "+numRows + " ,getMaxPoint x: "+point.x + " , y: "+point.y);
+    if(point.y == numRows-1){
+        point.y = 0 ;
+        point.x = point.x + 1;
+    }else{
+        point.y  = point.y +1;
     }
-    Log.i(TAG, "queryAllFilesFromDatabase: x:  "+point.x + " , y: "+point.y);
+  
+    // //outer: 
+    // for(int i = 0 ; i < numColumns ; i++ ){
+    //     for(int j = 0 ; j < numRows ; j++){
+    //         point = new Point(i,j);
+    //         if(list == null || !list.contains(point)){
+    //             //break outer;
+    //             Log.i(TAG, "queryFilesByPointFromDatabase----findNextFreePoint: x:  "+point.x + " , y: "+point.y);
+    //             return point ;
+    //         }
+    //     }
+    // }
+    Log.i(TAG, "queryFilesByPointFromDatabase----not find point: x:  "+point.x + " , y: "+point.y);
     return point ;
+
+
+    // int numRows  =  getScreenRows(context);//8
+    // int numColumns  =  getScreenColumns(context);//16
+    // Log.i(TAG, "queryAllFilesFromDatabase: numRows:  "+numRows + " , numColumns: "+numColumns);
+    // Point point = new Point(-1,-1);
+    // outer: 
+    // for(int j = 0 ; j < numRows ; j++){ 
+    //     for(int i = 0 ; i < numColumns ; i++ ){
+    //         if(DbUtils.queryFilesByPointFromDatabase(context,i,j) == null){
+    //             point.x = i ;
+    //             point.y = j ;
+    //             break outer;
+    //         }
+    //     }
+    // }
+    // // Log.i(TAG, "queryAllFilesFromDatabase: x:  "+point.x + " , y: "+point.y);
+    // return point ;
 }
 
 
@@ -390,6 +429,7 @@ public static Point findNextFreePoint(Context context){
                     "Name[zh_CN]="+title,
                     "Categories="+itemType,
                     "Exec=fde_launch "+packageName,
+                    "NotShowIn=OpenFDE",
                     "Icon="+linuxPic
                 );
          
@@ -447,12 +487,25 @@ public static Point findNextFreePoint(Context context){
         String documentId = FileUtils.getAllDesktopPath();
         String filePath = documentId +fileName;
 
+        Path path = Paths.get(filePath);
+        try {
+            if (Files.isSymbolicLink(path)) {
+                Path target = Files.readSymbolicLink(path);
+                filePath = "/volumes"+"/"+getLinuxUUID()+ target.toString();
+            } else {
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         Map<String, Object> entries = new HashMap<>();
         File file = new File(filePath);
         try (InputStream is = new FileInputStream(file)) {
             Map<String, Map<String, Object>> config = parseDesktopFile(is);
             //String Name = config.get("Desktop Entry").get("Name");
             entries = config.get("Desktop Entry");
+            // Log.e(TAG,"bella getLinuxContentString  "+entries);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -475,10 +528,15 @@ public static Point findNextFreePoint(Context context){
                 map.put("icon",mp.get("Icon").toString());
             }
                      
-            if(mp.get("Name[zh_CN]") != null ){
+            if(mp.get("Name[zh_CN]") != null){
                 map.put("nameZh",mp.get("Name[zh_CN]").toString());
             }else{
-                map.put("nameZh",mp.get("Name").toString()); 
+                if(mp.get("Name") !=null){
+                    map.put("nameZh",mp.get("Name").toString()); 
+                }else{
+                    map.put("nameZh",""); 
+                }
+                
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -855,6 +913,54 @@ public static boolean containsChinese(String str) {
     // is Chinese
     String regex = "[\\u4e00-\\u9fa5]";
     return str.matches(".*" + regex + ".*");
+}
+
+
+public static  Bitmap fileToBitmap(String filePath) {
+    try (FileInputStream fis = new FileInputStream(filePath)) {
+        return BitmapFactory.decodeStream(fis);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+
+public static String getLinuxPrefixPath(){
+    return "/volumes"+"/"+FileUtils.getLinuxUUID();
+}
+
+public static void createShortcut(Context mContext, Map<String,Object> mp) {
+    Log.w(TAG,"createShortcut mp"+mp);
+    String IconPath = getLinuxPrefixPath() +mp.get("IconPath").toString();
+    Log.w(TAG,"createShortcut IconPath "+IconPath);
+    String name = mp.get("Name").toString();
+    String path = mp.get("Path").toString();
+    Bitmap iconBitmap = fileToBitmap(IconPath);
+    Icon icon = Icon.createWithBitmap(iconBitmap);
+
+    ShortcutManager shortcutManager = (ShortcutManager) mContext.getSystemService(Context.SHORTCUT_SERVICE);
+    if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported()) {
+        // Intent launchIntentForPackage = Objects.requireNonNull(mContext.getPackageManager().getLaunchIntentForPackage(app.getPackageName()));
+        
+        // Intent launchIntentForPackage = new Intent(mContext, Launcher.class);
+        // launchIntentForPackage.setAction(Intent.ACTION_MAIN);
+        // launchIntentForPackage.putExtra("App", name);
+        // launchIntentForPackage.putExtra("Path", path);
+        
+        ShortcutInfo pinShortcutInfo = new ShortcutInfo.Builder(mContext, name)
+                .setLongLabel(name)
+                .setShortLabel(name)
+                .setIcon(icon)
+                //.setIntent(launchIntentForPackage)
+                .build();
+
+        Intent pinnedShortcutCallbackIntent = shortcutManager.createShortcutResultIntent(pinShortcutInfo);
+        PendingIntent successCallback = PendingIntent.getBroadcast(
+                mContext, 0,
+                pinnedShortcutCallbackIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        shortcutManager.requestPinShortcut(pinShortcutInfo, successCallback.getIntentSender());
+    }
 }
 
 

@@ -46,6 +46,7 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- TODO(b/150802536): Enabled only for ENABLE_FIXED_ROTATION_TRANSFORM feature flag -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
@@ -83,6 +84,7 @@
         android:label="@string/derived_app_name"
         android:largeHeap="@bool/config_largeHeap"
         android:restoreAnyVersion="true"
+        android:usesCleartextTraffic="true"
         android:supportsRtl="true" >
 
         <!-- Intent received used to install shortcuts from other applications -->
