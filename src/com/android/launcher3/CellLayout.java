@@ -975,7 +975,7 @@ public class CellLayout extends ViewGroup {
         int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize =  MeasureSpec.getSize(heightMeasureSpec);
+        int heightSize =  960;//MeasureSpec.getSize(heightMeasureSpec);
         int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());
         int childHeightSize = heightSize - (getPaddingTop() + getPaddingBottom());
 

@@ -26,7 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.taskbar.TaskbarActivityContext;
-
+import android.util.Log;
 /**
  * Controls bubble bar drag to dismiss interaction.
  * Interacts with {@link BubbleDismissController}, used by {@link BubbleBarViewController}.
@@ -39,6 +39,8 @@ public class BubbleDragController {
     private final TaskbarActivityContext mActivity;
     private BubbleBarViewController mBubbleBarViewController;
     private BubbleDismissController mBubbleDismissController;
+
+    private static final String TAG = "BubbleDragController";
 
     public BubbleDragController(TaskbarActivityContext activity) {
         mActivity = activity;
@@ -91,12 +93,14 @@ public class BubbleDragController {
         bubbleBarView.setOnTouchListener(new BubbleTouchListener() {
             @Override
             protected boolean onTouchDown(@NonNull View view, @NonNull MotionEvent event) {
+                Log.i(TAG, "bellaLauncher setupBubbleBarView....onTouchDown......" );
                 if (bubbleBarView.isExpanded()) return false;
                 return super.onTouchDown(view, event);
             }
 
             @Override
             void onDragStart() {
+                Log.i(TAG, "bellaLauncher setupBubbleBarView....onDragStart......" );
                 initialRelativePivot.set(bubbleBarView.getRelativePivotX(),
                         bubbleBarView.getRelativePivotY());
                 // By default the bubble bar view pivot is in bottom right corner, while dragging

@@ -24,7 +24,7 @@
 
 <!-- Dragging-->
     <dimen name="drop_target_top_margin">0dp</dimen>
-    <dimen name="drop_target_bottom_margin">32dp</dimen>
+    <dimen name="drop_target_bottom_margin">0dp</dimen>
 
 <!-- Hotseat -->
     <dimen name="spring_loaded_hotseat_top_margin">0dp</dimen>

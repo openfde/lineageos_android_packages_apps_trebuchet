@@ -71,7 +71,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import android.util.Log;
 /**
  * A container for shortcuts to deep links associated with an app.
  *
@@ -98,6 +98,8 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
 
     protected PopupItemDragHandler mPopupItemDragHandler;
     protected LauncherAccessibilityDelegate mAccessibilityDelegate;
+
+    private static final String TAG = "PopupContainerWithArrow";
 
     public PopupContainerWithArrow(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -195,6 +197,7 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
             return null;
         }
         ItemInfo item = (ItemInfo) icon.getTag();
+        Log.i(TAG,"showForIcon..............item "+item);
         if (!ShortcutUtil.supportsShortcuts(item)) {
             return null;
         }
@@ -202,10 +205,11 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
         PopupContainerWithArrow<Launcher> container;
         PopupDataProvider popupDataProvider = launcher.getPopupDataProvider();
         int deepShortcutCount = popupDataProvider.getShortcutCountForItem(item);
-        List<SystemShortcut> systemShortcuts = launcher.getSupportedShortcuts()
+        List<SystemShortcut> systemShortcuts = launcher.getSupportedShortcuts(item.itemType)
                 .map(s -> s.getShortcut(launcher, item, icon))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+        Log.i(TAG,"showForIcon..............systemShortcuts  "+systemShortcuts.size());
         container = (PopupContainerWithArrow) launcher.getLayoutInflater().inflate(
                 R.layout.popup_container, launcher.getDragLayer(), false);
         container.configureForLauncher(launcher, item);

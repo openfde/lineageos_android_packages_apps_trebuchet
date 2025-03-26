@@ -47,6 +47,7 @@ import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.testing.TestLogging;
 import com.android.launcher3.testing.shared.TestProtocol;
 import com.android.launcher3.util.TouchUtil;
+import android.util.Log;
 
 /**
  * Helper class to handle touch on empty space in workspace and show options popup on long press
@@ -89,10 +90,11 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
         mGestureDetector.onTouchEvent(ev);
 
         int action = ev.getActionMasked();
+        boolean handleLongPress = canHandleLongPress();
         if (action == ACTION_DOWN) {
             // Check if we can handle long press.
-            boolean handleLongPress = canHandleLongPress();
-
+            
+            mLauncher.hidePopWindowList();
             if (handleLongPress) {
                 // Check if the event is not near the edges
                 DeviceProfile dp = mLauncher.getDeviceProfile();
@@ -196,6 +198,7 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
         maybeShowMenu();
     }
 
+
     private void maybeShowMenu() {
         if (mLongPressState == STATE_REQUESTED) {
             TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "Workspace.longPress");
@@ -206,7 +209,7 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
                 mWorkspace.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS,
                         HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
                 mLauncher.getStatsLogManager().logger().log(LAUNCHER_WORKSPACE_LONGPRESS);
-                mLauncher.showDefaultOptions(mTouchDownPoint.x, mTouchDownPoint.y);
+                mLauncher.showPopWindowList(mTouchDownPoint.x, mTouchDownPoint.y);
                 if (FeatureFlags.enableSplitContextually() && mLauncher.isSplitSelectionActive()) {
                     mLauncher.dismissSplitSelection(LAUNCHER_SPLIT_SELECTION_EXIT_INTERRUPTED);
                 }

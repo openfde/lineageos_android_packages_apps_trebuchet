@@ -391,6 +391,7 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
             @DeviceType int deviceType) {
         iconSize = displayOption.iconSizes;
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        // DisplayMetrics metrics = displayInfo.metrics;
         GridOption closestProfile = displayOption.grid;
         float density = metrics.density;
         float iconPixel = iconSize[INDEX_DEFAULT] * density;
@@ -470,6 +471,9 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
         transientTaskbarIconSize = displayOption.transientTaskbarIconSize;
 
         startAlignTaskbar = displayOption.startAlignTaskbar;
+
+        Log.i(TAG, "bellaLauncher maxIconSize=" + maxIconSize + "  allAppsIconSize=" + allAppsIconSize + ",allAppsCellSize: "+allAppsCellSize+",minCellSize: "+minCellSize);
+
 
         // If the partner customization apk contains any grid overrides, apply them
         // Supported overrides: numRows, numColumns, iconSize

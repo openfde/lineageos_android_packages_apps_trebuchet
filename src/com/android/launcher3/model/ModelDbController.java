@@ -87,7 +87,7 @@ import java.io.StringReader;
  * around it.
  */
 public class ModelDbController {
-    private static final String TAG = "LauncherProvider";
+    private static final String TAG = "ModelDbController";
 
     private static final String EMPTY_DATABASE_CREATED = "EMPTY_DATABASE_CREATED";
     public static final String EXTRA_DB_NAME = "db_name";

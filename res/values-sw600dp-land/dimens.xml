@@ -24,7 +24,7 @@
 
 <!-- Dragging -->
     <dimen name="drop_target_top_margin">0dp</dimen>
-    <dimen name="drop_target_bottom_margin">16dp</dimen>
+    <dimen name="drop_target_bottom_margin">0dp</dimen>
 
 <!-- Dynamic grid -->
     <dimen name="dynamic_grid_edge_margin">11.33dp</dimen>

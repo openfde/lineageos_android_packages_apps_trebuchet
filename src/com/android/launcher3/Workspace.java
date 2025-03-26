@@ -153,6 +153,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
      */
     private static final float ALLOW_DROP_TRANSITION_PROGRESS = 0.25f;
 
+    private static final String TAG = "CellLayout";
+
     /**
      * The value that {@link #mTransitionProgress} must be greater than for
      * {@link #isFinishedSwitchingState()} ()} to return true.
@@ -347,7 +349,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             int maxInsets = Math.max(insets.left, insets.right);
             int maxPadding = Math.max(grid.edgeMarginPx, padding.left + 1);
             // setPageSpacing(Math.max(maxInsets, maxPadding));
-            setPageSpacing(30);
+            setPageSpacing(Math.max(maxInsets, maxPadding));
         }
 
         updateCellLayoutMeasures();
@@ -412,6 +414,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             // Use the first page to estimate the child position
             CellLayout cl = (CellLayout) getChildAt(0);
             boolean isWidget = itemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET;
+
+            Log.i(TAG, "bellaLauncher estimateItemSize=" + isWidget);
 
             Rect r = estimateItemPosition(cl, 0, 0, itemInfo.spanX, itemInfo.spanY);
 
@@ -482,6 +486,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (addNewPage) {
             mDeferRemoveExtraEmptyScreen = false;
             addExtraEmptyScreenOnDrag(dragObject);
+            Log.i(TAG, "bellaLauncher onDragStart  addNewPage=" + addNewPage + ",dragObject.dragInfo.itemType  "+dragObject.dragInfo.itemType );
 
             if (dragObject.dragInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
                     && dragObject.dragSource != this) {
@@ -788,6 +793,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         SparseArray<CellLayout> finalScreens = new SparseArray<>();
 
         int pageCount = mScreenOrder.size();
+        Log.i(TAG,"bellaLauncher convertFinalScreenToEmptyScreenIfNecessary panelCount: "+panelCount + ",pageCount: "+pageCount);
         // First we add the last page(s) to the finalScreens collection. The number of final pages
         // depends on the panel count.
         for (int pageIndex = pageCount - panelCount; pageIndex < pageCount; pageIndex++) {
@@ -1116,6 +1122,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         if (isTrackpadMultiFingerSwipe(ev)) {
             return false;
         }
+        Log.i("bella","WORK onTouchEvent");
         return super.onTouchEvent(ev);
     }
 
@@ -1881,6 +1888,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 (info.itemType == ITEM_TYPE_APPLICATION ||
                         info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT);
 
+        Log.i(TAG, "bellaLauncher willCreateUserFolder  aboveShortcut=" + aboveShortcut + ",willBecomeShortcut  "+willBecomeShortcut );
+                
+
         return (aboveShortcut && willBecomeShortcut);
     }
 
@@ -2009,6 +2019,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         boolean snappedToNewPage = false;
         boolean resizeOnDrop = false;
         Runnable onCompleteRunnable = null;
+        Log.i(TAG, "bellaLauncher onDrop  ");
         if (d.dragSource != this || mDragInfo == null) {
             final int[] touchXY = new int[]{(int) mDragViewVisualCenter[0],
                     (int) mDragViewVisualCenter[1]};
@@ -2026,6 +2037,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                         LauncherSettings.Favorites.CONTAINER_DESKTOP;
                 int screenId = (mTargetCell[0] < 0) ?
                         mDragInfo.screenId : getCellLayoutId(dropTargetLayout);
+                Log.i(TAG, "bellaLauncher onDrop  container=" + container + ",screenId  "+screenId );
+
                 int spanX = mDragInfo != null ? mDragInfo.spanX : 1;
                 int spanY = mDragInfo != null ? mDragInfo.spanY : 1;
                 // First we find the cell nearest to point at which the item is
@@ -2193,6 +2206,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 final ItemInfo info = (ItemInfo) cell.getTag();
                 boolean isWidget = info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
                         || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
+                        Log.i(TAG, "bellaLauncher onDrop  isWidget=" + isWidget + ",info  "+info );
                 if (isWidget && dropTargetLayout != null) {
                     // animate widget to a valid place
                     int animationType = resizeOnDrop ? ANIMATE_INTO_POSITION_AND_RESIZE :
@@ -2781,6 +2795,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 ? LauncherSettings.Favorites.CONTAINER_HOTSEAT
                 : LauncherSettings.Favorites.CONTAINER_DESKTOP;
         final int screenId = getCellLayoutId(cellLayout);
+        Log.i(TAG, "bellaLauncher onDropExternal  container=" + container + ",screenId  "+screenId );
         if (!mLauncher.isHotseatLayout(cellLayout)
                 && screenId != getScreenIdForPageIndex(mCurrentPage)
                 && !mLauncher.isInState(SPRING_LOADED)
@@ -2788,6 +2803,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             snapToPage(getPageIndexForScreenId(screenId));
         }
 
+        Log.i(TAG, "bellaLauncher onDropExternal  screenId=" + screenId + ",info  "+info );
         if (info instanceof PendingAddItemInfo) {
             final PendingAddItemInfo pendingInfo = (PendingAddItemInfo) info;
 
@@ -2844,7 +2860,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             };
             boolean isWidget = pendingInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET
                     || pendingInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
-
+                    Log.i(TAG, "bellaLauncher onDropExternal  isWidget=" + isWidget  );
             AppWidgetHostView finalView = isWidget ?
                     ((PendingAddWidgetInfo) pendingInfo).boundWidget : null;
 
@@ -2939,6 +2955,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         int spanY = info.spanY;
 
         Rect r = estimateItemPosition(layout, targetCell[0], targetCell[1], spanX, spanY);
+        Log.i(TAG, "bellaLauncher getFinalPositionForDropAnimation  info=" + info  );
         if (info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET) {
             DeviceProfile profile = mLauncher.getDeviceProfile();
             if (finalView instanceof NavigableAppWidgetHostView) {
@@ -3002,6 +3019,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         boolean isWidget = info.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPWIDGET ||
                 info.itemType == LauncherSettings.Favorites.ITEM_TYPE_CUSTOM_APPWIDGET;
+                Log.i(TAG, "bellaLauncher getFinalPositionForDropAnimation  isWidget=" + isWidget +",info "+info  );
         if ((animationType == ANIMATE_INTO_POSITION_AND_RESIZE || external)
                 && finalView != null
                 && dragView.getContentView() != finalView) {

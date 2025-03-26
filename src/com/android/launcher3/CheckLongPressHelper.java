@@ -22,7 +22,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.launcher3.util.TouchUtil;
-
+import android.util.Log;
 /**
  * Utility class to handle tripper long press or right click on a view with custom timeout and
  * stylus event
@@ -34,6 +34,9 @@ public class CheckLongPressHelper {
     private final View mView;
     private final View.OnLongClickListener mListener;
     private final float mSlop;
+
+    
+    private static final String TAG = "CheckLongPressHelper";
 
     private float mLongPressTimeoutFactor = DEFAULT_LONG_PRESS_TIMEOUT_FACTOR;
 

@@ -196,9 +196,23 @@
         <item name="dropTargetHoverButtonColor">@color/drop_target_hover_button_color_dark</item>
     </style>
 
+    <style name="MyPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <!-- 背景 -->
+        <item name="android:popupBackground">@drawable/bg_desktop_menu</item>
+        <!-- 文本颜色 -->
+        <item name="android:textColor">#FF0000</item>
+        <!-- 文本大小 -->
+        <item name="android:textSize">10sp</item>
+        <!-- 垂直偏移（距离锚点的位置） -->
+        <item name="android:dropDownVerticalOffset">0dp</item>
+        <item name="android:dropDownHorizontalOffset">120dp</item>
+    </style>
+
     <!-- A derivative project can extend these themes to customize the application theme without
          affecting the base theme -->
-    <style name="AppTheme" parent="@style/LauncherTheme" />
+    <style name="AppTheme" parent="@style/LauncherTheme" >
+        <item name="android:popupMenuStyle">@style/MyPopupMenu</item>
+    </style>
     <style name="AppTheme.DarkMainColor" parent="@style/LauncherTheme.DarkMainColor" />
     <style name="AppTheme.DarkText" parent="@style/LauncherTheme.DarkText" />
 
@@ -313,7 +327,7 @@
 
     <style name="BaseIconRoot" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
 
-    <style name="BaseIconUnBounded" parent="BaseIconRoot">
+    <style name="BaseIconUnBounded" >
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_gravity">center</item>
@@ -445,4 +459,29 @@
         <item name="android:fontFamily">google-sans-text-medium</item>
         <item name="android:ellipsize">end</item>
     </style>
+
+    <declare-styleable name="SVGImageView">
+        <!-- Location of the SVG document. -->
+        <attr name="svg" format="reference|string"/>
+        <attr name="css" format="string"/>
+    </declare-styleable>
+
+    
+    <style name="popWindowTextStyle" >
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#e6000000</item>
+        <item name="android:gravity">left|center</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:paddingLeft">14dp</item>
+    </style>
+
+    <style name="popWindowLineStyle" >
+        <item name="android:background">#1a000000</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_width">130dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginHorizontal">15dp</item>
+    </style>
+
 </resources>

@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import com.android.launcher3.AbstractFloatingView;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
+import com.android.launcher3.Launcher;
 import com.android.launcher3.SecondaryDropTarget;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.allapps.PrivateProfileManager;
@@ -41,6 +42,20 @@ import com.android.launcher3.widget.WidgetsBottomSheet;
 
 import java.util.Arrays;
 import java.util.List;
+
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView.OnEditorActionListener;
+import android.util.Log;
+import com.android.launcher3.LauncherSettings;
+import com.android.launcher3.util.FileUtils;
+import java.io.File;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import com.android.launcher3.touch.ItemClickHandler;
 
 /**
  * Represents a system shortcut for a given app. The shortcut should have a label and icon, and an
@@ -136,6 +151,12 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
     }
 
     public static final Factory<ActivityContext> APP_INFO = AppInfo::new;
+    public static final Factory<ActivityContext> APP_OPEN = AppOpen::new;
+    public static final Factory<ActivityContext> APP_OPEN_TYPE = AppOpenType::new;
+    public static final Factory<ActivityContext> APP_REMOVE = AppRemove::new;
+    public static final Factory<ActivityContext> APP_COPY = AppCopy::new ;
+    public static final Factory<ActivityContext> APP_CUT = AppCut::new ;
+    public static final Factory<ActivityContext> APP_RENAME = AppRename::new ;
 
     public static class AppInfo<T extends ActivityContext> extends SystemShortcut<T> {
 
@@ -163,6 +184,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             mSplitA11yInfo = accessibilityInfo;
             mAccessibilityActionId = accessibilityInfo.nodeId;
         }
+        
 
         @Override
         public AccessibilityNodeInfo.AccessibilityAction createAccessibilityAction(
@@ -187,6 +209,8 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                     .log(LAUNCHER_SYSTEM_SHORTCUT_APP_INFO_TAP);
         }
 
+       
+
         public static class SplitAccessibilityInfo {
             public final boolean containsMultipleTasks;
             public final CharSequence taskTitle;
@@ -198,6 +222,111 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                 this.taskTitle = taskTitle;
                 this.nodeId = nodeId;
             }
+        }
+    }
+
+    public static class AppOpen<T extends ActivityContext> extends SystemShortcut {
+
+        public AppOpen(T target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_open_app, R.string.app_open_drop_target_label, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+           dismissTaskMenuView(mTarget);
+           ItemClickHandler.startAppShortcutOrInfoActivity(view, mItemInfo, Launcher.getLauncher(view.getContext()));
+        }
+    }
+
+    public static class AppOpenType<T extends ActivityContext> extends SystemShortcut {
+
+        public AppOpenType(T target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_open_type, R.string.app_open_type, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+           dismissTaskMenuView(mTarget);
+           ItemClickHandler.appOpenLinuxType( Launcher.getLauncher(view.getContext()),mItemInfo);
+        }
+    }
+
+    public static class AppCopy<T extends ActivityContext> extends SystemShortcut {
+
+        public AppCopy(T target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_copy_no_shadow, R.string.copy_drop_target, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+           dismissTaskMenuView(mTarget);
+           ItemClickHandler.copyFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo);
+        //    ItemClickHandler.startAppShortcutOrInfoActivity(view, mItemInfo, Launcher.getLauncher(view.getContext()), null);
+        }
+    }
+
+    public static class AppCut<T extends ActivityContext> extends SystemShortcut {
+
+        public AppCut(T target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_cut_no_shadow, R.string.cut_drop_target, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+           dismissTaskMenuView(mTarget);
+           ItemClickHandler.cutFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo);
+        }
+    }
+
+    public static class AppRename<T extends ActivityContext> extends SystemShortcut {
+
+        public AppRename(T target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_rename_no_shadow, R.string.rename_drop_target, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            dismissTaskMenuView(mTarget);
+            ItemClickHandler.renameFiletoClipboard( Launcher.getLauncher(view.getContext()),mItemInfo);
+            // Launcher launcher = Launcher.getLauncher(view.getContext());
+           
+        }
+    }
+
+
+    public static class AppRemove<T extends ActivityContext> extends SystemShortcut {
+
+        public AppRemove(T target, ItemInfo itemInfo, View bubbleTextView) {
+            super(R.drawable.ic_remove_no_shadow, R.string.delete_drop_target, target,
+                    itemInfo, bubbleTextView);
+        }
+
+        @Override
+        public void onClick(View view) {
+            dismissTaskMenuView(mTarget);
+            AlertDialog alertDialog = new AlertDialog.Builder(view.getContext())
+            .setTitle(R.string.desktop_tips)
+            .setMessage(R.string.desktop_delete_tips)
+            .setNegativeButton(R.string.desktop_cancel, null)
+            .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                    Launcher launcher = Launcher.getLauncher(view.getContext());
+                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY ){
+                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    }else if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    }
+                    dismissTaskMenuView(mTarget);
+                    // launcher.removeItem(icon, mItemInfo,true);
+                }
+            }).create();
+            alertDialog.show();
         }
     }
 
@@ -301,6 +430,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             super(R.drawable.ic_install_no_shadow, R.string.install_drop_target_label,
                     target, itemInfo, originalView);
         }
+        
 
         @Override
         public void onClick(View view) {

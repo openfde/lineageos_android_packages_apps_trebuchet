@@ -74,6 +74,7 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
         mBubbleText = findViewById(R.id.bubble_text);
         mBubbleText.setHideBadge(true);
         mIconView = findViewById(R.id.icon);
+        mIconView.setVisibility(View.GONE);
         tryUpdateTextBackground();
     }
 
@@ -98,7 +99,7 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
         }
         GradientDrawable background = (GradientDrawable) getBackground();
 
-        int color = Themes.getAttrColor(getContext(), android.R.attr.colorControlHighlight);
+        int color = Color.TRANSPARENT;//getContext().getColor(R.color.menu_bg);//Themes.getAttrColor(getContext(), android.R.attr.colorControlHighlight);
         GradientDrawable backgroundMask = new GradientDrawable();
         backgroundMask.setColor(color);
         backgroundMask.setShape(GradientDrawable.RECTANGLE);
@@ -108,9 +109,9 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
             backgroundMask.setCornerRadius(background.getCornerRadius());
         }
 
-        RippleDrawable drawable = new RippleDrawable(ColorStateList.valueOf(color),
-                mTransparentDrawable, backgroundMask);
-        mBubbleText.setBackground(drawable);
+        // RippleDrawable drawable = new RippleDrawable(ColorStateList.valueOf(color),
+        //         mTransparentDrawable, backgroundMask);
+        // mBubbleText.setBackground(null);
     }
 
     @Override
@@ -119,7 +120,7 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
     }
 
     public void setWillDrawIcon(boolean willDraw) {
-        mIconView.setVisibility(willDraw ? View.VISIBLE : View.INVISIBLE);
+        // mIconView.setVisibility(willDraw ? View.VISIBLE : View.INVISIBLE);
     }
 
     public boolean willDrawIcon() {
@@ -144,6 +145,7 @@ public class DeepShortcutView extends FrameLayout implements BubbleTextHolder {
         mDetail = detail;
         mBubbleText.applyFromWorkspaceItem(info);
         mIconView.setBackground(mBubbleText.getIcon());
+        mIconView.setVisibility(View.GONE);
 
         // Use the long label as long as it exists and fits.
         CharSequence longLabel = mDetail.getLongLabel();

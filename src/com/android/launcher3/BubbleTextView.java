@@ -56,6 +56,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.widget.TextView;
+import com.android.launcher3.graphics.IconPalette;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -87,11 +88,19 @@ import com.android.launcher3.util.ShortcutUtil;
 import com.android.launcher3.util.Themes;
 import com.android.launcher3.views.ActivityContext;
 import com.android.launcher3.views.IconLabelDotView;
-
+import com.android.launcher3.icons.BitmapInfo;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
-
+import com.android.launcher3.R;
+import com.android.launcher3.util.FileUtils;
+import android.util.Log;
+import java.io.File;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -123,6 +132,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private IntArray mBreakPointsIntArray;
     private CharSequence mLastOriginalText;
     private CharSequence mLastModifiedText;
+
+    private static final String TAG = "BubbleTextView";
 
     private static final Property<BubbleTextView, Float> DOT_SCALE_PROPERTY
             = new Property<BubbleTextView, Float>(Float.TYPE, "dotScale") {
@@ -256,7 +267,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             defaultIconSize = mDeviceProfile.iconSizePx;
         } else {
             // widget_selection or shortcut_popup
-            defaultIconSize = mDeviceProfile.iconSizePx;
+            defaultIconSize = mDeviceProfile.allAppsIconSizePx;//mDeviceProfile.iconSizePx;
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         }
 
@@ -427,6 +438,112 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             flags |= FLAG_SKIP_USER_BADGE;
         }
         FastBitmapDrawable iconDrawable = info.newIcon(getContext(), flags);
+        Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(),R.mipmap.ic_unkown);
+        if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.ic_doc_folder);
+            iconDrawable = new FastBitmapDrawable(bitmap);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ){
+            String fileName = info.title.toString() ;
+            int resId =  R.mipmap.ic_doc_document;
+            String fileType = FileUtils.getFileTyle(fileName);
+            if(fileType !=null){
+                 if(fileType.contains("png") || fileType.contains("jpg")||fileType.contains("svg")){
+                    resId =  R.mipmap.ic_doc_image;
+                 }else if(fileType.contains("mp3") || fileType.contains("wav")|| fileType.contains("aac") || fileType.contains("flac") || fileType.contains("ogg")  ){
+                    resId =  R.mipmap.ic_doc_audio;
+                 }else if(fileType.contains("mp4") || fileType.contains("avi") || fileType.contains("mov") || fileType.contains("wmv") || fileType.contains("mpg") || fileType.contains("flv") || fileType.contains("3gp")   ){
+                    resId =  R.mipmap.ic_doc_video;
+                 }else if(fileType.contains("txt") || fileType.contains("md") || fileType.contains("xml")  || fileType.contains("java")  || fileType.contains("htm") || fileType.contains("json")  ){
+                    resId =  R.mipmap.ic_doc_document;
+                 }else if(fileType.contains("pdf") ){
+                    resId =  R.mipmap.ic_doc_pdf;
+                 } else if(fileType.contains("kt") ){
+                    resId =  R.mipmap.ic_kotlin;
+                 }else if(fileType.contains("sh") ){
+                    resId =  R.mipmap.ic_shell;
+                 }else if(fileType.contains("db") || fileType.contains("sql") ){
+                    resId =  R.mipmap.ic_sql;
+                 }else if(fileType.contains("apk") ){
+                    resId =  R.mipmap.ic_doc_apk;
+                 } else if(fileType.contains("ppt")){
+                    resId =  R.mipmap.ic_doc_powerpoint;
+                 } else if(fileType.contains("doc")){
+                    resId =  R.mipmap.ic_doc_word;
+                 } else if(fileType.contains("xls")){
+                    resId =  R.mipmap.ic_doc_excel;
+                 } else if(fileType.contains("rar")||fileType.contains("zip") ){
+                    resId =  R.mipmap.ic_doc_compressed;
+                 } else{
+                    resId =  R.mipmap.ic_unkown;
+                 } 
+            }else{
+                resId =  R.mipmap.ic_unkown;
+            }
+            Log.i(TAG,"bellaLauncher applyIconAndLabel  fileName: "+fileName + " ,fileType  "+fileType);
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
+            iconDrawable = new FastBitmapDrawable(bitmap);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.icon_linux);
+            String appTitle = info.title.toString();
+            // if(info.appTitle  != null){
+            //     appTitle = info.appTitle.toString();
+            // }
+
+            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(appTitle);
+            Log.i(TAG,"bellaLauncher applyIconAndLabel   map  "+map);
+            if(map !=null && !map.isEmpty()){
+                // String icon = map.get("icon").toString();
+               try{
+                // if(FileUtils.isChineseLanguage(getContext())){
+                //     info.setTitle(map.get("nameZh").toString());
+                // }else{
+                //     info.setTitle(map.get("name").toString());
+                // }
+ 
+                String name = map.get("name").toString().replaceAll(" ", "_");
+                String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
+                int lastIndex = exec.lastIndexOf('/');
+                String key = name ;
+                if(FileUtils.containsChinese(name)){
+                    if(lastIndex > 0){
+                        key = exec.substring(lastIndex+1);
+                     }
+                }
+                String IconPath = FileUtils.getSystemProperty(key ,"-1");
+
+                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key  );
+        
+                if("-1".equals(IconPath) ){
+
+                }else{
+                    String icon = "/volumes"+"/"+FileUtils.getLinuxUUID() + IconPath;
+                    File f = new File(icon);
+                    Log.i("bella","FastBitmapDrawable exists : "+f.exists() + ",icon "+icon);
+                    if(IconPath.contains(".svg") ){
+                        bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(getContext(),icon));
+                    }else{
+                        bitmap = BitmapFactory.decodeFile(icon); 
+                    }    
+                }
+               }catch(Exception e){
+                  e.printStackTrace();
+               }
+            }
+            Bitmap b2 = FileUtils.vectorToBitmap(getContext(), R.mipmap.bg_linux);
+            b2  = FileUtils.scaleBitmap(b2,80,80);
+            if(bitmap != null ){
+                bitmap  = FileUtils.scaleBitmap(bitmap,48,48);
+                Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);
+                // BitmapInfo bi = new BitmapInfo(b,0);
+                // iconDrawable = newIcon(getContext(), bi);
+                iconDrawable = new FastBitmapDrawable(b);
+            }else{
+                bitmap  = b2;
+                // BitmapInfo bi = new BitmapInfo(bitmap,0);
+                // iconDrawable = newIcon(getContext(), bi);
+                iconDrawable = new FastBitmapDrawable(bitmap);
+            }
+        }
         mDotParams.appColor = iconDrawable.getIconColor();
         mDotParams.dotColor = Themes.getAttrColor(getContext(), R.attr.notificationDotColor);
         setIcon(iconDrawable);

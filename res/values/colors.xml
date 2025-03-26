@@ -173,4 +173,8 @@
     <color name="material_color_primary">#445E91</color>
     <color name="material_color_secondary">#575E71</color>
     <color name="material_color_tertiary">#715573</color>
+
+    <color name="menu_bg">#F9FAFC</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 </resources>
