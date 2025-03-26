@@ -26,6 +26,15 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_NEW_PASTE;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_CHANGE_WALLPAPER;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_DISPLAY_PROPERTIES;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_DISPLAY_SETTINGS;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_SYSTEM_THEME;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_SYSTEM_THEME_DARK;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_SYSTEM_THEME_LIGHT;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_SORT;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_SORT_NAME;
+import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_DESKTOP_ICON_TAP_SORT_TYPE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -67,6 +76,9 @@ import android.util.Log;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
+import android.view.Gravity;
 
 /**
  * Popup shown on long pressing an empty space in launcher
@@ -220,25 +232,25 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                 R.drawable.ic_palette,
                 IGNORE,
                 OptionsPopupView::startWallpaperPicker));
-        if (!WidgetsModel.GO_DISABLE_WIDGETS && Utilities.isWorkspaceEditAllowed(launcher)) {
-            options.add(new OptionItem(launcher,
-                    R.string.widget_button_text,
-                    R.drawable.ic_widget,
-                    LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS,
-                    OptionsPopupView::onWidgetsClicked));
-        }
-        if (MULTI_SELECT_EDIT_MODE.get()) {
-            options.add(new OptionItem(launcher,
-                    R.string.edit_home_screen,
-                    R.drawable.enter_home_gardening_icon,
-                    LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
-                    OptionsPopupView::enterHomeGardening));
-        }
-        options.add(new OptionItem(launcher,
-                R.string.settings_button_text,
-                R.drawable.ic_setting,
-                LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
-                OptionsPopupView::startSettings));
+        // if (!WidgetsModel.GO_DISABLE_WIDGETS && Utilities.isWorkspaceEditAllowed(launcher)) {
+        //     options.add(new OptionItem(launcher,
+        //             R.string.widget_button_text,
+        //             R.drawable.ic_widget,false,
+        //             LAUNCHER_WIDGETSTRAY_BUTTON_TAP_OR_LONGPRESS,
+        //             OptionsPopupView::onWidgetsClicked));
+        // }
+        // if (MULTI_SELECT_EDIT_MODE.get()) {
+        //     options.add(new OptionItem(launcher,
+        //             R.string.edit_home_screen,
+        //             R.drawable.enter_home_gardening_icon,false,
+        //             LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
+        //             OptionsPopupView::enterHomeGardening));
+        // }
+        // options.add(new OptionItem(launcher,
+        //         R.string.settings_button_text,
+        //         R.drawable.ic_setting,false,
+        //         LAUNCHER_SETTINGS_BUTTON_TAP_OR_LONGPRESS,
+        //         OptionsPopupView::startSettings));
 
         options.add(new OptionItem(launcher,
         R.string.desktop_new_directory, 
@@ -250,8 +262,45 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         R.string.desktop_new_document,
         R.drawable.ic_doc,
         LAUNCHER_DESKTOP_ICON_TAP_NEW_DOC,
-        OptionsPopupView::startNewDoc));     
+        OptionsPopupView::startNewDoc));    
+        
+        ArrayList<OptionItem> optionsTheme = new ArrayList<>();
+        optionsTheme.add(new OptionItem(launcher,
+        R.string.theme_dark,
+        R.drawable.ic_doc,
+        LAUNCHER_DESKTOP_ICON_TAP_SYSTEM_THEME_DARK,
+        OptionsPopupView::startNewDoc));  
 
+        optionsTheme.add(new OptionItem(launcher,
+        R.string.theme_light,
+        R.drawable.ic_doc,
+        LAUNCHER_DESKTOP_ICON_TAP_SYSTEM_THEME_LIGHT,
+        OptionsPopupView::startNewDoc));  
+
+        options.add(new OptionItem(launcher,
+        R.string.system_theme,
+        R.drawable.ic_doc,true,
+        LAUNCHER_DESKTOP_ICON_TAP_SYSTEM_THEME,
+        OptionsPopupView::startSetTheme,optionsTheme));   
+
+        ArrayList<OptionItem> optionsSort = new ArrayList<>();
+        optionsSort.add(new OptionItem(launcher,
+        R.string.sort_by_name,
+        R.drawable.ic_doc,
+        LAUNCHER_DESKTOP_ICON_TAP_SORT_NAME,
+        OptionsPopupView::startNewDoc));  
+
+        optionsSort.add(new OptionItem(launcher,
+        R.string.sort_by_type,
+        R.drawable.ic_doc,
+        LAUNCHER_DESKTOP_ICON_TAP_SORT_TYPE,
+        OptionsPopupView::startNewDoc));  
+
+        options.add(new OptionItem(launcher,
+        R.string.sort,
+        R.drawable.ic_doc,true,
+        LAUNCHER_DESKTOP_ICON_TAP_SORT,
+        OptionsPopupView::startSortType,optionsSort));   
 
         boolean isShowPasteDlg = true ;//launcher.isShowPasteDlg();  
         Log.i("bellaLauncher"," showDefaultOptions isShowPasteDlg: "+isShowPasteDlg);     
@@ -272,8 +321,26 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         TestLogging.recordEvent(TestProtocol.SEQUENCE_MAIN, "start: rearray");
         Launcher launcher = Launcher.getLauncher(view.getContext());
         launcher.bindWorkspace();   
-        launcher.rearray(view.getContext());
+        launcher.rearray(view.getContext(),"");
         return true;
+    }
+
+    public static boolean startSortType(View view) {    
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        PopupMenu popupMenu = new PopupMenu(launcher, view, Gravity.END);
+        popupMenu.getMenuInflater().inflate(R.menu.sort_menu, popupMenu.getMenu());
+        // 显示 PopupMenu
+        popupMenu.show();
+        return false;
+    }
+
+    public static boolean startSetTheme(View view) {    
+        Launcher launcher = Launcher.getLauncher(view.getContext());
+        PopupMenu popupMenu = new PopupMenu(launcher, view, Gravity.END);
+        popupMenu.getMenuInflater().inflate(R.menu.theme_menu, popupMenu.getMenu());
+        // 显示 PopupMenu
+        popupMenu.show();
+        return false;
     }
 
     public static boolean startNewDir(View view) {    
@@ -373,10 +440,12 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
         public final CharSequence label;
         public final Drawable icon;
         public final EventEnum eventId;
+        public boolean hasChild;
+        ArrayList<OptionItem> options;
         public final OnLongClickListener clickListener;
 
-        public OptionItem(Context context, int labelRes, int iconRes, EventEnum eventId,
-                OnLongClickListener clickListener) {
+        public OptionItem(Context context, int labelRes, int iconRes,EventEnum eventId,
+        OnLongClickListener clickListener) {
             this.labelRes = labelRes;
             this.label = context.getText(labelRes);
             this.icon = ContextCompat.getDrawable(context, iconRes);
@@ -384,7 +453,18 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
             this.clickListener = clickListener;
         }
 
-        public OptionItem(CharSequence label, Drawable icon, EventEnum eventId,
+        public OptionItem(Context context, int labelRes, int iconRes,boolean hasChild, EventEnum eventId,
+                OnLongClickListener clickListener, ArrayList<OptionItem> options ) {
+            this.labelRes = labelRes;
+            this.label = context.getText(labelRes);
+            this.icon = ContextCompat.getDrawable(context, iconRes);
+            this.eventId = eventId;
+            this.hasChild = hasChild;
+            this.options = options;
+            this.clickListener = clickListener;
+        }
+
+        public OptionItem(CharSequence label, Drawable icon,EventEnum eventId,
                 OnLongClickListener clickListener) {
             this.labelRes = 0;
             this.label = label;

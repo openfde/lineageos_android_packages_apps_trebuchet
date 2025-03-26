@@ -491,6 +491,7 @@
     <string name="delete_drop_target">"delete"</string>
 
     <string name="desktop_icon_rearray">Icon Rearry</string>
+    <string name="desktop_new">"New"</string>
     <string name="desktop_new_document">"New document"</string>
     <string name="desktop_new_directory">"New directory"</string>
     <string name="desktop_new_paste">"paste"</string>
@@ -500,4 +501,32 @@
     <string name="desktop_cancel">"cancel"</string>
     <string name="desktop_ok">"OK"</string>
     <string name="desktop_rename">"Rename"</string>
+    
+    <string name="change_wallpaper">"Change Wallpaper"</string>
+    <string name="display_properties">"Display Properties"</string>
+    <string name="display_settings">"Display Settings"</string>
+    <string name="system_theme">"System Theme"</string>
+    <string name="view_type">"View Type"</string>
+    <string name="sort">"sort order"</string>
+    <string name="open_the_terminal">"open the terminal"</string>
+    <string name="theme_dark">"dark"</string>
+    <string name="theme_light">"light"</string>
+    <string name="sort_by_name">"Arrange by name"</string>
+    <string name="sort_by_type">"Arrange by type"</string>
+
+    <string-array name="theme_options">
+        <item>dark</item>
+        <item>light</item>
+    </string-array>
+
+    <string-array name="sort_options">
+        <item>Name</item>
+        <item>Type</item>
+        <item>Time</item>
+    </string-array>
+
+     <string-array name="file_options">
+        <item>directory</item>
+        <item>document</item>
+    </string-array>
 </resources>

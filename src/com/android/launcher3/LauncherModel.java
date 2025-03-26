@@ -353,7 +353,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
         }
     }
 
-    public List<ItemInfo> rearray(Context context) {
+    public List<ItemInfo> rearray(Context context,String type) {
         // InstallShortcutReceiver.enableInstallQueue(InstallShortcutReceiver.FLAG_LOADER_RUNNING);
         synchronized (mLock) {
             // Don't bother to start the thread if we know it's not going to do anything
@@ -392,7 +392,14 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                 }
                 mBgDataModel.workspaceItems = workspaceItems;
                 // Log.i(TAG, "workspaceItems "+workspaceItems.size());
-                Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
+                if("title".equals(type)){
+                    Collections.sort(workspaceItems, (p1, p2) -> p1.title.toString().compareTo(p2.title.toString()));
+                }else if("itemType".equals(type)){
+                    Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.itemType, p2.itemType));
+                }else{
+                    Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
+                }
+                
 
                 InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
                 Log.i(TAG, "workspaceItems.size  " + workspaceItems.size() + ",idp.numRows: "+idp.numRows + ",idp.numColumns: "+idp.numColumns);

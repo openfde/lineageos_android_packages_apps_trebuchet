@@ -255,6 +255,7 @@ import com.android.launcher3.views.ComposeInitializer;
 import com.android.launcher3.views.FloatingIconView;
 import com.android.launcher3.views.FloatingSurfaceView;
 import com.android.launcher3.views.OptionsPopupView;
+import com.android.launcher3.views.NewOptionsPopupWindow;
 import com.android.launcher3.views.ScrimView;
 import com.android.launcher3.widget.LauncherAppWidgetHostView;
 import com.android.launcher3.widget.LauncherAppWidgetProviderInfo;
@@ -315,7 +316,9 @@ import android.provider.Settings;
 import android.os.Environment;
 import androidx.core.content.FileProvider;
 import com.android.quickstep.util.ImageActionUtils;
-
+import android.widget.PopupWindow;
+import android.view.Gravity;
+import android.widget.Toast;
 
 /**
  * Default launcher application.
@@ -324,6 +327,12 @@ public class Launcher extends StatefulActivity<LauncherState>
         implements Callbacks, InvariantDeviceProfile.OnIDPChangeListener,
         PluginListener<LauncherOverlayPlugin> {
     public static final String TAG = "Launcher";
+
+    private static final String EXTRA_WALLPAPER_OFFSET = "com.android.launcher3.WALLPAPER_OFFSET";
+    private static final String EXTRA_WALLPAPER_FLAVOR = "com.android.launcher3.WALLPAPER_FLAVOR";
+    // An intent extra to indicate the launch source by launcher.
+    private static final String EXTRA_WALLPAPER_LAUNCH_SOURCE =
+            "com.android.wallpaper.LAUNCH_SOURCE";
 
     public static final ActivityTracker<Launcher> ACTIVITY_TRACKER = new ActivityTracker<>();
 
@@ -345,6 +354,8 @@ public class Launcher extends StatefulActivity<LauncherState>
     private static boolean sIsNewProcess = true;
 
     private StateManager<LauncherState> mStateManager;
+
+    private NewOptionsPopupWindow newOptionsPopupWindow;
 
     private static final int ON_ACTIVITY_RESULT_ANIMATION_DELAY = 500;
 
@@ -639,6 +650,9 @@ public class Launcher extends StatefulActivity<LauncherState>
             RuleController.getInstance(this).setRules(
                     RuleController.parseRules(this, R.xml.split_configuration));
         }
+
+        View popupView = LayoutInflater.from(this).inflate(R.layout.popup_layout, null);
+        newOptionsPopupWindow = new NewOptionsPopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,this);
     }
 
     protected ModelCallbacks createModelCallbacks() {
@@ -2822,6 +2836,19 @@ public class Launcher extends StatefulActivity<LauncherState>
                 false);
     }
 
+    public void showPopWindowList(float x, float y){
+        if(newOptionsPopupWindow.isShowing()){
+            newOptionsPopupWindow.dismiss();
+        }   
+        newOptionsPopupWindow.showAtLocation(mScrimView, Gravity.NO_GRAVITY, (int)x, (int)y);
+    }
+
+    public void hidePopWindowList(){
+        if(newOptionsPopupWindow !=null){
+            newOptionsPopupWindow.dismiss();
+        }  
+    }
+
     @Override
     public boolean canUseMultipleShadesForPopup() {
         return getTopOpenViewWithType(this, TYPE_FOLDER) == null
@@ -3630,8 +3657,8 @@ public class Launcher extends StatefulActivity<LauncherState>
         });
     }
 
-    public void rearray(Context context){
-        List<ItemInfo> rearray = getModel().rearray(context);
+    public void rearray(Context context,String type){
+        List<ItemInfo> rearray = getModel().rearray(context,type);
         List<ItemInfo> rearrayList = new ArrayList<>();
         Log.i(TAG, "bindItems----rearray :  "+rearray.size());
         for (int i = 0 ; i < rearray.size() ; i++){
@@ -3670,6 +3697,39 @@ public class Launcher extends StatefulActivity<LauncherState>
             return item ;
         }
     }
+
+     /**
+     * Event handler for the wallpaper picker button that appears after a long press
+     * on the home screen.
+     */
+    public  boolean startWallpaperPicker(View v) {
+        if (!Utilities.isWallpaperAllowed(this)) {
+            String message = getStringCache() != null
+                    ? getStringCache().disabledByAdminMessage
+                    : getString(R.string.msg_disabled_by_admin);
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                .putExtra(EXTRA_WALLPAPER_OFFSET,
+                 getWorkspace().getWallpaperOffsetForCenterPage())
+                .putExtra(EXTRA_WALLPAPER_LAUNCH_SOURCE, "app_launched_launcher")
+                .putExtra(EXTRA_WALLPAPER_FLAVOR, "focus_wallpaper");
+        String pickerPackage = this.getString(R.string.wallpaper_picker_package);
+        if (!TextUtils.isEmpty(pickerPackage)) {
+            intent.setPackage(pickerPackage);
+        }
+        return this.startActivitySafely(v, intent, placeholderInfo(intent)) != null;
+    }
+
+    static WorkspaceItemInfo placeholderInfo(Intent intent) {
+        WorkspaceItemInfo placeholderInfo = new WorkspaceItemInfo();
+        placeholderInfo.intent = intent;
+        placeholderInfo.container = LauncherSettings.Favorites.CONTAINER_SETTINGS;
+        return placeholderInfo;
+    }
+
 
     @Subscribe
     public void onMessageEvent(MessageEvent event) {

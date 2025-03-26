@@ -295,10 +295,10 @@
     <dimen name="pending_widget_elevation">2dp</dimen>
 
     <!-- Deep shortcuts -->
-    <dimen name="deep_shortcuts_elevation">2dp</dimen>
-    <dimen name="bg_popup_padding">2dp</dimen>
-    <dimen name="bg_popup_item_width">216dp</dimen>
-    <dimen name="bg_popup_item_height">52dp</dimen>
+    <dimen name="deep_shortcuts_elevation">1dp</dimen>
+    <dimen name="bg_popup_padding">1dp</dimen>
+    <dimen name="bg_popup_item_width">160dp</dimen>
+    <dimen name="bg_popup_item_height">32dp</dimen>
     <dimen name="bg_popup_item_vertical_padding">12dp</dimen>
     <dimen name="pre_drag_view_scale">6dp</dimen>
     <!-- an icon with shortcuts must be dragged this far before the container is removed. -->
@@ -319,7 +319,7 @@
     <dimen name="popup_arrow_horizontal_center_offset">26dp</dimen>
     <dimen name="popup_arrow_corner_radius">2dp</dimen>
     <!-- popup_padding_start + deep_shortcut_icon_size + 12dp -->
-    <dimen name="deep_shortcuts_text_padding_start">54dp</dimen>
+    <dimen name="deep_shortcuts_text_padding_start">16dp</dimen>
     <dimen name="system_shortcut_icon_size">20dp</dimen>
     <!-- popup_arrow_horizontal_center_offset - system_shortcut_icon_size / 2 -->
     <dimen name="system_shortcut_margin_start">16dp</dimen>
