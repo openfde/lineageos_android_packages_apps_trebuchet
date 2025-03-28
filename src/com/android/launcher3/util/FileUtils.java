@@ -246,6 +246,34 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
     return point ;
 }
 
+public static List<Point> getAllIdlePoints(Context context,ModelDbController dbController){
+    List<Point> list = new ArrayList<>(); 
+    int numRows  =  getScreenRows(context);//8
+    int numColumns  =  getScreenColumns(context);//16
+    
+    List<Point> listExists = DbUtils.queryFilesByPointFromDatabase(dbController);
+    for(int j = 0 ; j < numRows ; j++){ 
+        for(int i = 0 ; i < numColumns ; i++ ){
+            Point point = new Point(i,j);
+            if(listExists ==null ||  !listExists.contains(point) ){
+                list.add(point);
+            }
+        }
+    }
+    return list ;
+}
+
+public static synchronized Point getMaxPoint(ModelDbController dbController){
+    List<Point> list = DbUtils.queryFilesByPointFromDatabase(dbController);
+    Point point = new Point(-1,-1);
+    if(list == null || list.size() == 0){
+        point = new Point(0,0); 
+    }else{
+        int size = list.size() ;
+        point = list.get(size-1);
+    }
+    return point;
+}
 
 /**
      * get file type
@@ -874,6 +902,10 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
             mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
         return mimeType;
+    }
+
+    public static String getLinuxPrefixPath(){
+        return "/volumes"+"/"+FileUtils.getLinuxUUID();
     }
 
 }

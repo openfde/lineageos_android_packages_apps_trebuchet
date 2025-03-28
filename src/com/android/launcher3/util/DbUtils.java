@@ -17,7 +17,7 @@ import java.util.Arrays;
 import android.content.ContentValues;
 import com.android.launcher3.model.LoaderCursor;
 import com.android.launcher3.model.ModelDbController;
-
+import android.graphics.Point;
 
 public class DbUtils {
     protected static final String TAG = "DbUtils";
@@ -56,6 +56,45 @@ public class DbUtils {
     
         return list ;
     }
+
+
+    public static synchronized List<Point> queryFilesByPointFromDatabase(ModelDbController dbController){
+        // String selection = "cellX = ? and cellY = ? ";
+        // String[] selectionArgs = {String.valueOf(x),String.valueOf(y)};
+        String selection = null;
+        String[] selectionArgs = null;
+    
+        List<Point> list = null;
+    
+        Cursor cursor  =dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            list = new ArrayList<>();
+            do {
+                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                Point p = new Point();
+                p.x = cellX ;
+                p.y = cellY ;
+                list.add(p);
+            } while (cursor.moveToNext());
+        }
+    
+        if(list == null ){
+            Log.i(TAG, "queryFilesByPointFromDatabase is null ");
+        }else{
+            Log.i(TAG, "queryFilesByPointFromDatabase list =  "+list.size());
+            list.sort((p1, p2) -> {
+                int xCompare = Integer.compare(p1.x, p2.x);
+                if (xCompare != 0) {
+                    return xCompare;
+                }
+                return Integer.compare(p1.y, p2.y);
+            });
+        }
+        cursor.close();
+        return list ;
+    }
+    
     
     
     public static List<Map<String,Object>> queryAllFilesFromDatabase(ModelDbController dbController){
@@ -333,6 +372,47 @@ public class DbUtils {
             maxId = cursor.getInt(cursor.getColumnIndex("max_id"));
         }
         return maxId ;
+    }
+
+    public static List<Map<String,Object>> queryDesktopLinuxAppInDatabase(ModelDbController dbController){
+        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP)};
+        String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
+      
+        List<Map<String,Object>> list = null;
+       
+        Cursor cursor  = dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
+
+        try{
+            if (cursor != null && cursor.moveToFirst()) {
+                list = new ArrayList<>();
+                do {
+                    int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                    String title = cursor.getString(cursor.getColumnIndex("title"));
+                    int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                    int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                    int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                    Map<String,Object> mp = new HashMap<>();
+                    mp.put("_id",_id);
+                    mp.put("title",title);
+                    mp.put("itemType",itemType);
+                    mp.put("cellX",cellX);
+                    mp.put("cellY",cellY);
+                    list.add(mp);
+                } while (cursor.moveToNext());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+           cursor.close();
+        }
+
+        if(list == null ){
+            Log.i(TAG, "queryDesktopFileInDatabase is null" );
+        }else{
+            Log.i(TAG, "queryDesktopFileInDatabase  size is  list "+list.size() );
+        }
+
+        return list ;
     }
 
 }

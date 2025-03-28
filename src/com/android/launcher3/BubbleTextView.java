@@ -489,19 +489,13 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             //     appTitle = info.appTitle.toString();
             // }
 
-            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(appTitle);
+            Map<String,Object> map = Launcher.getDesktopMap(appTitle);
+            //Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(appTitle);
             Log.i(TAG,"bellaLauncher applyIconAndLabel   map  "+map);
             if(map !=null && !map.isEmpty()){
-                // String icon = map.get("icon").toString();
                try{
-                // if(FileUtils.isChineseLanguage(getContext())){
-                //     info.setTitle(map.get("nameZh").toString());
-                // }else{
-                //     info.setTitle(map.get("name").toString());
-                // }
- 
-                String name = map.get("name").toString().replaceAll(" ", "_");
-                String exec = map.get("exec").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
+                String name = map.get("Name").toString().replaceAll(" ", "_");
+                String exec = map.get("Path").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
                 int lastIndex = exec.lastIndexOf('/');
                 String key = name ;
                 if(FileUtils.containsChinese(name)){
@@ -509,7 +503,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                         key = exec.substring(lastIndex+1);
                      }
                 }
-                String IconPath = FileUtils.getSystemProperty(key ,"-1");
+                String IconPath = map.get("IconPath").toString();
+                //String IconPath = FileUtils.getSystemProperty(key ,"-1");
 
                 Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key  );
         

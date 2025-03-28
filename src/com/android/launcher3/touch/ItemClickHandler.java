@@ -98,13 +98,35 @@ public class ItemClickHandler {
      */
     public static final OnClickListener INSTANCE = ItemClickHandler::onClick;
 
+    private static final long DOUBLE_CLICK_TIME_DELTA = 400; // 
+    private static long lastClickTime = 0; 
+
     private static void onClick(View v) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
         if (v.getWindowToken() == null) return;
 
         Launcher launcher = Launcher.getLauncher(v.getContext());
+        boolean hasFocus = v.hasFocus();  
         if (!launcher.getWorkspace().isFinishedSwitchingState()) return;
+
+        launcher.gotoDocApp(FileUtils.CLICK_BLANK,"");
+        if(v instanceof BubbleTextView){
+            //mFocusHandler.onFocusChange(v,true);
+            v.setFocusableInTouchMode(true);
+            v.requestFocus();
+        }
+     
+        long currentTime = System.currentTimeMillis();
+        long subTime = currentTime - lastClickTime;
+        if (subTime  < DOUBLE_CLICK_TIME_DELTA || hasFocus) {
+            //double click   
+            v.setFocusableInTouchMode(false);
+            v.clearFocus();
+        }else{
+            lastClickTime = currentTime;
+            return ;
+        }
 
         Object tag = v.getTag();
         if (tag instanceof WorkspaceItemInfo) {
