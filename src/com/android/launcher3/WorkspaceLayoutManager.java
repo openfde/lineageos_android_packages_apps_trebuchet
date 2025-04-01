@@ -53,12 +53,15 @@ public interface WorkspaceLayoutManager {
         CellPos presenterPos = getCellPosMapper().mapModelToPresenter(info);
         int x = presenterPos.cellX;
         int y = presenterPos.cellY;
+        Log.d(TAG, "addViewToCellLayout addInScreenFromBind x: " + x + ",y  "+y  + ",info "+info);
+
         if (info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT
                 || info.container == LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION) {
             Log.d(TAG, "add predicted icon " + child.getTag().toString() + " to home screen");
             int screenId = presenterPos.screenId;
             x = getHotseat().getCellXFromOrder(screenId);
             y = getHotseat().getCellYFromOrder(screenId);
+            Log.d(TAG, "addViewToCellLayout CONTAINER_HOTSEAT addInScreenFromBind x: " + x + ",y  "+y );
         }
         addInScreen(child, info.container, presenterPos.screenId, x, y, info.spanX, info.spanY);
     }
@@ -139,6 +142,7 @@ public interface WorkspaceLayoutManager {
         int childId = info.getViewId();
 
         boolean markCellsAsOccupied = !(child instanceof Folder);
+        Log.i(TAG, "addViewToCellLayout   addInScreen x "+x + " ,y "+y +",info "+info);
         if (!layout.addViewToCellLayout(child, -1, childId, lp, markCellsAsOccupied)) {
             // TODO: This branch occurs when the workspace is adding views
             // outside of the defined grid

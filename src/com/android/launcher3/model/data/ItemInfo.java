@@ -293,8 +293,6 @@ public class ItemInfo {
         return "id=" + id
                 + " type=" + LauncherSettings.Favorites.itemTypeToString(itemType)
                 + " itemType=" + itemType
-                + " container=" + getContainerInfo()
-                + " targetComponent=" + getTargetComponent()
                 + " screen=" + screenId
                 + " cell(" + cellX + "," + cellY + ")"
                 + " span(" + spanX + "," + spanY + ")"
@@ -302,7 +300,9 @@ public class ItemInfo {
                 + " rank=" + rank
                 + " user=" + user
                 + " appTitle=" + appTitle
-                + " title=" + title;
+                + " title=" + title
+                + " targetComponent=" + getTargetComponent()
+                + " container=" + getContainerInfo();
     }
     
     /**

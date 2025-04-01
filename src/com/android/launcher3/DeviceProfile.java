@@ -878,7 +878,7 @@ public class DeviceProfile {
                     + hotseatQsbVisualHeight
                     + hotseatBarBottomSpacePx;
         }
-        hotseatBarSizePx = 0;
+        //hotseatBarSizePx = 0;
     }
 
     /**
@@ -1063,8 +1063,8 @@ public class DeviceProfile {
             scaleX = availableWidthPx / usedWidth;
             shouldScale = true;
         }
-        shouldScale = true;
-        scaleX = 0.9f;
+       // shouldScale = true;
+       // scaleX = 0.9f;
         if (shouldScale) {
             float scale = Math.min(scaleX, scaleY);
             updateIconSize(scale, context);

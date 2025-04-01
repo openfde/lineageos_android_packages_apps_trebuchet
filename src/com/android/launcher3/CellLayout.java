@@ -87,7 +87,7 @@ import java.util.Stack;
 
 public class CellLayout extends ViewGroup {
     private static final String TAG = "CellLayout";
-    private static final boolean LOGD = false;
+    private static final boolean LOGD = true;
 
     /** The color of the "leave-behind" shape when a folder is opened from Hotseat. */
     private static final int FOLDER_LEAVE_BEHIND_COLOR = Color.argb(160, 245, 245, 245);
@@ -776,7 +776,7 @@ public class CellLayout extends ViewGroup {
 
             child.setId(childId);
             if (LOGD) {
-                Log.d(TAG, "Adding view to ShortcutsAndWidgetsContainer: " + child);
+                Log.d(TAG, "addViewToCellLayout ShortcutsAndWidgetsContainer:markCells " + markCells + ",childId  "+childId + ",mCountX "+mCountX + ",mCountY:"+mCountY);
             }
             mShortcutsAndWidgets.addView(child, index, lp);
 
@@ -1758,7 +1758,7 @@ public class CellLayout extends ViewGroup {
         if (cellXY == null) {
             cellXY = new int[2];
         }
-        return mOccupied.findVacantCell(cellXY, spanX, spanY);
+        return mOccupied.findVacantCellVertical(cellXY, spanX, spanY);
     }
 
     /**

@@ -127,8 +127,9 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
             for (ItemInfo item : filteredItems) {
                 // Find appropriate space for the item.
                 int[] coords = mItemSpaceFinder.findSpaceForItem(app, dataModel, workspaceScreens,
-                        addedWorkspaceScreensFinal, item.spanX, item.spanY);
+                        addedWorkspaceScreensFinal, item.spanX, item.spanY);  
                 int screenId = coords[0];
+                FileLog.d(LOG, "Adding item info to workspace: cellX:" + coords[1] + ",cellY:"+coords[2]+ ",screenId:"+screenId);      
 
                 ItemInfo itemInfo;
                 if (item instanceof WorkspaceItemInfo || item instanceof FolderInfo ||
@@ -192,7 +193,6 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                                 ((WorkspaceItemInfo) itemInfo).usingLowResIcon());
                     }
                 }
-
                 // Add the shortcut to the db
                 getModelWriter().addItemToDatabase(itemInfo,
                         LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,

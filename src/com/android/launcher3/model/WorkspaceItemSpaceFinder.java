@@ -30,11 +30,12 @@ import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.IntSet;
 
 import java.util.ArrayList;
-
+import com.android.launcher3.logging.FileLog;
 /**
  * Utility class to help find space for new workspace items
  */
 public class WorkspaceItemSpaceFinder {
+    private static final String LOG = "WorkspaceItemSpaceFinder";
 
     /**
      * Find a position on the screen for the given size or adds a new screen.
@@ -72,6 +73,7 @@ public class WorkspaceItemSpaceFinder {
             screensToExclude.add(FIRST_SCREEN_ID);
         }
 
+
         for (int screen = 0; screen < screenCount; screen++) {
             screenId = workspaceScreens.get(screen);
             if (!screensToExclude.contains(screenId) && findNextAvailableIconSpaceInScreen(
@@ -81,6 +83,7 @@ public class WorkspaceItemSpaceFinder {
                 break;
             }
         }
+
 
         if (!found) {
             // Still no position found. Add a new screen to the end.
@@ -96,6 +99,7 @@ public class WorkspaceItemSpaceFinder {
                 throw new RuntimeException("Can't find space to add the item");
             }
         }
+        FileLog.d(LOG, "Adding item info to workspace: cellX:" + coordinates[0] + ",cellY:"+coordinates[1]+ ",screenId:"+screenId); 
         return new int[]{screenId, coordinates[0], coordinates[1]};
     }
 
@@ -107,9 +111,10 @@ public class WorkspaceItemSpaceFinder {
         GridOccupancy occupied = new GridOccupancy(profile.numColumns, profile.numRows);
         if (occupiedPos != null) {
             for (ItemInfo r : occupiedPos) {
+                //FileLog.d(LOG, "Adding item info to workspace: r:" + r); 
                 occupied.markCells(r, true);
             }
         }
-        return occupied.findVacantCell(xy, spanX, spanY);
+        return occupied.findVacantCellVertical(xy, spanX, spanY);
     }
 }

@@ -252,14 +252,24 @@ public static List<Point> getAllIdlePoints(Context context,ModelDbController dbC
     int numColumns  =  getScreenColumns(context);//16
     
     List<Point> listExists = DbUtils.queryFilesByPointFromDatabase(dbController);
-    for(int j = 0 ; j < numRows ; j++){ 
-        for(int i = 0 ; i < numColumns ; i++ ){
+
+    for(int i = 0 ; i < numColumns ; i++){ 
+        for(int j = 0 ; j < numRows ; j++ ){
             Point point = new Point(i,j);
             if(listExists ==null ||  !listExists.contains(point) ){
                 list.add(point);
             }
         }
     }
+
+    // for(int j = 0 ; j < numRows ; j++){ 
+    //     for(int i = 0 ; i < numColumns ; i++ ){
+    //         Point point = new Point(i,j);
+    //         if(listExists ==null ||  !listExists.contains(point) ){
+    //             list.add(point);
+    //         }
+    //     }
+    // }
     return list ;
 }
 
