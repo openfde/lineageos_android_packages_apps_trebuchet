@@ -2373,7 +2373,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             new Thread(() -> {
                 try {
                     Log.i(TAG, "bella_insert createLinuxDesktopFile shortcuts size: "+shortcuts.size());
-                    List<String> listMd5 = new ArrayList<>();
+                  //  List<String> listMd5 = new ArrayList<>();
                     for (Pair<ItemInfo, View> e : shortcuts) {
                         ItemInfo item = e.first;
                         Log.i(TAG, "bella_insert createLinuxDesktopFile item: "+item);
@@ -2395,8 +2395,8 @@ public class Launcher extends StatefulActivity<LauncherState>
                                     initialValues.put("packageName", packageName);
                                     initialValues.put("itemType", item.itemType);
                                     FileUtils.createLinuxDesktopFile(initialValues);
-                                    String md5 = FileUtils.getMD5(packageName);
-                                    listMd5.add(md5);
+                                    //String md5 = FileUtils.getMD5(packageName);
+                                    //listMd5.add(md5);
                                 }
                                 // Log.i(TAG, "bella_insert packageName " + packageName);
                             }

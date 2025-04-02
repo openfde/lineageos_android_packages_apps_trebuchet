@@ -786,7 +786,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             Canvas canvas = new Canvas(overlayBitmap);
             canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
             // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
-            canvas.drawBitmap(bitmap2, (bitmap1.getWidth()-bitmap2.getWidth())/2, (bitmap1.getHeight()-bitmap2.getHeight())/2, null);  // 将 bitmap2 绘制到 canvas 上
+            canvas.drawBitmap(bitmap2, 32,36, null);  // 将 bitmap2 绘制到 canvas 上
             // 将叠加后的 Bitmap 设置到 ImageView
             return overlayBitmap ;
        }catch(Exception e){
@@ -845,8 +845,8 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         if(svg == null ){
             return null ;
         }
-        int width = 36 ;
-        int height = 36 ;
+        int width = 64 ;
+        int height = 64 ;
         // 获取 SVG 的宽度和高度
         try{
             width = (int) svg.getDocumentWidth();
@@ -855,7 +855,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             e.printStackTrace();
         }
         if(width <= 0 || height <= 0){
-            width = height = 36;
+            width = height = 64;
         }
         // 创建一个 Bitmap
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);

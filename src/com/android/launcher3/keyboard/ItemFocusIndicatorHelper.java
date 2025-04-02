@@ -31,14 +31,16 @@ import android.view.View;
 
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
+import com.android.launcher3.logging.FileLog;
 
 /**
  * A helper class to draw background of a focused item.
  * @param <T> Item type
  */
 public abstract class ItemFocusIndicatorHelper<T> implements AnimatorUpdateListener {
+    private static final String LOG = "AddWorkspaceItemsTask";
 
-    private static final float MIN_VISIBLE_ALPHA = 0.2f;
+    private static final float MIN_VISIBLE_ALPHA = 0.16f;
     private static final long ANIM_DURATION = 150;
 
     public static final FloatProperty<ItemFocusIndicatorHelper> ALPHA =
@@ -154,8 +156,11 @@ public abstract class ItemFocusIndicatorHelper<T> implements AnimatorUpdateListe
                 newRect.inset(halfStrokeWidth, halfStrokeWidth);
             }
             mDirtyRect.set(newRect);
-            c.drawRoundRect((float) mDirtyRect.left, (float) mDirtyRect.top,
-                    (float) mDirtyRect.right, (float) mDirtyRect.bottom,
+            float width = mDirtyRect.right - mDirtyRect.left ;
+            float scale = (108 - width)/2 ;
+            FileLog.d(LOG,"draw halfStrokeWidth left："+mDirtyRect.left + ",top "+mDirtyRect.top + ",right "+mDirtyRect.right+"，bottom "+mDirtyRect.bottom+",mRadius "+mRadius);
+            c.drawRoundRect((float) mDirtyRect.left-scale, (float) mDirtyRect.top-16,
+            (float) mDirtyRect.right+scale, (float) mDirtyRect.bottom-16,
                     mRadius, mRadius, mPaint);
             mIsDirty = true;
         }

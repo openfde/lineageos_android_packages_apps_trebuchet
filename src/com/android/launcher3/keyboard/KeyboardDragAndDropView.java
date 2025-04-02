@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.ToIntBiFunction;
 import java.util.function.ToIntFunction;
+import com.android.launcher3.logging.FileLog;
 
 /**
  * A floating view to allow keyboard navigation across virtual nodes
@@ -63,6 +64,7 @@ public class KeyboardDragAndDropView extends AbstractFloatingView
         implements Insettable, StateListener<LauncherState> {
 
     private static final long MINOR_AXIS_WEIGHT = 13;
+    private static final String LOG = "KeyboardDragAndDropView";
 
     private final ArrayList<Integer> mIntList = new ArrayList<>();
     private final ArrayList<DragAndDropAccessibilityDelegate> mDelegates = new ArrayList<>();
@@ -148,6 +150,8 @@ public class KeyboardDragAndDropView extends AbstractFloatingView
 
         new RectF(pos[0], pos[1], pos[2], pos[3]).roundOut(bounds);
         mFocusIndicator.changeFocus(bounds, true);
+        FileLog.d(LOG,"setCurrentSelection changeFocus pos "+pos);
+
     }
 
     @Override

@@ -18,4 +18,3 @@
     android:id="@+id/icon"
     launcher:iconDisplay="all_apps"
     launcher:centerVertically="true" />
-

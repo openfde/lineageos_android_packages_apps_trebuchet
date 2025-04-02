@@ -507,12 +507,12 @@
     <string name="display_settings">"Display Settings"</string>
     <string name="system_theme">"System Theme"</string>
     <string name="view_type">"View Type"</string>
-    <string name="sort">"sort order"</string>
-    <string name="open_the_terminal">"open the terminal"</string>
-    <string name="theme_dark">"dark"</string>
-    <string name="theme_light">"light"</string>
-    <string name="sort_by_name">"Arrange by name"</string>
-    <string name="sort_by_type">"Arrange by type"</string>
+    <string name="sort">"Sort Order"</string>
+    <string name="open_the_terminal">"Open The Terminal"</string>
+    <string name="theme_dark">"Dark"</string>
+    <string name="theme_light">"Light"</string>
+    <string name="sort_by_name">"Arrange by Name"</string>
+    <string name="sort_by_type">"Arrange by Type"</string>
 
     <string-array name="theme_options">
         <item>dark</item>
@@ -526,7 +526,7 @@
     </string-array>
 
      <string-array name="file_options">
-        <item>directory</item>
-        <item>document</item>
+        <item>Directory</item>
+        <item>Document</item>
     </string-array>
 </resources>

@@ -101,6 +101,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
+import android.view.Gravity;
+
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -224,6 +226,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         super(context, attrs, defStyle);
         mActivity = ActivityContext.lookupContext(context);
         FastBitmapDrawable.setFlagHoverEnabled(enableCursorHoverStates());
+        //setGravity(Gravity.CENTER);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.BubbleTextView, defStyle, 0);
@@ -524,16 +527,14 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                   e.printStackTrace();
                }
             }
-            Bitmap b2 = FileUtils.vectorToBitmap(getContext(), R.mipmap.bg_linux);
-            b2  = FileUtils.scaleBitmap(b2,80,80);
+            Bitmap b2 = FileUtils.vectorToBitmap(getContext(), R.mipmap.flag_linux);
+            b2  = FileUtils.scaleBitmap(b2,36,36);
             if(bitmap != null ){
-                bitmap  = FileUtils.scaleBitmap(bitmap,48,48);
-                Bitmap b = FileUtils.overlayBitmaps(b2,bitmap);
-                // BitmapInfo bi = new BitmapInfo(b,0);
-                // iconDrawable = newIcon(getContext(), bi);
+                bitmap  = FileUtils.scaleBitmap(bitmap,64,64);
+                Bitmap b = FileUtils.overlayBitmaps(bitmap,b2);
                 iconDrawable = new FastBitmapDrawable(b);
             }else{
-                bitmap  = b2;
+                bitmap  = FileUtils.vectorToBitmap(getContext(), R.mipmap.bg_linux);
                 // BitmapInfo bi = new BitmapInfo(bitmap,0);
                 // iconDrawable = newIcon(getContext(), bi);
                 iconDrawable = new FastBitmapDrawable(bitmap);
@@ -843,6 +844,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int height = MeasureSpec.getSize(heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        Log.i(TAG,"onMeasure  height: "+height + " ,widthMeasureSpec  "+widthMeasureSpec + ",heightMeasureSpec "+heightMeasureSpec + ",width "+width);
+
+        
         if (mCenterVertically) {
             Paint.FontMetrics fm = getPaint().getFontMetrics();
             int cellHeightPx = mIconSize + getCompoundDrawablePadding() +
@@ -855,6 +860,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             int allowedVerticalSpace = height - getPaddingTop() - getPaddingBottom()
                     - mDeviceProfile.allAppsIconSizePx
                     - mDeviceProfile.allAppsIconDrawablePaddingPx;
+                    Log.i(TAG,"onMeasure  allowedVerticalSpace: "+allowedVerticalSpace );
+
             CharSequence modifiedString = modifyTitleToSupportMultiLine(
                     MeasureSpec.getSize(widthMeasureSpec) - getCompoundPaddingLeft()
                             - getCompoundPaddingRight(),
@@ -877,6 +884,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 }
             }
         }
+        //setMeasuredDimension(108, 116);
+
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -1210,7 +1219,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         // same as before.
         mDisableRelayout = mIcon != null;
 
-        icon.setBounds(0, 0, mIconSize, mIconSize);
+        icon.setBounds(0, 0, 60, 60);
 
         updateIcon(icon);
 
@@ -1335,6 +1344,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     }
 
     private void updateIcon(Drawable newIcon) {
+        setCompoundDrawablePadding(2);
         if (mLayoutHorizontal) {
             setCompoundDrawablesRelative(newIcon, null, null, null);
         } else {

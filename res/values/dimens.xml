@@ -458,7 +458,7 @@
     <dimen name="focus_outline_stroke_width">3dp</dimen>
 
     <!-- Workspace grid visualization parameters -->
-    <dimen name="grid_visualization_rounding_radius">6dp</dimen>
+    <dimen name="grid_visualization_rounding_radius">8dp</dimen>
     <dimen name="grid_visualization_horizontal_cell_spacing">16dp</dimen>
     <dimen name="grid_visualization_vertical_cell_spacing">16dp</dimen>
 
