@@ -217,6 +217,7 @@
     <string name="display_settings">"显示设置"</string>
     <string name="system_theme">"系统主题"</string>
     <string name="view_type">"视图类型"</string>
+    <string name="refresh">"刷新"</string>
     <string name="sort">"排序方式"</string>
     <string name="open_the_terminal">"打开终端"</string>
     <string name="theme_dark">"深色"</string>

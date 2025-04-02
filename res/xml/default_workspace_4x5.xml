@@ -19,7 +19,7 @@
     <!-- Hotseat (We use the screen as the position of the item in the hotseat) -->
     <!-- Dialer, Messaging, Browser, Camera -->
     <resolve
-        launcher:container="-101"
+        launcher:container="-100"
         launcher:screen="0"
         launcher:x="0"
         launcher:y="0" >
@@ -29,7 +29,7 @@
     </resolve>
 
     <resolve
-        launcher:container="-101"
+        launcher:container="-100"
         launcher:screen="1"
         launcher:x="1"
         launcher:y="0" >
@@ -41,7 +41,7 @@
     </resolve>
 
     <resolve
-         launcher:container="-101"
+         launcher:container="-100"
          launcher:screen="2"
          launcher:x="2"
          launcher:y="0" >
@@ -50,7 +50,7 @@
     </resolve>
 
     <resolve
-        launcher:container="-101"
+        launcher:container="-100"
         launcher:screen="3"
         launcher:x="3"
         launcher:y="0" >

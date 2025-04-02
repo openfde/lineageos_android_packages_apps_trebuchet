@@ -36,6 +36,11 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             dismiss()
         })
 
+        contentView.findViewById<TextView>(R.id.text_refresh)?.setOnClickListener({
+            launcher.refresh();
+            dismiss()
+        })
+
         contentView.findViewById<TextView>(R.id.text_display_properties)?.setOnHoverListener { v: View, event: MotionEvent ->
             hidePopupWindow()
             false
@@ -153,6 +158,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
         )
 
         if (v != null && !launcher.isDestroyed && !launcher.isFinishing) {
+            popupChildWindow?.elevation = 6f;
             popupChildWindow?.showAsDropDown(v, 164, -30, Gravity.NO_GRAVITY)
         }
     }

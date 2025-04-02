@@ -407,8 +407,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                 for (int i = 0; i < workspaceItems.size(); i++) {
                     ItemInfo info = workspaceItems.get(i);
                     launcher.removeView(info.cellX, info.cellY);
-                    info.cellX = i / idp.numColumns;
-                    info.cellY = i % idp.numColumns; 
+                    info.cellX = i / idp.numRows;
+                    info.cellY = i % idp.numRows; 
                 }
 //                startLoaderForResults(loaderResults);
                 return workspaceItems;

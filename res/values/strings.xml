@@ -507,6 +507,7 @@
     <string name="display_settings">"Display Settings"</string>
     <string name="system_theme">"System Theme"</string>
     <string name="view_type">"View Type"</string>
+    <string name="refresh">"Refresh"</string>
     <string name="sort">"Sort Order"</string>
     <string name="open_the_terminal">"Open The Terminal"</string>
     <string name="theme_dark">"Dark"</string>
@@ -515,8 +516,8 @@
     <string name="sort_by_type">"Arrange by Type"</string>
 
     <string-array name="theme_options">
-        <item>dark</item>
-        <item>light</item>
+        <item>Dark</item>
+        <item>Light</item>
     </string-array>
 
     <string-array name="sort_options">

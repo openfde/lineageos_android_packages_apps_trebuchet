@@ -73,6 +73,7 @@ public class WorkspaceItemSpaceFinder {
             screensToExclude.add(FIRST_SCREEN_ID);
         }
 
+        FileLog.d(LOG, "Adding item info to workspace: screenCount:" + screenCount ); 
 
         for (int screen = 0; screen < screenCount; screen++) {
             screenId = workspaceScreens.get(screen);

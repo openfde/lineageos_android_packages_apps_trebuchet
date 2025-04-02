@@ -53,7 +53,7 @@ public class DbUtils {
             Log.i(TAG, "queryFilesByPointFromDatabase is null "+ ",cellX: "+x + ", cellY: "+y);
         }else{
         }
-    
+        cursor.close();
         return list ;
     }
 
@@ -127,7 +127,7 @@ public class DbUtils {
             Log.i(TAG, "queryAllFilesFromDatabase is null");
         }else{
         }
-    
+        cursor.close();
         return list ;
     }
     
@@ -161,12 +161,12 @@ public class DbUtils {
             Log.i(TAG, "queryAllDesktopFilesFromDatabase is null");
         }else{
         }
-    
+        cursor.close();
         return list ;
     }
     
     
-    public static List<Map<String,Object>> queryAllNotDesktopFilesFromDatabase(ModelDbController dbController){
+    public static synchronized List<Map<String,Object>> queryAllNotDesktopFilesFromDatabase(ModelDbController dbController){
         String[] selectionArgs = {"0","1","2","3","4","5","6","7"};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
     
@@ -196,40 +196,47 @@ public class DbUtils {
             Log.i(TAG, "queryAllNotDesktopFilesFromDatabase is null");
         }else{
         }
-    
+        cursor.close();
         return list ;
     }
 
 
-    public static List<Map<String,Object>> queryDesktopTextFilesFromDatabase(ModelDbController dbController){
+    public static synchronized  List<Map<String,Object>> queryDesktopTextFilesFromDatabase(ModelDbController dbController){
         String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT)};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
-    
+        Log.i(TAG, "selection "+selection + ",selectionArgs:  "+selectionArgs);
         List<Map<String,Object>> list = null;
     
         Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
         //Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            list = new ArrayList<>();
-            do {
-                int _id = cursor.getInt(cursor.getColumnIndex("_id"));
-                String title = cursor.getString(cursor.getColumnIndex("title"));
-                int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
-                int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
-                int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
-                Map<String,Object> mp = new HashMap<>();
-                mp.put("_id",_id);
-                mp.put("title",title);
-                mp.put("itemType",itemType);
-                mp.put("cellX",cellX);
-                mp.put("cellY",cellY);
-                list.add(mp);
-            } while (cursor.moveToNext());
+        try{
+            if (cursor != null && cursor.moveToFirst()) {
+                list = new ArrayList<>();
+                do {
+                    int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                    String title = cursor.getString(cursor.getColumnIndex("title"));
+                    int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                    int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                    int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                    Map<String,Object> mp = new HashMap<>();
+                    mp.put("_id",_id);
+                    mp.put("title",title);
+                    mp.put("itemType",itemType);
+                    mp.put("cellX",cellX);
+                    mp.put("cellY",cellY);
+                    list.add(mp);
+                } while (cursor.moveToNext());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
     
         if(list == null ){
             Log.i(TAG, "queryDesktopTextFilesFromDatabase is null");
+        }else{
+            Log.i(TAG, "size  "+list.size()  );
         }
+        cursor.close();
         return list ;
     }
 
@@ -265,7 +272,7 @@ public class DbUtils {
         }else{
             Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
         }
-
+        cursor.close();
         return list ;
     }
 
@@ -299,7 +306,7 @@ public class DbUtils {
         }else{
             Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
         }
-
+        cursor.close();
         return list ;
     }
 
@@ -357,7 +364,7 @@ public class DbUtils {
         }else{
             Log.i(TAG, "queryItemsFromDatabase  size is  list "+list.size());
         }
-
+        cursor.close();
         return list ;
     }
 
@@ -371,6 +378,7 @@ public class DbUtils {
         if (cursor != null && cursor.moveToFirst()) {
             maxId = cursor.getInt(cursor.getColumnIndex("max_id"));
         }
+        cursor.close();
         return maxId ;
     }
 

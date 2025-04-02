@@ -2844,6 +2844,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         if(newOptionsPopupWindow.isShowing()){
             newOptionsPopupWindow.dismiss();
         }   
+        newOptionsPopupWindow.setElevation(6f); 
         newOptionsPopupWindow.showAtLocation(mScrimView, Gravity.NO_GRAVITY, (int)x, (int)y);
     }
 
@@ -3273,7 +3274,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             // gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
 
             // gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
-            // refreshDesktopFiles();
 
             handler.postDelayed(new Runnable() {
                 @Override
@@ -3507,6 +3507,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             }
             // List<Map<String,Object>>  listDesktopFileOrDir = DbUtils.queryDesktopFileInDatabase(Launcher.this,f.getName());
             if(listTexts !=null){
+                Log.d(TAG, "refreshDesktopFiles  size  "+listTexts.size() + ",listTexts: "+listTexts );
                 for(Map<String,Object> mp : listTexts){
                     String fName = mp.get("title").toString();
                     File f = new File(documentId + fName);
@@ -3540,7 +3541,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     boolean found = false ;
                     if(listTexts != null){
                         found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
-                        Log.d(TAG, "refreshDesktopFiles: fname: "+f.getName() + ",found "+found  + ",listTexts "+listTexts.size());
+                        Log.d(TAG, "refreshDesktopFiles: fname: "+f.getName() + ",found "+found  + ",listTexts size "+listTexts.size());
                     } 
                     
                     if(!found){

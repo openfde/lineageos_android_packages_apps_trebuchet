@@ -28,6 +28,12 @@
     <View style="@style/popWindowLineStyle" />
 
     <TextView
+        android:id="@+id/text_refresh"
+        style="@style/popWindowTextStyle"
+        android:visibility="gone"
+        android:text="@string/refresh" />
+
+    <TextView
         android:id="@+id/text_display_properties"
         style="@style/popWindowTextStyle"
         android:text="@string/display_properties" />
