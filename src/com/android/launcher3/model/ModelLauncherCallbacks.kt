@@ -29,6 +29,10 @@ import com.android.launcher3.model.PackageUpdatedTask.OP_UNAVAILABLE
 import com.android.launcher3.model.PackageUpdatedTask.OP_UNSUSPEND
 import com.android.launcher3.model.PackageUpdatedTask.OP_UPDATE
 import java.util.function.Consumer
+import org.greenrobot.eventbus.EventBus;
+import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.model.data.MessageEvent;
+
 
 /**
  * Implementation of {@link LauncherApps#Callbacks} which converts various events to corresponding
@@ -55,6 +59,7 @@ class ModelLauncherCallbacks(private var taskExecutor: Consumer<ModelUpdateTask>
 
     override fun onPackageRemoved(packageName: String, user: UserHandle) {
         FileLog.d(TAG, "package removed received $packageName")
+        EventBus.getDefault().post(MessageEvent(FileUtils.DELETE_FILE, FileUtils.PATH_ID_DESKTOP+""+packageName+"_fde.desktop"));
         taskExecutor.accept(PackageUpdatedTask(OP_REMOVE, user, packageName))
     }
 

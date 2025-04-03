@@ -317,13 +317,14 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
                     Launcher launcher = Launcher.getLauncher(view.getContext());
-                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY ){
-                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
-                    }else if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
-                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
-                    }
+                    // if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY ){
+                    //     launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    // }else if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
+                    //     launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    // }
+                    launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
                     dismissTaskMenuView(mTarget);
-                    // launcher.removeItem(icon, mItemInfo,true);
+                    launcher.removeItem(mOriginalView, mItemInfo,true);
                 }
             }).create();
             alertDialog.show();

@@ -2368,49 +2368,49 @@ public class Launcher extends StatefulActivity<LauncherState>
 
        
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(() -> {
-            new Thread(() -> {
-                try {
-                    Log.i(TAG, "bella_insert createLinuxDesktopFile shortcuts size: "+shortcuts.size());
-                  //  List<String> listMd5 = new ArrayList<>();
-                    for (Pair<ItemInfo, View> e : shortcuts) {
-                        ItemInfo item = e.first;
-                        Log.i(TAG, "bella_insert createLinuxDesktopFile item: "+item);
-                        if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
-                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
-                            item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
-                            ContentValues initialValues = new ContentValues();
-                            initialValues.put("title", item.title.toString());
-                            String packageName = "";
-                            if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
-                                packageName = item.getTargetComponent().getPackageName();    
-                            }else{
-                                // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
-                                packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
-                            }
-                            Log.i(TAG, "bella_insert createLinuxDesktopFile packageName: "+packageName);
-                            if (packageName != null) {
-                                if(!"com.fde.x11".equals(packageName)){
-                                    initialValues.put("packageName", packageName);
-                                    initialValues.put("itemType", item.itemType);
-                                    FileUtils.createLinuxDesktopFile(initialValues);
-                                    //String md5 = FileUtils.getMD5(packageName);
-                                    //listMd5.add(md5);
-                                }
-                                // Log.i(TAG, "bella_insert packageName " + packageName);
-                            }
+        // Handler handler = new Handler(Looper.getMainLooper());
+        // handler.postDelayed(() -> {
+        //     new Thread(() -> {
+        //         try {
+        //             Log.i(TAG, "bella_insert createLinuxDesktopFile shortcuts size: "+shortcuts.size());
+        //           //  List<String> listMd5 = new ArrayList<>();
+        //             for (Pair<ItemInfo, View> e : shortcuts) {
+        //                 ItemInfo item = e.first;
+        //                 Log.i(TAG, "bella_insert createLinuxDesktopFile item: "+item);
+        //                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
+        //                     item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
+        //                     item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
+        //                     ContentValues initialValues = new ContentValues();
+        //                     initialValues.put("title", item.title.toString());
+        //                     String packageName = "";
+        //                     if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
+        //                         packageName = item.getTargetComponent().getPackageName();    
+        //                     }else{
+        //                         // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+        //                         packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
+        //                     }
+        //                     Log.i(TAG, "bella_insert createLinuxDesktopFile packageName: "+packageName);
+        //                     if (packageName != null) {
+        //                         if(!"com.fde.x11".equals(packageName)){
+        //                             initialValues.put("packageName", packageName);
+        //                             initialValues.put("itemType", item.itemType);
+        //                             FileUtils.createLinuxDesktopFile(initialValues);
+        //                             //String md5 = FileUtils.getMD5(packageName);
+        //                             //listMd5.add(md5);
+        //                         }
+        //                         // Log.i(TAG, "bella_insert packageName " + packageName);
+        //                     }
                            
-                        } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
-                            // Handle Linux app item type if needed
-                        }
-                    }
+        //                 } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
+        //                     // Handle Linux app item type if needed
+        //                 }
+        //             }
         
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }, 10 * 1000);
+        //         } catch (Exception e) {
+        //             e.printStackTrace();
+        //         }
+        //     }).start();
+        // }, 10 * 1000);
     }
 
     /**
@@ -3535,6 +3535,24 @@ public class Launcher extends StatefulActivity<LauncherState>
                     String fTitle = f.getName().toLowerCase() ;
                     if(fTitle.contains(".desktop")) {
                         Log.d(TAG, "refreshDesktopFiles: not show this file  ,fname: "+f.getName() );
+                        if(fTitle.contains("_fde.desktop")){
+                            //如果是android应用
+                          try{
+                            Map<String,Object> mapFiles =  FileUtils.getLinuxContentString(f.getName());
+                            Log.d(TAG, "refreshDesktopFiles: mapFiles: "+mapFiles );
+                            String packageName = mapFiles.get("PackageName").toString();
+                            if(packageName != null){
+                                boolean isAppInstalled  = FileUtils.isAppInstalled(Launcher.this,packageName);
+                                if(!isAppInstalled){
+                                    gotoDocApp(FileUtils.DELETE_FILE, FileUtils.PATH_ID_DESKTOP+""+packageName+"_fde.desktop");
+                                }
+                            }
+                          }catch(Exception e){
+                            e.printStackTrace();
+                          }
+                        }else{
+                            //则不管   
+                        }
                         continue;
                     }
                     //默认未添加该问题到DB，如果查询到则不执行插入操作

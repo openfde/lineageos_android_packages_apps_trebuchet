@@ -45,7 +45,7 @@ import com.android.launcher3.util.PackageManagerHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
+import com.android.launcher3.util.FileUtils;
 /**
  * Task to add auto-created workspace items.
  */
@@ -129,9 +129,12 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 int[] coords = mItemSpaceFinder.findSpaceForItem(app, dataModel, workspaceScreens,
                         addedWorkspaceScreensFinal, item.spanX, item.spanY);  
                 int screenId = coords[0];
-                FileLog.d(LOG, "Adding item info to workspace: cellX:" + coords[1] + ",cellY:"+coords[2]+ ",screenId:"+screenId);      
+                FileLog.d(LOG, "Adding item info to workspace: cellX:" + coords[1] + ",cellY:"+coords[2]+ ",item:"+item);      
 
                 ItemInfo itemInfo;
+                String packageName = item.getTargetComponent() != null
+                ? item.getTargetComponent().getPackageName() : null;
+
                 if (item instanceof WorkspaceItemInfo || item instanceof FolderInfo ||
                         item instanceof LauncherAppWidgetInfo) {
                     itemInfo = item;
@@ -143,8 +146,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
                 if (item instanceof WorkspaceItemInfo && ((WorkspaceItemInfo) item).isPromise()) {
                     WorkspaceItemInfo workspaceInfo = (WorkspaceItemInfo) item;
-                    String packageName = item.getTargetComponent() != null
-                            ? item.getTargetComponent().getPackageName() : null;
+                  
                     if (packageName == null) {
                         continue;
                     }
@@ -200,9 +202,10 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
                 // Save the WorkspaceItemInfo for binding in the workspace
                 addedItemsFinal.add(itemInfo);
-
+                FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);
                 // log bitmap and label
                 FileLog.d(LOG, "Adding item info to workspace: " + itemInfo);
+                
             }
         }
 

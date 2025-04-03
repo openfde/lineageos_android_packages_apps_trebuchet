@@ -379,72 +379,55 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
         return null;  
     }
-    public static void createLinuxDesktopFile(ContentValues initialValues){
-        // desktop linux app temp delete 
-        // if(!isOpenLinuxApp){
-        //     return ;
-        // }
+   
+    public static void createLinuxDesktopFile(String title ,String packageName){
         createDesktopDir(PATH_ID_DESKTOP);
-        if(initialValues !=null){
-            try{
-                String title  = initialValues.get("title").toString();
-                if(initialValues.get("packageName") == null){
-                    Log.e(TAG,"bella packageName is null  ");
-                    return ;
-                }
-                String packageName  = initialValues.get("packageName").toString();
-                int itemType  = Integer.valueOf(initialValues.get("itemType").toString());
-                Log.i(TAG,"bella..createLinuxDesktopFile packageName "+packageName + ",itemType: "+itemType);
-                if(title.contains(".desktop") || itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
-                    return ;
-                }
-    
-                String documentId =  getAllDesktopPath();
-      
-                String md5 =  getMD5(packageName);
-                String pathDesktop = documentId+""+ md5+"_fde.desktop";
-                File file = new File(pathDesktop);
-                if(file.exists()){
-                    // Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
-                    file.delete();
-                }
-                md5 = packageName;
-                pathDesktop = documentId+""+ packageName+"_fde.desktop";
-                file = new File(pathDesktop);
-                if(file.exists()){
-                    return ;
-                }
-                Path desktopFilePath = Paths.get(pathDesktop);
-
-                String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/"+md5+".png" ;
-                File filePic = new File(picPath);
-                String homeDir = getLinuxHomeDir();
-                String linuxPath = homeDir+"/.local/share/icons/"+md5+".png";
-                // Log.i(TAG,"bella...homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
-                File linuxPic = new File(linuxPath);
-                if(!linuxPic.exists()){
-                    Log.i(TAG,"bella...insert.............md5: "+md5 +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
-                }else{
-                    //if pic exists ,return 
-                }    
-    
-                List<String> lines = List.of(
-                    "[Desktop Entry]",
-                    "Type=Application",
-                    "Name="+title,
-                    "Name[zh_CN]="+title,
-                    "Categories="+itemType,
-                    "Exec=fde_launch "+packageName,
-                    "Icon="+linuxPic
-                );
-         
-                // 写入.desktop文件
-                Files.write(desktopFilePath, lines, StandardOpenOption.CREATE);
-                file.setExecutable(true);
- 
-            }catch(Exception e){
-                e.printStackTrace();
+        try{    
+            Log.i(TAG,"createLinuxDesktopFile title:  "+title + ",packageName: "+packageName);
+            String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
+            File ff = new File(documentId);
+            if(!ff.exists()){
+                documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
             }
+
+            //String md5 = getMD5(packageName);
+            String pathDesktop = documentId+""+ packageName+"_fde.desktop";
+            File file = new File(pathDesktop);
+            if(file.exists()){
+                Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                return ;
+            }
+            Path desktopFilePath = Paths.get(pathDesktop);
+
+            String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/"+packageName+".png" ;
+            File filePic = new File(picPath);
+            String homeDir = getLinuxHomeDir();
+            String linuxPath = homeDir+"/.local/share/icons/"+packageName+".png";
+            Log.i(TAG,"bella...homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
+            File linuxPic = new File(linuxPath);
+            if(!linuxPic.exists()){
+                Log.i(TAG,"bella...insert............." +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
+            }else{
+                //if pic exists ,return 
+            }    
+
+            List<String> lines = List.of(
+                "[Desktop Entry]",
+                "Type=Application",
+                "Name="+title,
+                "PackageName="+packageName,
+                "Name[zh_CN]="+title,
+                "Categories="+ LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
+                "Exec=fde_launch "+packageName,
+                "Icon="+linuxPic
+            );
+
+            // 写入.desktop文件
+            Files.write(desktopFilePath, lines, StandardOpenOption.CREATE);
+            file.setExecutable(true);
+
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -917,5 +900,4 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
     public static String getLinuxPrefixPath(){
         return "/volumes"+"/"+FileUtils.getLinuxUUID();
     }
-
 }
