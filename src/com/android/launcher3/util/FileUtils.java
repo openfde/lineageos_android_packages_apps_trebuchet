@@ -233,8 +233,8 @@ public static Point findNextFreePoint(Context context,ModelDbController dbContro
     Log.i(TAG, "queryAllFilesFromDatabase: numRows:  "+numRows + " , numColumns: "+numColumns);
     Point point = new Point(-1,-1);
     outer: 
-    for(int j = 0 ; j < numRows ; j++){ 
-        for(int i = 0 ; i < numColumns ; i++ ){
+    for(int i = 0 ; i < numColumns ; i++){ 
+        for(int j = 0 ; j < numRows ; j++ ){
             if(DbUtils.queryFilesByPointFromDatabase(dbController,i,j) == null){
                 point.x = i ;
                 point.y = j ;

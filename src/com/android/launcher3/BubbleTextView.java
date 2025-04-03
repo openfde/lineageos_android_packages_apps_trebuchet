@@ -575,7 +575,21 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 mLastOriginalText = label;
                 mLastModifiedText = mLastOriginalText;
                 mBreakPointsIntArray = StringMatcherUtility.getListOfBreakpoints(label, MATCHER);
-                setText(label);
+                if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+                    Map<String,Object> mp = Launcher.getDesktopMap(label.toString());
+                    if(isCurrentLanguageEnglish() ){
+                        setText(mp.get("Name").toString());
+                    }else{
+                        try{
+                            setText(mp.get("ZhName").toString());
+                        }catch(Exception e){
+                            setText(mp.get("Name").toString());
+                            e.printStackTrace();
+                        }
+                    }                    
+                }else{
+                    setText(label);
+                }
             }
         }
         if (info.contentDescription != null) {
@@ -845,8 +859,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        Log.i(TAG,"onMeasure  height: "+height + " ,widthMeasureSpec  "+widthMeasureSpec + ",heightMeasureSpec "+heightMeasureSpec + ",width "+width);
-
+        // Log.i(TAG,"onMeasure  height: "+height + " ,widthMeasureSpec  "+widthMeasureSpec + ",heightMeasureSpec "+heightMeasureSpec + ",width "+width);
         
         if (mCenterVertically) {
             Paint.FontMetrics fm = getPaint().getFontMetrics();
@@ -860,7 +873,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             int allowedVerticalSpace = height - getPaddingTop() - getPaddingBottom()
                     - mDeviceProfile.allAppsIconSizePx
                     - mDeviceProfile.allAppsIconDrawablePaddingPx;
-                    Log.i(TAG,"onMeasure  allowedVerticalSpace: "+allowedVerticalSpace );
 
             CharSequence modifiedString = modifyTitleToSupportMultiLine(
                     MeasureSpec.getSize(widthMeasureSpec) - getCompoundPaddingLeft()

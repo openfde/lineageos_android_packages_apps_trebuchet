@@ -41,7 +41,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             dismiss()
         })
 
-        contentView.findViewById<TextView>(R.id.text_display_properties)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<TextView>(R.id.text_display_properties)?.setOnHoverListener { _, _ ->
             hidePopupWindow()
             false
         }
@@ -51,7 +51,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             dismiss()
         })
 
-        contentView.findViewById<TextView>(R.id.text_change_wallpaper)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<TextView>(R.id.text_change_wallpaper)?.setOnHoverListener { _, _ ->
             hidePopupWindow()
             false
         }
@@ -62,7 +62,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             dismiss()
         })
 
-        contentView.findViewById<TextView>(R.id.text_display_settings)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<TextView>(R.id.text_display_settings)?.setOnHoverListener { _, _ ->
             hidePopupWindow()
             false
         }
@@ -71,7 +71,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             showPopupWindow(R.array.theme_options,it)
         })
 
-        contentView.findViewById<RelativeLayout>(R.id.layout_system_theme)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<RelativeLayout>(R.id.layout_system_theme)?.setOnHoverListener { v :View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_HOVER_ENTER -> {
                     // 鼠标悬停进入
@@ -91,7 +91,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             showPopupWindow(R.array.file_options,it)
         })
 
-        contentView.findViewById<RelativeLayout>(R.id.layout_new)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<RelativeLayout>(R.id.layout_new)?.setOnHoverListener { v :View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_HOVER_ENTER -> {
                     // 鼠标悬停进入
@@ -112,7 +112,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
         contentView.findViewById<RelativeLayout>(R.id.layout_sort)?.setOnClickListener({
             showPopupWindow(R.array.sort_options,it)
         })
-        contentView.findViewById<RelativeLayout>(R.id.layout_sort)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<RelativeLayout>(R.id.layout_sort)?.setOnHoverListener { v :View, event: MotionEvent ->
             when (event.action) {
                 MotionEvent.ACTION_HOVER_ENTER -> {
                     // 鼠标悬停进入
@@ -137,7 +137,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             dismiss()
         })
 
-        contentView.findViewById<TextView>(R.id.text_open_the_terminal)?.setOnHoverListener { v: View, event: MotionEvent ->
+        contentView.findViewById<TextView>(R.id.text_open_the_terminal)?.setOnHoverListener {_, _ ->
             hidePopupWindow()
             false
         }
