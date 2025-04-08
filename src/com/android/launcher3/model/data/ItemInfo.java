@@ -300,9 +300,9 @@ public class ItemInfo {
                 + " rank=" + rank
                 + " user=" + user
                 + " appTitle=" + appTitle
-                + " title=" + title
-                + " targetComponent=" + getTargetComponent()
-                + " container=" + getContainerInfo();
+                + " title=" + title;
+               // + " targetComponent=" + getTargetComponent()
+               // + " container=" + getContainerInfo();
     }
     
     /**

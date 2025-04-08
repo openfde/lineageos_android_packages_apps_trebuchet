@@ -576,17 +576,13 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 mLastModifiedText = mLastOriginalText;
                 mBreakPointsIntArray = StringMatcherUtility.getListOfBreakpoints(label, MATCHER);
                 if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-                    Map<String,Object> mp = Launcher.getDesktopMap(label.toString());
-                    if(isCurrentLanguageEnglish() ){
-                        setText(mp.get("Name").toString());
-                    }else{
-                        try{
-                            setText(mp.get("ZhName").toString());
-                        }catch(Exception e){
-                            setText(mp.get("Name").toString());
-                            e.printStackTrace();
-                        }
-                    }                    
+                    Map<String, Object> appMap = Launcher.getDesktopMap(label.toString());
+                    if (appMap != null) {
+                        setAppName(label.toString(), appMap);
+                    } else {
+                        setText(label);
+                    }
+                                
                 }else{
                     setText(label);
                 }
@@ -596,6 +592,16 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             setContentDescription(info.isDisabled()
                     ? getContext().getString(R.string.disabled_app_label, info.contentDescription)
                     : info.contentDescription);
+        }
+    }
+
+    private void setAppName(String label, Map<String, Object> appMap) {
+        String appName = appMap != null && appMap.get("Name") != null ? appMap.get("Name").toString() : label;
+        if (isCurrentLanguageEnglish()) {
+            setText(appName);
+        } else {
+            String chineseName = appMap != null && appMap.get("ZhName") != null ? appMap.get("ZhName").toString() : null;
+            setText(chineseName != null ? chineseName : appName);
         }
     }
 
