@@ -3189,7 +3189,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
             return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
         }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-            return Stream.of(APP_OPEN,APP_OPEN_TYPE);
+            return Stream.of(APP_OPEN,APP_REMOVE,APP_OPEN_TYPE);
         }else{
             return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
         }
