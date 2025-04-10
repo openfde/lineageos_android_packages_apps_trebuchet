@@ -438,10 +438,14 @@ public class ItemClickHandler {
             launcher.openFile(title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
-            Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
-            String name = map.get("name").toString();
-            String exec = map.get("exec").toString();
-            launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString());
+            try{
+                Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+                String name = map.get("name").toString();
+                String exec = map.get("exec").toString();
+                launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString());
+            }catch(Exception e){
+                e.printStackTrace();
+            }
             // launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###open###"+item.title.toString());
             return ;
         }
