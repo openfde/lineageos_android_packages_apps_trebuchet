@@ -121,6 +121,10 @@ public class AddItemActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(true){
+            finish();
+            return;
+        }
 
         mRequest = PinRequestHelper.getPinItemRequest(getIntent());
         if (mRequest == null) {
