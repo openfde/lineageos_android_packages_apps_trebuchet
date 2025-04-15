@@ -56,6 +56,8 @@ import java.io.File;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import com.android.launcher3.touch.ItemClickHandler;
+import android.view.Window;
+import android.view.WindowManager;
 
 /**
  * Represents a system shortcut for a given app. The shortcut should have a label and icon, and an
@@ -327,6 +329,13 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                     launcher.removeItem(mOriginalView, mItemInfo,true);
                 }
             }).create();
+
+            Window window = alertDialog.getWindow();
+            if (window != null) {
+                WindowManager.LayoutParams params = window.getAttributes();
+                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                window.setAttributes(params);
+            }
             alertDialog.show();
         }
     }

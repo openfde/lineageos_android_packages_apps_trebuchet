@@ -657,6 +657,8 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         View popupView = LayoutInflater.from(this).inflate(R.layout.popup_layout, null);
         newOptionsPopupWindow = new NewOptionsPopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,this);
+        newOptionsPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+
     }
 
     protected ModelCallbacks createModelCallbacks() {

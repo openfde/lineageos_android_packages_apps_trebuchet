@@ -69,21 +69,23 @@ public class CheckLongPressHelper {
 
                 // Mouse right click should immediately trigger a long press
                 if (TouchUtil.isMouseRightClickDownOrMove(ev)) {
-                    mIsInMouseRightClick = true;
-                    triggerLongPress();
-                    final Handler handler = mView.getHandler();
-                    if (handler != null) {
-                        // Send an ACTION_UP to end this click gesture to avoid user dragging with
-                        // mouse's right button. Note that we need to call
-                        // {@link Handler#postAtFrontOfQueue()} instead of {@link View#post()} to
-                        // make sure ACTION_UP is sent before any ACTION_MOVE if user is dragging.
-                        final MotionEvent actionUpEvent = MotionEvent.obtain(ev);
-                        actionUpEvent.setAction(MotionEvent.ACTION_UP);
-                        handler.postAtFrontOfQueue(() -> {
-                            mView.getRootView().dispatchTouchEvent(actionUpEvent);
-                            actionUpEvent.recycle();
-                        });
-                    }
+                    // mIsInMouseRightClick = true;
+                    mHasPerformedLongPress = true ;
+                    mView.performLongClick();
+                    // triggerLongPress();
+                    // final Handler handler = mView.getHandler();
+                    // if (handler != null) {
+                    //     // Send an ACTION_UP to end this click gesture to avoid user dragging with
+                    //     // mouse's right button. Note that we need to call
+                    //     // {@link Handler#postAtFrontOfQueue()} instead of {@link View#post()} to
+                    //     // make sure ACTION_UP is sent before any ACTION_MOVE if user is dragging.
+                    //     final MotionEvent actionUpEvent = MotionEvent.obtain(ev);
+                    //     actionUpEvent.setAction(MotionEvent.ACTION_UP);
+                    //     handler.postAtFrontOfQueue(() -> {
+                    //         mView.getRootView().dispatchTouchEvent(actionUpEvent);
+                    //         actionUpEvent.recycle();
+                    //     });
+                    // }
                     break;
                 }
 
