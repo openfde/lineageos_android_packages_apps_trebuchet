@@ -116,6 +116,7 @@ public class NotificationListener extends NotificationListenerService {
     }
 
     private boolean handleWorkerMessage(Message message) {
+        Log.w(TAG, "handleWorkerMessage message.what: "+message.what);
         switch (message.what) {
             case MSG_NOTIFICATION_POSTED: {
                 StatusBarNotification sbn = (StatusBarNotification) message.obj;
@@ -163,6 +164,7 @@ public class NotificationListener extends NotificationListenerService {
     }
 
     private boolean handleUiMessage(Message message) {
+        Log.w(TAG, "handleUiMessage message.what: "+message.what);
         switch (message.what) {
             case MSG_NOTIFICATION_POSTED:
                 if (sNotificationsChangedListeners.size() > 0) {
@@ -205,6 +207,8 @@ public class NotificationListener extends NotificationListenerService {
     @Override
     public void onListenerConnected() {
         super.onListenerConnected();
+        Log.w(TAG, "onListenerConnected..........");
+
         sIsConnected = true;
 
         // Register an observer to rebind the notification listener when dots are re-enabled.
@@ -218,12 +222,14 @@ public class NotificationListener extends NotificationListenerService {
     }
 
     private void onNotificationSettingsChanged(boolean areNotificationDotsEnabled) {
+        Log.w(TAG, "onNotificationSettingsChanged..........");
         if (!areNotificationDotsEnabled && sIsConnected) {
             requestUnbind();
         }
     }
 
     private void onNotificationFullRefresh() {
+        Log.w(TAG, "onNotificationFullRefresh..........");
         mWorkerHandler.obtainMessage(MSG_NOTIFICATION_FULL_REFRESH).sendToTarget();
     }
 
@@ -237,6 +243,7 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(final StatusBarNotification sbn) {
+        Log.w(TAG, "onNotificationPosted..........");
         if (sbn != null) {
             mWorkerHandler.obtainMessage(MSG_NOTIFICATION_POSTED, sbn).sendToTarget();
         }
@@ -244,6 +251,7 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public void onNotificationRemoved(final StatusBarNotification sbn) {
+        Log.w(TAG, "onNotificationRemoved..........");
         if (sbn != null) {
             mWorkerHandler.obtainMessage(MSG_NOTIFICATION_REMOVED, sbn).sendToTarget();
         }
@@ -256,6 +264,7 @@ public class NotificationListener extends NotificationListenerService {
 
     @WorkerThread
     private void updateGroupKeyIfNecessary(StatusBarNotification sbn) {
+        Log.w(TAG, "updateGroupKeyIfNecessary..........");
         String childKey = sbn.getKey();
         String oldGroupKey = mNotificationGroupKeyMap.get(childKey);
         String newGroupKey = sbn.getGroupKey();
@@ -294,6 +303,7 @@ public class NotificationListener extends NotificationListenerService {
      */
     @WorkerThread
     private boolean notificationIsValidForUI(StatusBarNotification sbn) {
+        Log.w(TAG, "notificationIsValidForUI..........");
         Notification notification = sbn.getNotification();
         updateGroupKeyIfNecessary(sbn);
 

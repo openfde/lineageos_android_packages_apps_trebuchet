@@ -102,6 +102,8 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import android.view.Gravity;
+import android.view.WindowManager;
+
 
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
@@ -130,6 +132,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private static final int[] STATE_PRESSED = new int[]{android.R.attr.state_pressed};
 
     private float mScaleForReorderBounce = 1f;
+
+    private WindowManager windowManager;
 
     private IntArray mBreakPointsIntArray;
     private CharSequence mLastOriginalText;
@@ -486,7 +490,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
             iconDrawable = new FastBitmapDrawable(bitmap);
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.icon_linux);
+            bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.bg_linux);
             String appTitle = info.title.toString();
             // if(info.appTitle  != null){
             //     appTitle = info.appTitle.toString();
@@ -531,7 +535,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             b2  = FileUtils.scaleBitmap(b2,36,36);
             if(bitmap != null ){
                 bitmap  = FileUtils.scaleBitmap(bitmap,64,64);
-                Bitmap b = FileUtils.overlayBitmaps(bitmap,b2);
+                Bitmap b = FileUtils.overlayBitmaps(bitmap,b2,32,36);
                 iconDrawable = new FastBitmapDrawable(b);
             }else{
                 bitmap  = FileUtils.vectorToBitmap(getContext(), R.mipmap.bg_linux);
@@ -1384,6 +1388,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
      * Starts a long press action and returns the corresponding pre-drag condition
      */
     public PreDragCondition startLongPressAction() {
+        windowManager = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+
         PopupContainerWithArrow popup = PopupContainerWithArrow.showForIcon(this);
         return popup != null ? popup.createPreDragCondition(true) : null;
     }

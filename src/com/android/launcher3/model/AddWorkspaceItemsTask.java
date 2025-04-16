@@ -202,6 +202,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
                 // Save the WorkspaceItemInfo for binding in the workspace
                 addedItemsFinal.add(itemInfo);
+                FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
                 FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);
                 // log bitmap and label
                 FileLog.d(LOG, "Adding item info to workspace: " + itemInfo);

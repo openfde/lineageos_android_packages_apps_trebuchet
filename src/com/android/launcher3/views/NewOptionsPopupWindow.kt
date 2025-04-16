@@ -156,6 +156,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             this,
             launcher
         )
+        // popupChildWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
 
         if (v != null && !launcher.isDestroyed && !launcher.isFinishing) {
             popupChildWindow?.elevation = 6f;

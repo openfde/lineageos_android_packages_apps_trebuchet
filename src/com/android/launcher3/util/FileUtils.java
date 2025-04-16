@@ -70,7 +70,12 @@ import com.android.launcher3.svg.SVG;
 import android.webkit.MimeTypeMap;
 import com.android.launcher3.model.ModelDbController;
 import android.app.ActivityManager;
-
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
+import android.os.UserHandle;
+import android.os.UserManager;
+import com.android.launcher3.R;
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -379,6 +384,122 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
         return null;  
     }
+
+    public static void createAllAndroidIconToLinux(Context context, String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        String rootPath = "/volumes" + "/" + getLinuxUUID() + getLinuxHomeDir() + "/.local/share/icons/";
+
+
+        if ("".equals(packageName)) {
+            List<ApplicationInfo> apps = packageManager.getInstalledApplications(0);
+            apps.addAll(getAllApp(context));
+            for (ApplicationInfo appInfo : apps) {
+                try {
+                    // if(appInfo.name !=null){
+                    Drawable icon = packageManager.getApplicationIcon(appInfo);
+                    String appName = packageManager.getApplicationLabel(appInfo).toString();
+                    String md5 = appInfo.packageName;//getMD5(appInfo.packageName);
+
+                    String path = rootPath + md5 + ".png";
+                    Log.i("bella", "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packName: " + appInfo.packageName);
+                    File file = new File(path);
+                    if (!file.exists() && !path.contains(" ")) {
+                        drawableToPng(context, icon, path);
+                    }
+                    // }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            try {
+                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+                Drawable icon = packageManager.getApplicationIcon(appInfo);
+                String appName = packageManager.getApplicationLabel(appInfo).toString();
+                String md5 = appInfo.packageName;// getMD5(appInfo.packageName);
+
+                String path = rootPath + md5 + ".png";
+                Log.i("bella", "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packageName: " + packageName + ",appName: " + appName);
+                File file = new File(path);
+                if (!file.exists() && !path.contains(" ")) {
+                    drawableToPng(context, icon, path);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void drawableToPng(Context context, Drawable drawable, String filePath) {
+        Bitmap bitmapT = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+
+        Bitmap bitmap;
+        if (drawable instanceof AdaptiveIconDrawable) {
+            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
+            bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
+            bitmapT = scaleBitmap(bitmapT, 64, 64);
+            Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
+            b2 = scaleBitmap(b2, 36, 36);
+            bitmap = overlayBitmaps(bitmapT,b2);
+        } else {
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                bitmapT = bitmapDrawable.getBitmap();
+                bitmapT = scaleBitmap(bitmapT, 64, 64);
+                Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
+                b2 = scaleBitmap(b2, 36, 36);
+                bitmap = overlayBitmaps(bitmapT,b2);
+            } else {
+                bitmap = bitmapT;
+            }
+
+        }
+        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        // 保存Bitmap到PNG文件
+        File file = new File(filePath);
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private static List<ApplicationInfo> getAllApp(Context context) {
+        LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        List<UserHandle> userHandles = userManager.getUserProfiles();
+        List<LauncherActivityInfo> list = new ArrayList<>();
+        for (UserHandle userHandle : userHandles) {
+            list.addAll(launcherApps.getActivityList(null, userHandle));
+        }
+
+        PackageManager packageManager = context.getPackageManager();
+        List<ApplicationInfo> listApps = new ArrayList<>();
+        Log.i("bella", "getAllApp list  size:   " + list.size());
+        for (LauncherActivityInfo li : list) {
+            String appName = packageManager.getApplicationLabel(li.getApplicationInfo()).toString();
+            Drawable icon = packageManager.getApplicationIcon(li.getApplicationInfo());
+            String packageName = li.getApplicationInfo().packageName;
+            listApps.add(li.getApplicationInfo());
+        }
+        return listApps;
+    }
    
     public static void createLinuxDesktopFile(String title ,String packageName){
         createDesktopDir(PATH_ID_DESKTOP);
@@ -394,7 +515,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             String pathDesktop = documentId+""+ packageName+"_fde.desktop";
             File file = new File(pathDesktop);
             if(file.exists()){
-                Log.i(TAG,"bella...pathDesktop is exists :  "+pathDesktop);
+                Log.i(TAG,"pathDesktop is exists :  "+pathDesktop);
                 return ;
             }
             Path desktopFilePath = Paths.get(pathDesktop);
@@ -403,10 +524,10 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             File filePic = new File(picPath);
             String homeDir = getLinuxHomeDir();
             String linuxPath = homeDir+"/.local/share/icons/"+packageName+".png";
-            Log.i(TAG,"bella...homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
+            Log.i(TAG,"homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
             File linuxPic = new File(linuxPath);
             if(!linuxPic.exists()){
-                Log.i(TAG,"bella...insert............." +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
+                Log.i(TAG,"insert............." +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
             }else{
                 //if pic exists ,return 
             }    
@@ -586,6 +707,34 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
     }
 
+    public static Bitmap adaptiveIconToBitmap(AdaptiveIconDrawable adaptiveIconDrawable) {
+        int width = adaptiveIconDrawable.getIntrinsicWidth();
+        int height = adaptiveIconDrawable.getIntrinsicHeight();
+
+        // 创建一个与 AdaptiveIcon 大小相同的 Bitmap
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        // 获取前景和背景
+        Drawable background = adaptiveIconDrawable.getBackground();
+        Drawable foreground = adaptiveIconDrawable.getForeground();
+
+        // 绘制背景和前景
+        if (background != null) {
+            background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            background.draw(canvas);
+        } else {
+            Log.i("bella", "createAllAndroidIconToLinux background is null ...  ");
+        }
+        if (foreground != null) {
+            foreground.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            foreground.draw(canvas);
+        } else {
+            Log.i("bella", "createAllAndroidIconToLinux  background is null ....  ");
+        }
+
+        return bitmap;
+    }
 
     public static String findLinuxIconPath(String fileName){
         String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+fileName ;
@@ -761,7 +910,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
       return null ;
     }
 
-    public static  Bitmap overlayBitmaps(Bitmap bitmap1, Bitmap bitmap2) {
+    public static  Bitmap overlayBitmaps(Bitmap bitmap1, Bitmap bitmap2,float left,float top) {
        try{
             // 创建一个与第一个 Bitmap 相同大小的空白 Bitmap
             Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
@@ -769,13 +918,25 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             Canvas canvas = new Canvas(overlayBitmap);
             canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
             // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
-            canvas.drawBitmap(bitmap2, 32,36, null);  // 将 bitmap2 绘制到 canvas 上
+            canvas.drawBitmap(bitmap2, left,top, null);  // 将 bitmap2 绘制到 canvas 上
             // 将叠加后的 Bitmap 设置到 ImageView
             return overlayBitmap ;
        }catch(Exception e){
             e.printStackTrace();
        }
        return null ;
+    }
+
+    public static Bitmap overlayBitmaps(Bitmap bitmap1, Bitmap bitmap2 ) {
+        // 创建一个与第一个 Bitmap 相同大小的空白 Bitmap
+        Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth()+bitmap2.getWidth(), bitmap1.getHeight()+bitmap2.getHeight(), bitmap1.getConfig());
+        // 创建 Canvas，将第一个 Bitmap 作为底图
+        Canvas canvas = new Canvas(overlayBitmap);
+        canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
+        // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
+        canvas.drawBitmap(bitmap2, 48,42, null);  // 将 bitmap2 绘制到 canvas 上
+        // 将叠加后的 Bitmap 设置到 ImageView
+        return overlayBitmap;
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {

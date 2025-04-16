@@ -2359,7 +2359,8 @@ public class Launcher extends StatefulActivity<LauncherState>
                                 // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
                                 packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                             }
-                            gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
+                            FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
+                            //gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
                         }
                     }
                 }catch(Exception e){
