@@ -394,7 +394,7 @@ public class ItemClickHandler {
         Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
         String name = map.get("name").toString();
         String exec = map.get("exec").toString();
-        launcher.selectOpenType(FileUtils.OPEN_LINUX_APP,name+"###"+exec+"###type###"+item.title.toString());
+        launcher.selectOpenType(name,exec,item.title.toString());
    }
 
     public static void copyFiletoClipboard(Launcher launcher,ItemInfo item){

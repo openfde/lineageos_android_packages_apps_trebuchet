@@ -321,6 +321,7 @@ import android.widget.PopupWindow;
 import android.view.Gravity;
 import android.widget.Toast;
 import android.graphics.Point;
+import android.app.ActivityManager;
 /**
  * Default launcher application.
  */
@@ -3192,7 +3193,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
             return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
         }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-            return Stream.of(APP_OPEN,APP_REMOVE,APP_OPEN_TYPE);
+            return Stream.of(APP_OPEN,APP_REMOVE);
         }else{
             return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
         }
@@ -3317,7 +3318,12 @@ public class Launcher extends StatefulActivity<LauncherState>
                                     //bindWorkspace();
                                     getModel().forceReload();
                                 }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
-                                    refreshDesktopFiles(Launcher.this);
+                                    if(params !=null && params.endsWith(".desktop")){
+                                        refreshLinuxApps(Launcher.this);
+                                    }else{
+                                        refreshDesktopFiles(Launcher.this);
+                                    }
+                                   
                                     // getModel().refreshDeskFileList(Launcher.this);
                                 } 
                             }
@@ -3342,8 +3348,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             @Override
             public void run() {
                 try{
-                    boolean isActivityRunning = FileUtils.isActivityRunning(Launcher.this,"com.android.documentsui","com.android.documentsui.ui.OpenLinuxAppActivity");
-                    Log.i(TAG, "bellaLauncher gotoDocApp  method: " + method + ", title "+title + ",isActivityRunning "+isActivityRunning);
+                    // boolean isActivityRunning = FileUtils.isActivityRunning(Launcher.this,"com.android.documentsui","com.android.documentsui.ui.OpenLinuxAppActivity");
+                    // Log.i(TAG, "bellaLauncher gotoDocApp  method: " + method + ", title "+title + ",isActivityRunning "+isActivityRunning);
                     idocAidl.basicIpcMethon(method,title);
                 }catch(Exception e){
                     e.printStackTrace();
@@ -3440,8 +3446,25 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
     }
 
-    public void selectOpenType(String method,String title){
-        gotoDocApp(method,title);
+    public void selectOpenType(String name,String exec,String title){
+       // gotoDocApp(method,title);
+
+        String fileName =  name+".desktop";
+        String path = "content://com.android.externalstorage.documents/document/primary:Desktop%2f" + fileName;
+        Uri uri = Uri.parse(path);
+        Intent shareIntent = new Intent(Intent.ACTION_VIEW);
+        shareIntent.setDataAndType(uri, "application/vnd.desktop");
+        shareIntent.putExtra("fromOther", "Launcher");
+        shareIntent.putExtra("vnc_activity_name", name);
+        shareIntent.putExtra("App", name);
+        shareIntent.putExtra("openParams", name+"###"+exec+"###type###"+title);
+        shareIntent.putExtra("docTitle", fileName);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_SINGLE_TOP;
+        flags |= Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+        flags |= Intent.FLAG_ACTIVITY_NEW_TASK;
+        shareIntent.setFlags(flags);
+        startActivity(shareIntent);
     }
 
     public boolean isShowPasteDlg(){
@@ -3561,7 +3584,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     //默认未添加该问题到DB，如果查询到则不执行插入操作
                     boolean found = false ;
                     if(listTexts != null){
-                        found = listTexts.stream().anyMatch(item -> f.getName().contains(item.get("title").toString()));
+                        found = listTexts.stream().anyMatch(item -> f.getName().equals(item.get("title").toString()));
                         Log.d(TAG, "refreshDesktopFiles: fname: "+f.getName() + ",found "+found  + ",listTexts size "+listTexts.size());
                     } 
                     
@@ -3762,7 +3785,14 @@ public class Launcher extends StatefulActivity<LauncherState>
             Log.d(TAG, "result  "+result );
             executorService.shutdown();
             if(1 == result){
-                android.os.Process.killProcess(android.os.Process.myPid());
+                try{
+                    ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                    List<ActivityManager.AppTask> tasks = activityManager.getAppTasks();
+                    tasks.get(0).finishAndRemoveTask();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                // android.os.Process.killProcess(android.os.Process.myPid());
                 // Intent intent = getIntent();
                 // finish();
                 // handler.postDelayed(new Runnable() {

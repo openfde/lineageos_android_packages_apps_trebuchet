@@ -68,7 +68,11 @@ public class NetUtils {
                 map.put("Path",item.getString("Path"));
                 map.put("IconPath",item.getString("IconPath"));
                 map.put("Name",item.getString("Name"));
-                map.put("ZhName",item.getString("ZhName"));
+                String zName = item.getString("ZhName") ;
+                if(zName == null || "".equals(zName)){
+                    zName = item.getString("Name");
+                }
+                map.put("ZhName",zName);
                 String fileName = item.getString("FileName");
                 int lastIndex = fileName.lastIndexOf('/'); 
                 if (lastIndex != -1) {
