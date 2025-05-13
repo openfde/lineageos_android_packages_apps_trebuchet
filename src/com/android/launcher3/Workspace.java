@@ -336,14 +336,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         Rect padding = grid.workspacePadding;
         //set horizental padding
-        int padTop = 0;
-        try{
-            padTop = getResources().getDimensionPixelSize(getResources().getIdentifier("status_bar_height","dimen","android"));
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        
-        setPadding(30, padding.top + padTop, 30, padding.bottom);
+        setPadding(30, padding.top, 30, padding.bottom);
         mInsets.set(insets);
 
         if (mWorkspaceFadeInAdjacentScreens) {
