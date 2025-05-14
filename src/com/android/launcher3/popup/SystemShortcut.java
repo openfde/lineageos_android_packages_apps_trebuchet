@@ -319,12 +319,18 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
                     Launcher launcher = Launcher.getLauncher(view.getContext());
-                    // if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY ){
-                    //     launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
-                    // }else if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
-                    //     launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
-                    // }
-                    launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    }else {
+                        String packageName = "";
+                        if(mItemInfo.getTargetComponent() != null && mItemInfo.getTargetComponent().getPackageName() !=null){
+                            packageName = mItemInfo.getTargetComponent().getPackageName();    
+                        }else{
+                            packageName = FileUtils.getPackageNameByAppName(view.getContext(),mItemInfo.title.toString());
+                        }
+                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+packageName+"_fde.desktop");
+                    }
+                    
                     dismissTaskMenuView(mTarget);
                     launcher.removeItem(mOriginalView, mItemInfo,true);
                 }

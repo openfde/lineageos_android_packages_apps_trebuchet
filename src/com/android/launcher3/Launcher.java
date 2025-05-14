@@ -1671,6 +1671,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         boolean isActionMain = Intent.ACTION_MAIN.equals(intent.getAction());
         boolean internalStateHandled = ACTIVITY_TRACKER.handleNewIntent(this);
 
+        Log.w(TAG,"onNewIntent getAction "+intent.getAction());
         if (isActionMain) {
             if (!internalStateHandled) {
                 // In all these cases, only animate if we're already on home
@@ -1701,7 +1702,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         } else if (Intent.ACTION_ALL_APPS.equals(intent.getAction())) {
             showAllAppsFromIntent(alreadyOnHome);
         } else if (INTENT_ACTION_ALL_APPS_TOGGLE.equals(intent.getAction())) {
-            toggleAllAppsFromIntent(alreadyOnHome);
+            // toggleAllAppsFromIntent(alreadyOnHome);
         } else if (Intent.ACTION_SHOW_WORK_APPS.equals(intent.getAction())) {
             showAllAppsWorkTabFromIntent(alreadyOnHome);
         }
@@ -3318,12 +3319,13 @@ public class Launcher extends StatefulActivity<LauncherState>
                                     //bindWorkspace();
                                     getModel().forceReload();
                                 }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
-                                    if(params !=null && params.endsWith(".desktop")){
+                                    if(params == null || "".equals(params) || params.endsWith("_fde.desktop")){
+                                       //not refresh     
+                                    }else if(params.endsWith(".desktop")){
                                         refreshLinuxApps(Launcher.this);
                                     }else{
                                         refreshDesktopFiles(Launcher.this);
                                     }
-                                   
                                     // getModel().refreshDeskFileList(Launcher.this);
                                 } 
                             }
@@ -3777,7 +3779,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         // android.os.Process.killProcess(android.os.Process.myPid());
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-            // getModel().rearray(Launcher.this);
             return addDesktopFiles(0,null);
         }, executorService);
 
@@ -3792,6 +3793,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 }catch(Exception e){
                     e.printStackTrace();
                 }
+                // getModel().forceReload();
                 // android.os.Process.killProcess(android.os.Process.myPid());
                 // Intent intent = getIntent();
                 // finish();
@@ -3831,8 +3833,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         int xindex = item.cellX;
         int yindex = item.cellY ;
         CellLayout cl = mWorkspace.getScreenWithId(item.screenId);
+        InvariantDeviceProfile idp = LauncherAppState.getIDP(Launcher.this);
+
         if (cl != null && cl.isOccupied(xindex, yindex)) {
-            if(yindex >= 8 ){
+            if(yindex >= idp.numRows ){
                 yindex = 0;
                 xindex++;
             }else{

@@ -42,6 +42,7 @@ class ModelLauncherCallbacks(private var taskExecutor: Consumer<ModelUpdateTask>
     LauncherApps.Callback() {
 
     override fun onPackageAdded(packageName: String, user: UserHandle) {
+        FileLog.d(TAG, "package added received $packageName")
         taskExecutor.accept(PackageUpdatedTask(OP_ADD, user, packageName))
     }
 
