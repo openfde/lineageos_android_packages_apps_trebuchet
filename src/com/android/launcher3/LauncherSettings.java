@@ -65,6 +65,12 @@ public class LauncherSettings {
          */
         public static final String TITLE = "title";
 
+        public static final String FILE_NAME = "fileName";
+
+        public static final String PACKAGE_NAME = "packageName";
+
+        // public static final String ICON_PACKAGE = "iconPackage";
+
         /**
          * The Intent URL of the gesture, describing what it points to. This
          * value is given to {@link android.content.Intent#parseUri(String, int)} to create
@@ -143,6 +149,8 @@ public class LauncherSettings {
         public static final int ITEM_TYPE_DOCUMENT = 19;
 
         public static final int ITEM_TYPE_LINUX_APP = 20;
+
+        public static final int ITEM_TYPE_ANDROID_APP = 21;//android desktop生成的图标
 
         /**
          * The custom icon bitmap.

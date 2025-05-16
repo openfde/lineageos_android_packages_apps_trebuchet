@@ -30,6 +30,7 @@ import androidx.annotation.Nullable;
 
 import com.android.launcher3.LauncherModel;
 import com.android.launcher3.LauncherModel.CallbackTask;
+import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.LauncherSettings.Favorites;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.celllayout.CellPosMapper;
@@ -247,6 +248,7 @@ public class ModelWriter {
             do {
                 int _id = cursor.getInt(cursor.getColumnIndex("_id"));
                 String title = cursor.getString(cursor.getColumnIndex("title"));
+                String appWidgetProvider = cursor.getString(cursor.getColumnIndex("appWidgetProvider"));
                 int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
                 int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
                 int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
@@ -254,6 +256,7 @@ public class ModelWriter {
                 mp.put("_id",_id);
                 mp.put("title",title);
                 mp.put("itemType",itemType);
+                mp.put("appWidgetProvider",appWidgetProvider);
                 mp.put("cellX",cellX);
                 mp.put("cellY",cellY);
                 list.add(mp);
@@ -269,16 +272,16 @@ public class ModelWriter {
         return list ;
     }
 
-    public void insertItemToDatabase( ItemInfo item, int container, int screenId, int cellX, int cellY) {
-        Log.d(TAG, "addDesktopFiles: addItemToDatabase 3333 "+item);
-        final ContentWriter writer = new ContentWriter(mContext);
-        item.onAddToDatabase(writer);
-        writer.put(Favorites._ID, item.id);
+    // public void insertItemToDatabase( ItemInfo item, int container, int screenId, int cellX, int cellY) {
+    //     Log.d(TAG, "addDesktopFiles: addItemToDatabase 3333 "+item);
+    //     final ContentWriter writer = new ContentWriter(mContext);
+    //     item.onAddToDatabase(writer);
+    //     writer.put(Favorites._ID, item.id);
 
-        Log.d(TAG, "addDesktopFiles: addItemToDatabase 4444 "+item);
-        mModel.getModelDbController().insert(Favorites.TABLE_NAME, writer.getValues(mContext));
+    //     Log.d(TAG, "addDesktopFiles: addItemToDatabase 4444 "+item);
+    //     mModel.getModelDbController().insert(Favorites.TABLE_NAME, writer.getValues(mContext));
 
-    }
+    // }
 
     /**
      * Add an item to the database in a specified container. Sets the container, screen, cellX and
@@ -286,6 +289,20 @@ public class ModelWriter {
      */
     public void addItemToDatabase(final ItemInfo item,
             int container, int screenId, int cellX, int cellY) {
+        String packageName = item.getTargetComponent() != null
+            ? item.getTargetComponent().getPackageName() : null;
+        Log.w(TAG, "Adding item info to workspace addItemToDatabase packageName : "+packageName + ",item "+item);   
+        // if("com.android.launcher3".equals(packageName) || "com.termux.x11".equals(packageName) || "com.android.documentsui".equals(packageName)){
+        //     item.appWidgetProvider = "";
+        // } else{
+        //     String pathDesktop = packageName ;//+"_fde.desktop";
+        //     item.appWidgetProvider = pathDesktop ;
+        // }
+
+        // if(item.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT && item.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && item.itemType != LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+        //     return ;
+        // }
+    
         updateItemInfoProps(item, container, screenId, cellX, cellY);
         Log.d(TAG, "addDesktopFiles: addItemToDatabase 111 "+item);
 
@@ -539,6 +556,7 @@ public class ModelWriter {
                         case Favorites.ITEM_TYPE_DIRECTORY:
                         case Favorites.ITEM_TYPE_DOCUMENT:
                         case Favorites.ITEM_TYPE_LINUX_APP:
+                        case Favorites.ITEM_TYPE_ANDROID_APP:
                         case Favorites.ITEM_TYPE_DEEP_SHORTCUT:
                         case Favorites.ITEM_TYPE_FOLDER:
                         case Favorites.ITEM_TYPE_APP_PAIR:

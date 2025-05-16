@@ -489,6 +489,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             Log.i(TAG,"bellaLauncher applyIconAndLabel  fileName: "+fileName + " ,fileType  "+fileType);
             bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
             iconDrawable = new FastBitmapDrawable(bitmap);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
+
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.bg_linux);
             String appTitle = info.title.toString();

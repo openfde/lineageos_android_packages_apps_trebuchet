@@ -57,6 +57,7 @@ class ItemInflater<T>(
             Favorites.ITEM_TYPE_APPLICATION,
             Favorites.ITEM_TYPE_DOCUMENT,
             Favorites.ITEM_TYPE_DIRECTORY,
+            Favorites.ITEM_TYPE_ANDROID_APP,
             Favorites.ITEM_TYPE_LINUX_APP,
             Favorites.ITEM_TYPE_DEEP_SHORTCUT,
             Favorites.ITEM_TYPE_SEARCH_ACTION -> {

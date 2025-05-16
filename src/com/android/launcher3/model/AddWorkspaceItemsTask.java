@@ -195,13 +195,15 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                                 ((WorkspaceItemInfo) itemInfo).usingLowResIcon());
                     }
                 }
+                itemInfo.appWidgetProvider  = packageName ;
                 // Add the shortcut to the db
-                getModelWriter().addItemToDatabase(itemInfo,
-                        LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,
-                        coords[1], coords[2]);
+                // getModelWriter().addItemToDatabase(itemInfo,
+                //         LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,
+                //         coords[1], coords[2]);
 
                 // Save the WorkspaceItemInfo for binding in the workspace
                 addedItemsFinal.add(itemInfo);
+
                 FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
                 FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);
                 // log bitmap and label

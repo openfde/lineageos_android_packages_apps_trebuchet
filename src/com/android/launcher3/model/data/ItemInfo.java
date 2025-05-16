@@ -159,6 +159,8 @@ public class ItemInfo {
     @Nullable
     public CharSequence title;
 
+    public String appWidgetProvider;
+
     /**
      * Optionally set: The appTitle might e.g. be different if {@code title} is used to
      * display progress (e.g. Downloading..).
@@ -202,6 +204,7 @@ public class ItemInfo {
         rank = info.rank;
         screenId = info.screenId;
         itemType = info.itemType;
+        appWidgetProvider = info.appWidgetProvider;
         animationType = info.animationType;
         container = info.container;
         user = info.user;
@@ -255,6 +258,7 @@ public class ItemInfo {
                 .put(LauncherSettings.Favorites.CELLY, cellY)
                 .put(LauncherSettings.Favorites.SPANX, spanX)
                 .put(LauncherSettings.Favorites.SPANY, spanY)
+                .put(LauncherSettings.Favorites.APPWIDGET_PROVIDER, appWidgetProvider)
                 .put(LauncherSettings.Favorites.RANK, rank);
     }
 
@@ -300,6 +304,7 @@ public class ItemInfo {
                 + " rank=" + rank
                 + " user=" + user
                 + " appTitle=" + appTitle
+                + " appWidgetProvider=" + appWidgetProvider
                 + " title=" + title;
                // + " targetComponent=" + getTargetComponent()
                // + " container=" + getContainerInfo();

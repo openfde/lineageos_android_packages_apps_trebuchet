@@ -319,7 +319,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
                     Launcher launcher = Launcher.getLauncher(view.getContext());
-                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
                         launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
                     }else {
                         String packageName = "";

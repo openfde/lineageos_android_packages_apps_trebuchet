@@ -93,6 +93,8 @@ public class FileUtils {
 
     public static final String DELETE_FILE = "DELETE_FILE";
 
+    public static final String REMOVE_APP = "REMOVE_APP";
+
     public static final String NEW_DIR = "NEW_DIR";
 
     public static final String NEW_FILE = "NEW_FILE";
@@ -505,12 +507,12 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         createDesktopDir(PATH_ID_DESKTOP);
         try{    
             Log.i(TAG,"createLinuxDesktopFile title:  "+title + ",packageName: "+packageName);
-            String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
-            File ff = new File(documentId);
-            if(!ff.exists()){
-                documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
-            }
-
+            // String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
+            // File ff = new File(documentId);
+            // if(!ff.exists()){
+            //     documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
+            // }
+            String documentId = getAllDesktopPath();
             //String md5 = getMD5(packageName);
             String pathDesktop = documentId+""+ packageName+"_fde.desktop";
             File file = new File(pathDesktop);

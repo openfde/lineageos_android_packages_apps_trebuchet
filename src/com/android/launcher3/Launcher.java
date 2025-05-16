@@ -294,6 +294,7 @@ import android.content.ComponentName;
 import com.android.launcher3.util.FileUtils;
 import com.android.launcher3.util.DbUtils;
 import com.android.launcher3.util.NetUtils;
+import com.android.launcher3.util.StringUtils;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.io.File;
@@ -322,6 +323,9 @@ import android.view.Gravity;
 import android.widget.Toast;
 import android.graphics.Point;
 import android.app.ActivityManager;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
+
 /**
  * Default launcher application.
  */
@@ -1504,7 +1508,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 mWorkspace.onNoCellFound(layout, info, /* logInstanceId= */ null);
                 return;
             }
-
+  
             getModelWriter().addItemToDatabase(info, container, screenId, cellXY[0], cellXY[1]);
             mWorkspace.addInScreen(view, info);
         } else {
@@ -3193,7 +3197,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     public Stream<SystemShortcut.Factory> getSupportedShortcuts(int itemType) {
         if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
             return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
-        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP || itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP ){
             return Stream.of(APP_OPEN,APP_REMOVE);
         }else{
             return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
@@ -3319,9 +3323,26 @@ public class Launcher extends StatefulActivity<LauncherState>
                                     //bindWorkspace();
                                     getModel().forceReload();
                                 }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
-                                    if(params == null || "".equals(params) || params.endsWith("_fde.desktop")){
+                                    if(params == null || "".equals(params) ){
                                        //not refresh     
+                                       // }else if(params.endsWith("_fde.desktop")){
                                     }else if(params.endsWith(".desktop")){
+                                        try{
+                                            String[] arrFileName = params.split("###");
+                                            if("delete".equals(arrFileName[0])){
+                                                String fileName = Paths.get(arrFileName[1]).getFileName().toString();
+                                                Log.d(TAG, "delete c: arrFileName[1]: "+arrFileName[1] + ",fileName "+fileName);
+                                                if(fileName.endsWith("_fde.desktop")){
+                                                    // delete by fileName
+                                                    DbUtils.deleteByFileNameFromDatabase(getModel().getModelDbController(),fileName);
+                                                }else{
+                                                    //delete by title
+                                                    DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fileName); 
+                                                }
+                                            }
+                                        }catch(Exception e){
+                                            e.printStackTrace();
+                                        }
                                         refreshLinuxApps(Launcher.this);
                                     }else{
                                         refreshDesktopFiles(Launcher.this);
@@ -3551,37 +3572,31 @@ public class Launcher extends StatefulActivity<LauncherState>
             if(files !=null){
                 Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
                 int index = pos;
-                // int maxId = 1;//DbUtils.queryMaxIdFromDatabase(Launcher.this);
-                // if(point == null){
-                //     point = FileUtils.getMaxPoint(getModel().getModelDbController());
-                // }
-                // int x = point.x ;
-                // int y = point.y;
-                // Log.w(TAG, "refreshDesktopFiles: getMaxPoint: "+point.x + ",y: "+point.y + ",pos "+pos);
-                // int numRows  =  FileUtils.getScreenRows(Launcher.this);
+       
                 for(File f : files){
                     String fTitle = f.getName().toLowerCase() ;
+                    //如果被android应用被卸载了则删除desktop文件,但新版本去掉此逻辑
                     if(fTitle.contains(".desktop")) {
-                        Log.d(TAG, "refreshDesktopFiles: not show this file  ,fname: "+f.getName() );
-                        if(fTitle.contains("_fde.desktop")){
-                            //如果是android应用
-                          try{
-                            Map<String,Object> mapFiles =  FileUtils.getLinuxContentString(f.getName());
-                            Log.d(TAG, "refreshDesktopFiles: mapFiles: "+mapFiles );
-                            String packageName = mapFiles.get("PackageName").toString();
-                            if(packageName != null){
-                                boolean isAppInstalled  = FileUtils.isAppInstalled(Launcher.this,packageName);
-                                if(!isAppInstalled){
-                                    gotoDocApp(FileUtils.DELETE_FILE, FileUtils.PATH_ID_DESKTOP+""+packageName+"_fde.desktop");
-                                }
-                            }
-                          }catch(Exception e){
-                            e.printStackTrace();
-                          }
-                        }else{
-                            //则不管   
-                        }
-                        continue;
+                    //     Log.d(TAG, "refreshDesktopFiles: not show this file  ,fname: "+f.getName() );
+                    //     if(fTitle.contains("_fde.desktop")){
+                    //         //如果是android应用
+                    //       try{
+                    //         Map<String,Object> mapFiles =  FileUtils.getLinuxContentString(f.getName());
+                    //         Log.d(TAG, "refreshDesktopFiles: mapFiles: "+mapFiles );
+                    //         String packageName = mapFiles.get("PackageName").toString();
+                    //         if(packageName != null){
+                    //             boolean isAppInstalled  = FileUtils.isAppInstalled(Launcher.this,packageName);
+                    //             if(!isAppInstalled){
+                    //                 gotoDocApp(FileUtils.DELETE_FILE, FileUtils.PATH_ID_DESKTOP+""+packageName+"_fde.desktop");
+                    //             }
+                    //         }
+                    //       }catch(Exception e){
+                    //         e.printStackTrace();
+                    //       }
+                    //     }else{
+                    //         //则不管   
+                    //     }
+                         continue;
                     }
                     //默认未添加该问题到DB，如果查询到则不执行插入操作
                     boolean found = false ;
@@ -3648,20 +3663,37 @@ public class Launcher extends StatefulActivity<LauncherState>
         executorService.shutdown();
     }
 
-    public int addLinuxApps(){
+    public synchronized int addLinuxApps(){
         try{
             List<Point> listIdle = FileUtils.getAllIdlePoints(Launcher.this,getModel().getModelDbController());
             Log.w(TAG, "refreshDesktopFiles-listIdle: "+listIdle);
 
             listDeskTopLinux = NetUtils.getLinuxDesktopApp();
-            List<Map<String,Object>>  listApps = DbUtils.queryDesktopLinuxAppInDatabase(getModel().getModelDbController());
+            //所有桌面Linux应用,android应用
+            List<Map<String,Object>>  listApps = DbUtils.queryLinuxAndAndroidAppInDatabase(getModel().getModelDbController());
             if(listApps !=null){
                 //if db exists but linux not  exists . delete db data.
                 for(Map<String,Object> mp : listApps){
                     String fName = mp.get("title").toString();
-                    boolean isExists = listDeskTopLinux.stream().anyMatch(item -> fName.contains(item.get("FileName").toString()));
-                    if(!isExists){
-                        DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName);   
+                    boolean isExists = false;
+                    if(fName.endsWith(".desktop")) {
+                        //如果是.desktop文件开头的则判断是否存在，不存在则直接删除记录
+                        isExists = listDeskTopLinux.stream().anyMatch(item -> fName.equals(item.get("FileName").toString()));
+                        if(!isExists){
+                             DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName); 
+                        }
+                    }else{
+                        // //如果是android应用生成的 则判断appWidgetProvider，不存在则删除记录
+                        if(mp.get("appWidgetProvider") !=null &&  !"".equals(mp.get("appWidgetProvider").toString())){
+                            String appWidgetProvider = mp.get("appWidgetProvider").toString();
+                            isExists = listDeskTopLinux.stream().anyMatch(item -> item.get("Path").toString().contains(appWidgetProvider));
+                            if(!isExists){
+                                DbUtils.deletePackageNameFromDatabase(getModel().getModelDbController(),appWidgetProvider); 
+                            }
+                        }else{
+                            //旧数据则更新appWidgetProvider
+                            // DbUtils.updatePakcageNameFromDatabase(getModel().getModelDbController(),fName,)
+                        }
                     }
                 }
             }
@@ -3669,42 +3701,73 @@ public class Launcher extends StatefulActivity<LauncherState>
             // int index = 1;//DbUtils.queryMaxIdFromDatabase(Launcher.this);
             countLinuxApp = 0 ;
             if(listDeskTopLinux !=null ){
-                // Point point = FileUtils.getMaxPoint(getModel().getModelDbController());
-                // int x = point.x ;
-                // int y = point.y;
-                // Log.w(TAG, "refreshDesktopFiles-addLinuxApps: getMaxPoint: "+point.x + ",y: "+point.y);
                 int numRows  =  FileUtils.getScreenRows(Launcher.this);
+                if(listApps != null && listDeskTopLinux !=null){
+                    Log.d(TAG, "refreshDesktopFiles-addLinuxApps: listApps "+listApps.toString() + ",listDeskTopLinux "+listDeskTopLinux.size());
+                }
+
                 for(Map<String,Object> mp : listDeskTopLinux){
+                    boolean IsAndroidApp = Boolean.valueOf(mp.get("IsAndroidApp").toString());
                     boolean found = false ;
-                    String Path = mp.get("Path").toString();
-                    String FileName = mp.get("FileName").toString();
+                    String execPath = mp.get("Path").toString();
+                    String fileName = mp.get("FileName").toString();//Paths.get(mp.get("FileName").toString()).getFileName().toString();
+
                     String IconPath = FileUtils.getLinuxPrefixPath() + mp.get("IconPath").toString();
-                    String desc = Path + "###"+IconPath ;
-                    if(listApps != null){
-                        found = listApps.stream().anyMatch(item -> FileName.contains(item.get("title").toString()));
-                        Log.d(TAG, "refreshDesktopFiles-addLinuxApps: FileName: "+FileName + ",found "+found  + ",listApps "+listApps.size());
-                    } 
+                    String desc = execPath + "###"+IconPath ;
+                    String packageName = getPackageName();
+                    
+                    if(IsAndroidApp){
+                        packageName = execPath.replaceAll("fde_launch ","");
+                        if(listApps != null){
+                            //1、Linux端拷贝的应用 title是带.desktop的
+                            found = listApps.stream().anyMatch(item -> fileName.equals(StringUtils.ToString(item.get("title"))));
+                            if(!found){
+                                //2、android端自己生成的title是应用名,则根据appWidgetProvider字段去匹配且itemType=0包名
+                                final String  fName = packageName;
+                                final String  fdeName = packageName+"_fde.desktop";
+                                Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName "+fileName +",fName "+fName );
+                                //1、刚生成的_fde.desktop  ,从Linux拷贝出来的desktop文件
+                                found = listApps.stream().anyMatch(item ->  !fdeName.equals(StringUtils.ToString(item.get("title"))) && fName.equals(StringUtils.ToString(item.get("appWidgetProvider"))) && StringUtils.ToInt(item.get("itemType"),-1) == 0);
+                            }
+                        } 
+                        Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found +",packageName: "+packageName );
+                    }else{
+                        if(listApps != null){
+                            found = listApps.stream().anyMatch(item -> fileName.equals(item.get("title").toString()));
+                            Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found );
+                        } 
+                    }
+                  
+                   
                     
                     if(!found){
                         WorkspaceItemInfo info = new WorkspaceItemInfo();
                         //Point point = FileUtils.findNextFreePoint(this);
                         info.mComponentName = new ComponentName("com.termux.x11","com.termux.x11.AppListActivity");;
-                        info.title = FileName;
+                        info.title = fileName;
                         info.container = -100;
                         info.screenId = 0;
                         Intent intent = new Intent();
-                        intent.putExtra("App", FileName);
-                        intent.putExtra("Path", Path);
-                        intent.setPackage("com.android.launcher3");
+                        intent.putExtra("App", fileName);
+                        intent.putExtra("Path", execPath);
+                        intent.putExtra("packageName", packageName);
+                        intent.setPackage(getPackageName());
                         info.intent = intent;
                         // int newY = y + index ;
                         // int sY = newY%numRows ;
                         // int sX = newY/numRows + point.x ;
-        
+                        if(IsAndroidApp){
+                            info.appWidgetProvider = packageName;
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP;
+                        }else{
+                            info.appWidgetProvider = "";
+                            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                        }
+                        
                         info.cellY = listIdle.get(countLinuxApp).y;
                         info.cellX = listIdle.get(countLinuxApp).x;
                         Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id);
-                        info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
+                     
                         // index++;
                         countLinuxApp++;
                         insertOrUpdateFavorites(info);
@@ -3888,7 +3951,22 @@ public class Launcher extends StatefulActivity<LauncherState>
         String method = event.getMethod();
         String message = event.getMessage() ;
         Log.i(TAG,"1 onMessageEvent message "+message + ",method "+method);
-        gotoDocApp(method,message);
+
+        if(FileUtils.REMOVE_APP.equals(method)){
+            //如果是卸载则删除所有
+            List<Map<String, Object>> result = listDeskTopLinux.stream()
+            .filter(map -> map.get("Path").toString().contains(message))
+            .collect(Collectors.toList());
+             result.forEach(
+                map ->{
+                    String fileName = map.get("FileName").toString();
+                    gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+fileName);
+                }
+            );
+            // 
+        }else{
+            gotoDocApp(method,message);
+        }
     }
     
 }

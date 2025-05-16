@@ -157,7 +157,10 @@ public class ModelDbController {
     @WorkerThread
     public int insert(String table, ContentValues initialValues) {
         createDbIfNotExists();
-
+        for (String key : initialValues.keySet()) {
+            Object value = initialValues.get(key);
+            Log.w(TAG,"addItemToDatabase Key: " + key + ", Value: " + value);
+        }
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         addModifiedTime(initialValues);
         int rowId = mOpenHelper.dbInsertAndCheck(db, table, initialValues);
@@ -189,7 +192,7 @@ public class ModelDbController {
     public int update(String table, ContentValues values,
             String selection, String[] selectionArgs) {
         createDbIfNotExists();
-
+        Log.w(TAG,"addItemToDatabase update selection :"+selection);
         addModifiedTime(values);
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int count = db.update(table, values, selection, selectionArgs);

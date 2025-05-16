@@ -85,7 +85,8 @@ import android.provider.DocumentsContract;
 import com.android.launcher3.util.FileUtils;
 import java.util.Map;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
-
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -437,12 +438,33 @@ public class ItemClickHandler {
             launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
             launcher.openFile(title);
             return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
+
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
             try{
-                Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
-                String name = map.get("name").toString();
-                String exec = map.get("exec").toString();
-                launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString());
+                String packageName = item.appWidgetProvider ;
+                if(packageName == null || "".equals(packageName)){
+                    Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+                    String name = map.get("name").toString();
+                    String exec = map.get("exec").toString();
+                    launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString());
+                }else{
+                    PackageManager packageManager = launcher.getPackageManager();
+                    intent = packageManager.getLaunchIntentForPackage(packageName);
+                    if (intent != null) {
+                        // 如果找到了启动 Intent，则启动应用
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        launcher.startActivity(intent);
+                    } else {
+                    // 如果没有找到启动 Intent，则提示用户
+                    // 可以选择跳转到应用商店
+                        Uri uri = Uri.parse("market://details?id=" + packageName);
+                        Intent marketIntent = new Intent(Intent.ACTION_VIEW, uri);
+                        marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        launcher.startActivity(marketIntent);
+                    }
+                }
+                
             }catch(Exception e){
                 e.printStackTrace();
             }

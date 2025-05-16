@@ -110,6 +110,7 @@ public class LoaderCursor extends CursorWrapper {
     public int id;
     public int container;
     public int itemType;
+    public String appWidgetProvider;
     public int restoreFlag;
 
     public LoaderCursor(Cursor cursor, LauncherAppState app, UserManagerState userManagerState,
@@ -159,6 +160,7 @@ public class LoaderCursor extends CursorWrapper {
             serialNumber = getInt(mProfileIdIndex);
             user = allUsers.get(serialNumber);
             restoreFlag = getInt(mRestoredIndex);
+            appWidgetProvider = getString(mAppWidgetProviderIndex);
         }
         return result;
     }
@@ -181,6 +183,7 @@ public class LoaderCursor extends CursorWrapper {
         // Non-app shortcuts are only supported for current user.
         info.user = user;
         info.itemType = itemType;
+        info.appWidgetProvider = appWidgetProvider;
         info.title = getTitle();
         // the fallback icon
         if (!loadIcon(info)) {
@@ -313,6 +316,7 @@ public class LoaderCursor extends CursorWrapper {
 
         info.contentDescription = mIconCache.getUserBadgedLabel(info.title, info.user);
         info.itemType = itemType;
+        info.appWidgetProvider = appWidgetProvider;
         info.status = restoreFlag;
         return info;
     }
