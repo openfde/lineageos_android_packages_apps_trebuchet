@@ -585,6 +585,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         mAllAppsController = new AllAppsTransitionController(this);
         mStateManager = new StateManager<>(this, NORMAL);
 
+        DbUtils.deleteAllAndroidAppFromDatabase(getModel().getModelDbController());
         setupViews();
         updateDisallowBack();
 
@@ -3665,6 +3666,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     public synchronized int addLinuxApps(){
         try{
+            
             List<Point> listIdle = FileUtils.getAllIdlePoints(Launcher.this,getModel().getModelDbController());
             Log.w(TAG, "refreshDesktopFiles-listIdle: "+listIdle);
 
@@ -3676,25 +3678,29 @@ public class Launcher extends StatefulActivity<LauncherState>
                 for(Map<String,Object> mp : listApps){
                     String fName = mp.get("title").toString();
                     boolean isExists = false;
-                    if(fName.endsWith(".desktop")) {
-                        //如果是.desktop文件开头的则判断是否存在，不存在则直接删除记录
-                        isExists = listDeskTopLinux.stream().anyMatch(item -> fName.equals(item.get("FileName").toString()));
-                        if(!isExists){
-                             DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName); 
-                        }
-                    }else{
-                        // //如果是android应用生成的 则判断appWidgetProvider，不存在则删除记录
-                        if(mp.get("appWidgetProvider") !=null &&  !"".equals(mp.get("appWidgetProvider").toString())){
-                            String appWidgetProvider = mp.get("appWidgetProvider").toString();
-                            isExists = listDeskTopLinux.stream().anyMatch(item -> item.get("Path").toString().contains(appWidgetProvider));
-                            if(!isExists){
-                                DbUtils.deletePackageNameFromDatabase(getModel().getModelDbController(),appWidgetProvider); 
-                            }
-                        }else{
-                            //旧数据则更新appWidgetProvider
-                            // DbUtils.updatePakcageNameFromDatabase(getModel().getModelDbController(),fName,)
-                        }
+                    isExists = listDeskTopLinux.stream().anyMatch(item -> fName.equals(item.get("FileName").toString()));
+                    if(!isExists){
+                        DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName); 
                     }
+                    // if(fName.endsWith(".desktop")) {
+                    //     //如果是.desktop文件开头的则判断是否存在，不存在则直接删除记录
+                    //     isExists = listDeskTopLinux.stream().anyMatch(item -> fName.equals(item.get("FileName").toString()));
+                    //     if(!isExists){
+                    //          DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName); 
+                    //     }
+                    // }else{
+                    //     // //如果是android应用生成的 则判断appWidgetProvider，不存在则删除记录
+                    //     if(mp.get("appWidgetProvider") !=null &&  !"".equals(mp.get("appWidgetProvider").toString())){
+                    //         String appWidgetProvider = mp.get("appWidgetProvider").toString();
+                    //         isExists = listDeskTopLinux.stream().anyMatch(item -> item.get("Path").toString().contains(appWidgetProvider));
+                    //         if(!isExists){
+                    //             DbUtils.deletePackageNameFromDatabase(getModel().getModelDbController(),appWidgetProvider); 
+                    //         }
+                    //     }else{
+                    //         //旧数据则更新appWidgetProvider
+                    //         // DbUtils.updatePakcageNameFromDatabase(getModel().getModelDbController(),fName,)
+                    //     }
+                    // }
                 }
             }
 
@@ -3721,14 +3727,14 @@ public class Launcher extends StatefulActivity<LauncherState>
                         if(listApps != null){
                             //1、Linux端拷贝的应用 title是带.desktop的
                             found = listApps.stream().anyMatch(item -> fileName.equals(StringUtils.ToString(item.get("title"))));
-                            if(!found){
-                                //2、android端自己生成的title是应用名,则根据appWidgetProvider字段去匹配且itemType=0包名
-                                final String  fName = packageName;
-                                final String  fdeName = packageName+"_fde.desktop";
-                                Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName "+fileName +",fName "+fName );
-                                //1、刚生成的_fde.desktop  ,从Linux拷贝出来的desktop文件
-                                found = listApps.stream().anyMatch(item ->  !fdeName.equals(StringUtils.ToString(item.get("title"))) && fName.equals(StringUtils.ToString(item.get("appWidgetProvider"))) && StringUtils.ToInt(item.get("itemType"),-1) == 0);
-                            }
+                            // if(!found){
+                            //     //2、android端自己生成的title是应用名,则根据appWidgetProvider字段去匹配且itemType=0包名
+                            //     final String  fName = packageName;
+                            //     final String  fdeName = packageName+"_fde.desktop";
+                            //     Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName "+fileName +",fName "+fName );
+                            //     //1、刚生成的_fde.desktop  ,从Linux拷贝出来的desktop文件
+                            //     found = listApps.stream().anyMatch(item ->  !fdeName.equals(StringUtils.ToString(item.get("title"))) && fName.equals(StringUtils.ToString(item.get("appWidgetProvider"))) && StringUtils.ToInt(item.get("itemType"),-1) == 0);
+                            // }
                         } 
                         Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found +",packageName: "+packageName );
                     }else{
@@ -3838,6 +3844,18 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
     }
 
+    public static String getTopActivity(Context context) {
+    ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+    if (am != null) {
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            ComponentName topActivity = tasks.get(0).topActivity;
+            return topActivity.getClassName();
+        }
+    }
+    return null;
+}
+
     public void refresh(){
         // android.os.Process.killProcess(android.os.Process.myPid());
         ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -3851,8 +3869,17 @@ public class Launcher extends StatefulActivity<LauncherState>
             if(1 == result){
                 try{
                     ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-                    List<ActivityManager.AppTask> tasks = activityManager.getAppTasks();
-                    tasks.get(0).finishAndRemoveTask();
+                     List<ActivityManager.RunningTaskInfo> ts = activityManager.getRunningTasks(1);
+                    if (!ts.isEmpty()) {
+                        ComponentName topActivity = ts.get(0).topActivity;
+                        String topActivityStr = topActivity.getClassName();
+                        if(topActivityStr.contains("com.android.launcher3")){
+                            List<ActivityManager.AppTask> tasks = activityManager.getAppTasks();
+                            tasks.get(0).finishAndRemoveTask();
+                        }else{
+                            getModel().forceReload();
+                        }                
+                    }
                 }catch(Exception e){
                     e.printStackTrace();
                 }

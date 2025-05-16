@@ -338,6 +338,12 @@ public class DbUtils {
         Log.i(TAG, "updateTitleFromDatabase is res: "+res);
     }
 
+    public static void deleteAllAndroidAppFromDatabase(ModelDbController dbController){
+        String selection = "itemType = ?";
+        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
+        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+        Log.i(TAG, "deleteAllAndroidAppFromDatabase is res: "+res);
+    }
 
     public static void deleteTitleFromDatabase(ModelDbController dbController,String title){
         Log.i(TAG, "deleteTitleFromDatabase is title: "+title );

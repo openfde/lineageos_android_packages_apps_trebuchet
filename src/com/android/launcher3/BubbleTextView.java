@@ -103,7 +103,9 @@ import java.util.ArrayList;
 import java.util.List;
 import android.view.Gravity;
 import android.view.WindowManager;
-
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
@@ -490,17 +492,22 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             bitmap = BitmapFactory.decodeResource(getContext().getResources(),resId);
             iconDrawable = new FastBitmapDrawable(bitmap);
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
-
+            try {
+                String packageName = info.appWidgetProvider.toString();
+                PackageManager packageManager = getContext().getPackageManager();
+                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+                Drawable icon  = applicationInfo.loadIcon(packageManager);
+                bitmap = FileUtils.drawableToBitmap(icon);
+                iconDrawable = new FastBitmapDrawable(bitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.bg_linux);
             String appTitle = info.title.toString();
-            // if(info.appTitle  != null){
-            //     appTitle = info.appTitle.toString();
-            // }
-
+            Log.i(TAG,"bellaLauncher linux applyIconAndLabel  appTitle: "+appTitle);
             Map<String,Object> map = Launcher.getDesktopMap(appTitle);
-            //Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(appTitle);
-            Log.i(TAG,"bellaLauncher applyIconAndLabel   map  "+map);
+            Log.i(TAG,"bellaLauncher linux applyIconAndLabel  map: "+map);
             if(map !=null && !map.isEmpty()){
                try{
                 String name = map.get("Name").toString().replaceAll(" ", "_");
@@ -581,7 +588,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 mLastOriginalText = label;
                 mLastModifiedText = mLastOriginalText;
                 mBreakPointsIntArray = StringMatcherUtility.getListOfBreakpoints(label, MATCHER);
-                if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+                if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP ){
                     Map<String, Object> appMap = Launcher.getDesktopMap(label.toString());
                     if (appMap != null) {
                         setAppName(label.toString(), appMap);

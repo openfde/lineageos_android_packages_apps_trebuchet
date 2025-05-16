@@ -28,6 +28,9 @@ import static com.android.launcher3.util.Executors.MAIN_EXECUTOR;
 import static com.android.launcher3.util.Executors.UI_HELPER_EXECUTOR;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.view.Window;
+import android.view.WindowManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -439,32 +442,42 @@ public class ItemClickHandler {
             launcher.openFile(title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
+            String packageName = item.appWidgetProvider ;
+            PackageManager packageManager = launcher.getPackageManager();
+            intent = packageManager.getLaunchIntentForPackage(packageName);
+            if (intent != null) {
+                // 如果找到了启动 Intent，则启动应用
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                launcher.startActivity(intent);
+            } else {
+                // 如果没有找到启动 Intent，则提示用户
+                // 可以选择跳转到应用商店
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
+                .setTitle(R.string.desktop_tips)
+                .setMessage(R.string.app_not_install)
+                .setNegativeButton(R.string.desktop_cancel, null)
+                .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+item.title); 
+                    }
+                }).create();
 
+                Window window = alertDialog.getWindow();
+                if (window != null) {
+                    WindowManager.LayoutParams params = window.getAttributes();
+                    params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                    window.setAttributes(params);
+                }
+                alertDialog.show();
+            }
+            return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
             try{
-                String packageName = item.appWidgetProvider ;
-                if(packageName == null || "".equals(packageName)){
-                    Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
-                    String name = map.get("name").toString();
-                    String exec = map.get("exec").toString();
-                    launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString());
-                }else{
-                    PackageManager packageManager = launcher.getPackageManager();
-                    intent = packageManager.getLaunchIntentForPackage(packageName);
-                    if (intent != null) {
-                        // 如果找到了启动 Intent，则启动应用
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        launcher.startActivity(intent);
-                    } else {
-                    // 如果没有找到启动 Intent，则提示用户
-                    // 可以选择跳转到应用商店
-                        Uri uri = Uri.parse("market://details?id=" + packageName);
-                        Intent marketIntent = new Intent(Intent.ACTION_VIEW, uri);
-                        marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        launcher.startActivity(marketIntent);
-                    }
-                }
-                
+                Map<String,Object> map = FileUtils.getLinuxDesktopFileContent(item.title.toString());
+                String name = map.get("name").toString();
+                String exec = map.get("exec").toString();
+                launcher.openLinuxApp(name+"###"+exec+"###open###"+item.title.toString()); 
             }catch(Exception e){
                 e.printStackTrace();
             }
