@@ -3315,14 +3315,14 @@ public class Launcher extends StatefulActivity<LauncherState>
                             @Override
                             public void run() {
                                 if("NEW_FILE".equals(method) || "NEW_DIR".equals(method) ){
-                                    addDesktopFile(method,params);
-                                    getModel().forceReload();
+                                    // addDesktopFile(method,params);
+                                    // getModel().forceReload();
                                     // bindWorkspace();
                                 }else if("RENAME".equals(method)){
-                                    String[] arrFileName = params.split("###");
-                                    DbUtils.updateTitleFromDatabase(getModel().getModelDbController(),arrFileName[0],arrFileName[1]);
-                                    //bindWorkspace();
-                                    getModel().forceReload();
+                                    // String[] arrFileName = params.split("###");
+                                    // DbUtils.updateTitleFromDatabase(getModel().getModelDbController(),arrFileName[0],arrFileName[1]);
+                                    // //bindWorkspace();
+                                    // getModel().forceReload();
                                 }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
                                     if(params == null || "".equals(params) ){
                                        //not refresh     
