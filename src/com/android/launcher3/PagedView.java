@@ -1149,7 +1149,7 @@ public abstract class PagedView<T extends View & PageIndicator> extends ViewGrou
     }
 
     protected void determineScrollingStart(MotionEvent ev) {
-        // determineScrollingStart(ev, 1.0f);
+         determineScrollingStart(ev, 1.0f);
     }
 
     /*

@@ -97,7 +97,7 @@ public class PortraitStatesTouchController extends AbstractStateChangeTouchContr
                     ? mLauncher.getStateManager().getLastState()
                     : NORMAL;
         } else if (fromState == NORMAL && shouldOpenAllApps(isDragTowardPositive)) {
-            return NORMAL;
+            return ALL_APPS;
         }
         return fromState;
     }
