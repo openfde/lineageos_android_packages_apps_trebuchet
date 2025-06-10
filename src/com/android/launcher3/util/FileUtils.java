@@ -374,9 +374,10 @@ public  static synchronized Point findNextFreePoint(Context context){
 
     public static void createLinuxDesktopFile(ContentValues initialValues){
         // desktop linux app temp delete 
-        // if(!isOpenLinuxApp){
-        //     return ;
-        // }
+        String shareDesktopStr = getSystemProperty("fde_app_fusion","1");
+        if("0".equals(shareDesktopStr)){
+            return ;
+        }
         // Log.i(TAG,"bella...insert....2......... "+initialValues.toString());
         createDesktopDir(PATH_ID_DESKTOP);
         if(initialValues !=null){

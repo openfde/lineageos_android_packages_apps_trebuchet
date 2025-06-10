@@ -2643,7 +2643,11 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                                 // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
                                 packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                             }
+                            String shareDesktopStr = FileUtils.getSystemProperty("fde_app_fusion","1");
+                            if("1".equals(shareDesktopStr)){
                             gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
+                            }
+                           
                         }
                     }
                 }catch(Exception e){
@@ -2652,8 +2656,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             }
         }).start();
 
-        String shareDesktopStr = FileUtils.getSystemProperty("share_desktop","yes");
-        if("yes".equals(shareDesktopStr)){
+        String shareDesktopStr = FileUtils.getSystemProperty("fde_app_fusion","1");
+        if("1".equals(shareDesktopStr)){
             Handler handler = new Handler(Looper.getMainLooper());
             handler.postDelayed(() -> {
                 new Thread(() -> {
