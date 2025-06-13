@@ -111,6 +111,8 @@ public class FileUtils {
 
     public static final String FILE_INFO = "FILE_INFO";
 
+    public static final String FDE_APP_FUSION = "fde.app_fusion";
+
     public static final String OP_CREATE_LINUX_ICON = "OP_CREATE_LINUX_ICON";
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
@@ -374,7 +376,7 @@ public  static synchronized Point findNextFreePoint(Context context){
 
     public static void createLinuxDesktopFile(ContentValues initialValues){
         // desktop linux app temp delete 
-        String shareDesktopStr = getSystemProperty("fde_app_fusion","1");
+        String shareDesktopStr = getSystemProperty(FDE_APP_FUSION,"1");
         if("0".equals(shareDesktopStr)){
             return ;
         }
