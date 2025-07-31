@@ -80,6 +80,8 @@ public class LauncherSettings {
 
         public static final int ITEM_TYPE_LINUX_APP = 10;
 
+        public static final int ITEM_TYPE_ANDROID_APP = 21;
+
 
         /**
          * The icon package name in Intent.ShortcutIconResource

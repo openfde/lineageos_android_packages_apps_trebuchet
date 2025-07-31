@@ -99,7 +99,7 @@ public class DbUtils {
             Log.i(TAG, "queryFilesByPointFromDatabase is null "+ ",cellX: "+x + ", cellY: "+y);
         }else{
         }
-    
+        cursor.close();
         return list ;
     }
 
@@ -464,4 +464,47 @@ public class DbUtils {
         }
         return maxId ;
     }
+
+
+    public static List<Map<String,Object>> queryLinuxAndAndroidAppInDatabase(Context context){
+        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
+        String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
+        List<Map<String,Object>> list = null;
+        Cursor cursor  = context.getContentResolver().query(LauncherSettings.Favorites.CONTENT_URI, null, selection, selectionArgs, null);
+
+        try{
+            if (cursor != null && cursor.moveToFirst()) {
+                list = new ArrayList<>();
+                do {
+                    int _id = cursor.getInt(cursor.getColumnIndex("_id"));
+                    String title = cursor.getString(cursor.getColumnIndex("title"));
+                    String appWidgetProvider = cursor.getString(cursor.getColumnIndex("appWidgetProvider"));
+                    int itemType = cursor.getInt(cursor.getColumnIndex("itemType"));
+                    int cellX = cursor.getInt(cursor.getColumnIndex("cellX"));
+                    int cellY = cursor.getInt(cursor.getColumnIndex("cellY"));
+                    Map<String,Object> mp = new HashMap<>();
+                    mp.put("_id",_id);
+                    mp.put("title",title);
+                    mp.put("appWidgetProvider",appWidgetProvider);
+                    mp.put("itemType",itemType);
+                    mp.put("cellX",cellX);
+                    mp.put("cellY",cellY);
+                    list.add(mp);
+                } while (cursor.moveToNext());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+           cursor.close();
+        }
+
+        if(list == null ){
+            Log.i(TAG, "queryDesktopFileInDatabase is null" );
+        }else{
+            Log.i(TAG, "queryDesktopFileInDatabase  size is  list "+list.size() );
+        }
+
+        return list ;
+    }
+
 }

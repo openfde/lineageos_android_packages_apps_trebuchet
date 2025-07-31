@@ -26,7 +26,8 @@ public class NetUtils {
         try {
             list = new ArrayList<>();
             URL url = new URL(
-                    ADDRESS+"/api/v1/desktopapps?page=" + 1 + "&page_size=" + 100+"&refresh=true");
+                    ADDRESS+"/api/v1/desktopapps?page=" + 1 + "&page_size=" + 100+"&refresh=true&withAndroid=true");
+            Log.i(TAG,"getLinuxDesktopApp url "+url);        
             HttpURLConnection connection = (HttpURLConnection) url
                     .openConnection();
 
