@@ -170,14 +170,14 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 // if(itemInfo.getTargetComponent() != null  && itemInfo.getTargetComponent().getPackageName() !=null){
                 //     EventBus.getDefault().post(new MessageEvent(FileUtils.OP_CREATE_ANDROID_ICON,itemInfo.getTargetComponent().getPackageName()));
                 // }else{
-                    Log.w(TAG,"AddWorkspaceItemsTask itemInfo "+itemInfo);
+                
                 // }
                 if(itemInfo.getTargetComponent() !=null){
                     Log.w(TAG,"AddWorkspaceItemsTask getPackageName "+itemInfo.getTargetComponent().getPackageName() );
                 }
                 
-
                 String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+                Log.w(TAG,"AddWorkspaceItemsTask shareDesktopStr: " +shareDesktopStr + ",itemInfo "+itemInfo);
                 if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
                     FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
                     FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);

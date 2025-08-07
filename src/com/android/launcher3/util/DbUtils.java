@@ -507,4 +507,12 @@ public class DbUtils {
         return list ;
     }
 
+    public static void deleteByFileNameFromDatabase(Context context,String fileName){
+        Log.i(TAG, "deleteTitleFromDatabase is fileName: "+fileName );
+        String selection = "appWidgetProvider = ?";
+        String[] selectionArgs = {fileName};
+        int res = context.getContentResolver().delete(LauncherSettings.Favorites.CONTENT_URI,selection, selectionArgs);
+        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+    }
+
 }

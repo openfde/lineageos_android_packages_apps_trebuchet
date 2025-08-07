@@ -422,6 +422,7 @@ public class LoaderTask implements Runnable {
                         case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
                         case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
                         case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
+                        case LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP:
                         case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT:
                             intent = c.parseIntent();
                             if (intent == null) {

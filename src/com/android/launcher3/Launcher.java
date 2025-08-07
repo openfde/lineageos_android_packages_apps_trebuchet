@@ -216,7 +216,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.io.File;
 import java.util.Optional;
-
+import java.nio.file.Paths;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -2252,10 +2252,10 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     public int addLinuxApps(){
         try{
             List<Point> listIdle = FileUtils.getAllIdlePoints(Launcher.this);
-            Log.w(TAG, "refreshDesktopFiles-listIdle: "+listIdle);
+            // Log.w(TAG, "refreshDesktopFiles-listIdle: "+listIdle);
 
             listDeskTopLinux = NetUtils.getLinuxDesktopApp();
-            List<Map<String,Object>>  listApps = DbUtils.queryDesktopLinuxAppInDatabase(Launcher.this);
+            List<Map<String,Object>>  listApps = DbUtils.queryLinuxAndAndroidAppInDatabase(Launcher.this);
             if(listApps !=null){
                 //if db exists but linux not  exists . delete db data.
                 for(Map<String,Object> mp : listApps){
@@ -2271,14 +2271,12 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
             countLinuxApp = 0 ;
             if(listDeskTopLinux !=null ){
                 int numRows  =  FileUtils.getScreenRows(Launcher.this);
-
-                // Point point = FileUtils.getMaxPoint(Launcher.this);
-                // int x = point.x ;
-                // int y = point.y;
-                // Log.w(TAG, "refreshDesktopFiles-addLinuxApps: getMaxPoint: "+point.x + ",y: "+point.y);
-                // int numRows  =  FileUtils.getScreenRows(Launcher.this);
                 for(Map<String,Object> mp : listDeskTopLinux){
-                    boolean IsAndroidApp = Boolean.valueOf(mp.get("IsAndroidApp").toString());
+                    boolean IsAndroidApp = false ;
+                    if(mp.get("IsAndroidApp") != null){
+                        IsAndroidApp = Boolean.valueOf(mp.get("IsAndroidApp").toString());    
+                    }
+                    // Log.w(TAG, "refreshDesktopFiles-mp: "+mp.toString());
                     boolean found = false ;
                     String execPath = mp.get("Path").toString();
                     String fileName = mp.get("FileName").toString();
@@ -2289,6 +2287,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                         packageName = execPath.replaceAll("fde_launch ","");
                         if(listApps != null){
                             //1、Linux端拷贝的应用 title是带.desktop的
+                            Log.w(TAG, "refreshDesktopFiles-listApps: "+listApps.toString());
                             found = listApps.stream().anyMatch(item -> fileName.equals(StringUtils.ToString(item.get("title"))));
                         } 
                         Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found +",packageName: "+packageName );
@@ -2322,7 +2321,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                         
                         info.cellY = listIdle.get(countLinuxApp).y;
                         info.cellX = listIdle.get(countLinuxApp).x;
-                        Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id);
+                        Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id +",IsAndroidApp： "+IsAndroidApp);
                         countLinuxApp++;
                         insertOrUpdateFavorites(info);
                     }
@@ -2556,6 +2555,7 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                 case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
                 case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
                 case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
+                case LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP:
                 case LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT: {
                     WorkspaceItemInfo info = (WorkspaceItemInfo) item;
                     view = createShortcut(info);
@@ -3272,8 +3272,8 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
     public Stream<SystemShortcut.Factory> getSupportedShortcuts(int itemType) {
         if(itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
             return Stream.of(APP_OPEN, APP_COPY,APP_CUT,APP_RENAME,APP_REMOVE, WIDGETS, INSTALL);
-        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-            return Stream.of(APP_OPEN,APP_OPEN_TYPE);
+        }else if(itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP || itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
+            return Stream.of(APP_OPEN,APP_REMOVE);
         }else{
             return Stream.of(APP_OPEN, APP_REMOVE, WIDGETS, INSTALL);
         }
@@ -3372,9 +3372,32 @@ public class Launcher extends StatefulActivity<LauncherState> implements Launche
                                     DbUtils.updateTitleFromDatabase(Launcher.this,arrFileName[0],arrFileName[1]);
                                     //bindWorkspace();
                                     getModel().forceReload();
-                                }else if("UPDATE_DESKTOP".equals(method)){
-                                    refreshDesktopFiles(Launcher.this);
-                                    // getModel().refreshDeskFileList(Launcher.this);
+                                }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
+                                    // refreshDesktopFiles(Launcher.this);
+                                      if(params == null || "".equals(params) ){
+                                       //not refresh     
+                                       // }else if(params.endsWith("_fde.desktop")){
+                                    }else if(params.endsWith(".desktop")){
+                                        try{
+                                            String[] arrFileName = params.split("###");
+                                            if("delete".equals(arrFileName[0])){
+                                                String fileName = Paths.get(arrFileName[1]).getFileName().toString();
+                                                Log.d(TAG, "delete c: arrFileName[1]: "+arrFileName[1] + ",fileName "+fileName);
+                                                if(fileName.endsWith("_fde.desktop")){
+                                                    // delete by fileName
+                                                    DbUtils.deleteByFileNameFromDatabase(Launcher.this,fileName);
+                                                }else{
+                                                    //delete by title
+                                                    DbUtils.deleteTitleFromDatabase(Launcher.this,fileName); 
+                                                }
+                                            }
+                                        }catch(Exception e){
+                                            e.printStackTrace();
+                                        }
+                                        refreshLinuxApps(Launcher.this);
+                                    }else{
+                                        refreshDesktopFiles(Launcher.this);
+                                    }
                                 }   
                             }
                         });

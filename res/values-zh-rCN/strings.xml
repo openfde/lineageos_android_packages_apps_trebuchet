@@ -162,4 +162,5 @@
     <string name="desktop_cancel">"取消"</string>
     <string name="desktop_ok">"确定"</string>
     <string name="desktop_rename">"重命名"</string>
+    <string name="app_not_install">"应用未安装,是否删除该图标"</string>
 </resources>

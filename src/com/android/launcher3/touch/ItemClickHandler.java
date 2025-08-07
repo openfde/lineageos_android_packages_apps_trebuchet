@@ -74,6 +74,11 @@ import java.util.Map;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import org.greenrobot.eventbus.EventBus;
 import com.android.launcher3.model.data.MessageEvent;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.pm.ResolveInfo;
+import android.view.Window;
+import android.view.WindowManager;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -349,8 +354,46 @@ public class ItemClickHandler {
             launcher.gotoDocApp(FileUtils.OPEN_FILE,title);
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
-            Log.i(TAG, "ITEM_TYPE_LINUX_APP: " + item);
+            Log.i(TAG, "linux app: " + item);
             appOpenLinuxType(launcher,item,"open");
+            return ;
+        }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
+            String packageName  = "";
+            Log.i(TAG, "ITEM_TYPE_ANDROID_APP: " + item);
+            if(item.getIntent() !=null){
+                try {
+                    packageName = item.getIntent().getStringExtra("packageName");
+                    intent = launcher.getPackageManager().getLaunchIntentForPackage(packageName);
+                    if (intent != null) {
+                        // 如果找到了启动 Intent，则启动应用
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        launcher.startActivity(intent);
+                    } else {
+                        // 如果没有找到启动 Intent，则提示用户
+                        // 可以选择跳转到应用商店
+                        AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
+                        .setTitle(R.string.desktop_tips)
+                        .setMessage(R.string.app_not_install)
+                        .setNegativeButton(R.string.desktop_cancel, null)
+                        .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                                launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+item.title); 
+                            }
+                        }).create();
+
+                        Window window = alertDialog.getWindow();
+                        if (window != null) {
+                            WindowManager.LayoutParams params = window.getAttributes();
+                            //params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                            window.setAttributes(params);
+                        }
+                            alertDialog.show();
+                        }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                    }
             return ;
         }else {
             intent = item.getIntent();

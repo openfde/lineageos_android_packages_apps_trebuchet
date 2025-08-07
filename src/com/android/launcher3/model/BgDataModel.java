@@ -252,6 +252,7 @@ public class BgDataModel {
             }
             case LauncherSettings.Favorites.ITEM_TYPE_APPLICATION:
             case LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP:
+            case LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP:
             case LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY:
             case LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT:
             case LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT:
