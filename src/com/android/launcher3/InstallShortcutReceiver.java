@@ -135,6 +135,8 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
             }
 
             String pkg = getIntentPackage(info.launchIntent);
+            Log.w(TAG, "AddWorkspaceItemsTask: " + pkg);
+            Log.w(TAG, "AddWorkspaceItemsTask:info " + info);
             if (!TextUtils.isEmpty(pkg)
                     && !launcherApps.isPackageEnabled(pkg, info.user)
                     && !info.isActivity) {
@@ -143,10 +145,11 @@ public class InstallShortcutReceiver extends BroadcastReceiver {
                 }
                 continue;
             }
-
+            Log.w(TAG, "AddWorkspaceItemsTask:getItemInfo " + info.getItemInfo());
             // Generate a shortcut info to add into the model
             installQueue.add(info.getItemInfo());
         }
+         
         prefs.edit().remove(APPS_PENDING_INSTALL).apply();
         if (!installQueue.isEmpty()) {
             LauncherAppState.getInstance(context).getModel()

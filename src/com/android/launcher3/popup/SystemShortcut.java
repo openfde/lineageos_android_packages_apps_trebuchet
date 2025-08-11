@@ -280,10 +280,11 @@ public abstract class SystemShortcut<T extends BaseDraggingActivity> extends Ite
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
                     Launcher launcher = Launcher.getLauncher(view.getContext());
-                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY ){
+                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY  ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT 
+                        || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
                         launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
-                    }else if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT){
-                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
+                    }else {
+                        
                     }
                     dismissTaskMenuView(mTarget);
                     launcher.removeItem(icon, mItemInfo,true);

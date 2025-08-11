@@ -47,6 +47,9 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import android.graphics.drawable.BitmapDrawable;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 
 public class FastBitmapDrawable extends Drawable {
 
@@ -347,6 +350,21 @@ public class FastBitmapDrawable extends Drawable {
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),resId);
             BitmapInfo bitmapInfo = new BitmapInfo(bitmap,R.color.default_shadow_color_no_alpha);
             drawable = newIcon(context, bitmapInfo);
+        }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
+            String packageName  = "";
+            if(info.getIntent() !=null){
+                try {
+                    packageName = info.getIntent().getStringExtra("packageName");
+                    PackageManager packageManager = context.getPackageManager();
+                    ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+                    Drawable icon  = applicationInfo.loadIcon(packageManager);
+                    Bitmap bitmap = FileUtils.drawableToBitmap(icon);
+                    drawable = new FastBitmapDrawable(bitmap);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.w("bella","FastBitmapDrawable android packageName:" +packageName + ",info: "+info );
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_linux);
             String title = info.title.toString();

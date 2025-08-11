@@ -26,7 +26,8 @@ public class NetUtils {
         try {
             list = new ArrayList<>();
             URL url = new URL(
-                    ADDRESS+"/api/v1/desktopapps?page=" + 1 + "&page_size=" + 100+"&refresh=true");
+                    ADDRESS+"/api/v1/desktopapps?page=" + 1 + "&page_size=" + 100+"&refresh=true&withAndroid=true");
+            Log.i(TAG,"getLinuxDesktopApp url "+url);        
             HttpURLConnection connection = (HttpURLConnection) url
                     .openConnection();
 
@@ -66,7 +67,12 @@ public class NetUtils {
                 map.put("Path",item.getString("Path"));
                 map.put("IconPath",item.getString("IconPath"));
                 map.put("Name",item.getString("Name"));
-                map.put("ZhName",item.getString("ZhName"));
+                map.put("IsAndroidApp",item.getString("IsAndroidApp"));
+                String zName = item.getString("ZhName") ;
+                if(zName == null || "".equals(zName)){
+                    zName = item.getString("Name");
+                }
+                map.put("ZhName",zName);
                 String fileName = item.getString("FileName");
                 int lastIndex = fileName.lastIndexOf('/'); 
                 if (lastIndex != -1) {

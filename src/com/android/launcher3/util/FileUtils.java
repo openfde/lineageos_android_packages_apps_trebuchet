@@ -62,11 +62,15 @@ import android.graphics.BitmapFactory;
 import android.widget.TextView;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.PictureDrawable;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.Picture;
-import android.util.Xml;
-import org.xmlpull.v1.XmlPullParser;
 import java.io.InputStream;
 import com.android.launcher3.svg.SVG;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
+import android.os.UserHandle;
+import android.os.UserManager;
+import com.android.launcher3.R;
 
 
 public class FileUtils {
@@ -116,6 +120,8 @@ public class FileUtils {
     public static final String OP_CREATE_LINUX_ICON = "OP_CREATE_LINUX_ICON";
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
+
+    public static final String OPEN_APP_FUSION = "1";
 
     public static boolean isOpenLinuxApp = true ;
 
@@ -199,23 +205,6 @@ public static void createShortcut(Context mContext, String packageName ,String n
 //     }
 // }
 
-/**
- * rows count  --- 9 
- */
-public static int getScreenRows(Context context){
-    InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
-    int numRows = idp.numRows;
-    return numRows;
-}
-
-/**
- * Columns count  --- 17 
- */
-public static int getScreenColumns(Context context){
-    InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
-    int numColumns = idp.numColumns ;
-    return numColumns;
-}
 
 public static synchronized Point getMaxPoint(Context context){
     List<Point> list = DbUtils.queryFilesByPointFromDatabase(context);
@@ -432,9 +421,9 @@ public  static synchronized Point findNextFreePoint(Context context){
                     "Name[zh_CN]="+title,
                     "Categories="+itemType,
                     "Exec=fde_launch "+packageName,
-                    "NotShowIn=OpenFDE",
                     "Icon="+linuxPic
-                );
+                );//"NotShowIn=OpenFDE",
+
          
                 // 写入.desktop文件
                 Files.write(desktopFilePath, lines, StandardOpenOption.CREATE);
@@ -443,6 +432,56 @@ public  static synchronized Point findNextFreePoint(Context context){
             }catch(Exception e){
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void createLinuxDesktopFile(String title ,String packageName){
+        createDesktopDir(PATH_ID_DESKTOP);
+        String shareDesktopStr = getSystemProperty(FDE_APP_FUSION,"1");
+        if("0".equals(shareDesktopStr)){
+            return ;
+        }
+        try{    
+            Log.i(TAG,"createLinuxDesktopFile title:  "+title + ",packageName: "+packageName);
+            String documentId = getAllDesktopPath();
+            //String md5 = getMD5(packageName);
+            String pathDesktop = documentId+""+ packageName+"_fde.desktop";
+            File file = new File(pathDesktop);
+            if(file.exists()){
+                Log.i(TAG,"pathDesktop is exists :  "+pathDesktop);
+                return ;
+            }
+            Path desktopFilePath = Paths.get(pathDesktop);
+
+            String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/"+packageName+".png" ;
+            File filePic = new File(picPath);
+            String homeDir = getLinuxHomeDir();
+            String linuxPath = homeDir+"/.local/share/icons/"+packageName+".png";
+            Log.i(TAG,"homeDir :  "+homeDir + ",linuxPath: "+linuxPath);
+            File linuxPic = new File(linuxPath);
+            if(!linuxPic.exists()){
+                Log.i(TAG,"insert............." +  ", linuxPath "+linuxPath + ",packageName:  "+packageName);
+            }else{
+                //if pic exists ,return 
+            }    
+
+            List<String> lines = List.of(
+                "[Desktop Entry]",
+                "Type=Application",
+                "Name="+title,
+                "PackageName="+packageName,
+                "Name[zh_CN]="+title,
+                "Categories="+ LauncherSettings.Favorites.ITEM_TYPE_APPLICATION,
+                "Exec=fde_launch "+packageName,
+                "Icon="+linuxPic
+            );
+
+            // 写入.desktop文件
+            Files.write(desktopFilePath, lines, StandardOpenOption.CREATE);
+            file.setExecutable(true);
+
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -966,5 +1005,185 @@ public static void createShortcut(Context mContext, Map<String,Object> mp) {
     }
 }
 
+/**
+ * rows count  --- 9 
+ */
+public static int getScreenRows(Context context){
+    InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+    int numRows = idp.numRows;
+    return numRows;
+}
+
+/**
+ * Columns count  --- 17 
+ */
+public static int getScreenColumns(Context context){
+    InvariantDeviceProfile idp = LauncherAppState.getIDP(context);
+    int numColumns = idp.numColumns ;
+    return numColumns;
+}
+
+public static List<Point> getAllIdlePoints(Context context){
+    List<Point> list = new ArrayList<>(); 
+    int numRows  =  getScreenRows(context);//8
+    int numColumns  =  getScreenColumns(context);//16
+    
+    List<Point> listExists = DbUtils.queryFilesByPointFromDatabase(context);
+
+    for(int i = 0 ; i < numColumns ; i++){ 
+        for(int j = 0 ; j < numRows ; j++ ){
+            Point point = new Point(i,j);
+            if(listExists ==null ||  !listExists.contains(point) ){
+                list.add(point);
+            }
+        }
+    }
+    return list ;
+}
+
+
+public static void createAllAndroidIconToLinux(Context context, String packageName) {
+        PackageManager packageManager = context.getPackageManager();
+        String rootPath = "/volumes" + "/" + getLinuxUUID() + getLinuxHomeDir() + "/.local/share/icons/";
+
+
+        if ("".equals(packageName)) {
+            List<ApplicationInfo> apps = packageManager.getInstalledApplications(0);
+            apps.addAll(getAllApp(context));
+            for (ApplicationInfo appInfo : apps) {
+                try {
+                    Drawable icon = packageManager.getApplicationIcon(appInfo);
+                    String appName = packageManager.getApplicationLabel(appInfo).toString();
+                    String md5 = appInfo.packageName;//getMD5(appInfo.packageName);
+
+                    String path = rootPath + md5 + ".png";
+                    Log.i("bella", "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packName: " + appInfo.packageName);
+                    File file = new File(path);
+                    if (!file.exists() && !path.contains(" ")) {
+                        drawableToPng(context, icon, path);
+                    }
+                    // }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            try {
+                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+                Drawable icon = packageManager.getApplicationIcon(appInfo);
+                String appName = packageManager.getApplicationLabel(appInfo).toString();
+                String md5 = appInfo.packageName;// getMD5(appInfo.packageName);
+
+                String path = rootPath + md5 + ".png";
+                Log.i("bella", "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packageName: " + packageName + ",appName: " + appName);
+                File file = new File(path);
+                if (!file.exists() && !path.contains(" ")) {
+                    drawableToPng(context, icon, path);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void drawableToPng(Context context, Drawable drawable, String filePath) {
+        Bitmap bitmapT = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+
+        Bitmap bitmap;
+        if (drawable instanceof AdaptiveIconDrawable) {
+            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
+            bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
+            //bitmapT = scaleBitmap(bitmapT, 80, 80);
+            Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
+            b2 = scaleBitmap(b2, 36, 36);
+            bitmap = overlayBitmaps(bitmapT,b2);
+        } else {
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                bitmapT = bitmapDrawable.getBitmap();
+                //bitmapT = scaleBitmap(bitmapT, 80, 80);
+                Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
+                b2 = scaleBitmap(b2, 36, 36);
+                bitmap = overlayBitmaps(bitmapT,b2);
+            } else {
+                bitmap = bitmapT;
+            }
+
+        }
+        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        // 保存Bitmap到PNG文件
+        File file = new File(filePath);
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private static List<ApplicationInfo> getAllApp(Context context) {
+        LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+        UserManager userManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        List<UserHandle> userHandles = userManager.getUserProfiles();
+        List<LauncherActivityInfo> list = new ArrayList<>();
+        for (UserHandle userHandle : userHandles) {
+            list.addAll(launcherApps.getActivityList(null, userHandle));
+        }
+
+        PackageManager packageManager = context.getPackageManager();
+        List<ApplicationInfo> listApps = new ArrayList<>();
+        Log.i("bella", "getAllApp list  size:   " + list.size());
+        for (LauncherActivityInfo li : list) {
+            String appName = packageManager.getApplicationLabel(li.getApplicationInfo()).toString();
+            Drawable icon = packageManager.getApplicationIcon(li.getApplicationInfo());
+            String packageName = li.getApplicationInfo().packageName;
+            listApps.add(li.getApplicationInfo());
+        }
+        return listApps;
+    }
+
+    public static Bitmap adaptiveIconToBitmap(AdaptiveIconDrawable adaptiveIconDrawable) {
+        int width = adaptiveIconDrawable.getIntrinsicWidth();
+        int height = adaptiveIconDrawable.getIntrinsicHeight();
+
+        // 创建一个与 AdaptiveIcon 大小相同的 Bitmap
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        // 获取前景和背景
+        Drawable background = adaptiveIconDrawable.getBackground();
+        Drawable foreground = adaptiveIconDrawable.getForeground();
+
+        // 绘制背景和前景
+        if (background != null) {
+            background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            background.draw(canvas);
+        } else {
+            Log.i("bella", "createAllAndroidIconToLinux background is null ...  ");
+        }
+        if (foreground != null) {
+            foreground.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            foreground.draw(canvas);
+        } else {
+            Log.i("bella", "createAllAndroidIconToLinux  background is null ....  ");
+        }
+
+        return bitmap;
+    }
 
 }

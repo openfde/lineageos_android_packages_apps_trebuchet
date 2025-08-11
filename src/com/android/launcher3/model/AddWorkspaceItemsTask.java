@@ -112,6 +112,8 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 int screenId = coords[0];
 
                 ItemInfo itemInfo;
+                String packageName = item.getTargetComponent() != null
+                ? item.getTargetComponent().getPackageName() : null;
                 if (item instanceof WorkspaceItemInfo || item instanceof FolderInfo ||
                         item instanceof LauncherAppWidgetInfo) {
                     itemInfo = item;
@@ -123,8 +125,8 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
 
                 if (item instanceof WorkspaceItemInfo && ((WorkspaceItemInfo) item).isPromise()) {
                     WorkspaceItemInfo workspaceInfo = (WorkspaceItemInfo) item;
-                    String packageName = item.getTargetComponent() != null
-                            ? item.getTargetComponent().getPackageName() : null;
+                    // String packageName = item.getTargetComponent() != null
+                    //         ? item.getTargetComponent().getPackageName() : null;
                     if (packageName == null) {
                         continue;
                     }
@@ -165,17 +167,27 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                     }
                 }
 
-                if(itemInfo.getTargetComponent() != null  && itemInfo.getTargetComponent().getPackageName() !=null){
-                    EventBus.getDefault().post(new MessageEvent(FileUtils.OP_CREATE_ANDROID_ICON,itemInfo.getTargetComponent().getPackageName()));
-                }else{
-                    Log.i(TAG,"AddWorkspaceItemsTask itemInfo "+itemInfo);
+                // if(itemInfo.getTargetComponent() != null  && itemInfo.getTargetComponent().getPackageName() !=null){
+                //     EventBus.getDefault().post(new MessageEvent(FileUtils.OP_CREATE_ANDROID_ICON,itemInfo.getTargetComponent().getPackageName()));
+                // }else{
+                
+                // }
+                if(itemInfo.getTargetComponent() !=null){
+                    Log.w(TAG,"AddWorkspaceItemsTask getPackageName "+itemInfo.getTargetComponent().getPackageName() );
                 }
                 
-
-                // Add the shortcut to the db
-                getModelWriter().addItemToDatabase(itemInfo,
+                String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+                Log.w(TAG,"AddWorkspaceItemsTask shareDesktopStr: " +shareDesktopStr + ",itemInfo "+itemInfo);
+                if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
+                    FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
+                    FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);
+                }else{
+                    getModelWriter().addItemToDatabase(itemInfo,
                         LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,
                         coords[1], coords[2]);
+                }
+                // Add the shortcut to the db
+                
 
                 // Save the WorkspaceItemInfo for binding in the workspace
                 addedItemsFinal.add(itemInfo);
