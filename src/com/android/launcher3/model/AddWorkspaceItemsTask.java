@@ -179,6 +179,9 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
                 Log.w(TAG,"AddWorkspaceItemsTask shareDesktopStr: " +shareDesktopStr + ",itemInfo "+itemInfo);
                 if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
+                    if(packageName == null){
+                        packageName = FileUtils.getPackageNameByAppName(app.getContext(),itemInfo.title.toString());
+                    }
                     FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
                     FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);
                 }else{

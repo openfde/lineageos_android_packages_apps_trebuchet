@@ -351,14 +351,18 @@ public  static synchronized Point findNextFreePoint(Context context){
     }
 
     public static String getPackageNameByAppName(Context context, String appName) {
-        PackageManager packageManager = context.getPackageManager();
-        List<ApplicationInfo> apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
+        try{
+            PackageManager packageManager = context.getPackageManager();
+            List<ApplicationInfo> apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
 
-        for (ApplicationInfo app : apps) {
-            String appLabel = (String) packageManager.getApplicationLabel(app);  // 获取应用的显示名称
-            if (appLabel != null && appLabel.equalsIgnoreCase(appName)) {
-                return app.packageName;  
+            for (ApplicationInfo app : apps) {
+                String appLabel = (String) packageManager.getApplicationLabel(app);  
+                if (appLabel != null && appLabel.equalsIgnoreCase(appName)) {
+                    return app.packageName;  
+                }
             }
+        }catch(Exception e){
+            e.printStackTrace();
         }
         return null;  
     }
@@ -1092,20 +1096,20 @@ public static void createAllAndroidIconToLinux(Context context, String packageNa
 
         Bitmap bitmap;
         if (drawable instanceof AdaptiveIconDrawable) {
-            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
+            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable)drawable;
             bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
-            //bitmapT = scaleBitmap(bitmapT, 80, 80);
-            Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
-            b2 = scaleBitmap(b2, 36, 36);
-            bitmap = overlayBitmaps(bitmapT,b2);
+            bitmapT  = scaleBitmap(bitmapT,48,48);
+            Bitmap b2 = vectorToBitmap(context, R.mipmap.bg_android);
+            b2  = scaleBitmap(b2,80,80);
+            bitmap = overlayBitmaps(b2,bitmapT); 
         } else {
             if (drawable instanceof BitmapDrawable) {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 bitmapT = bitmapDrawable.getBitmap();
-                //bitmapT = scaleBitmap(bitmapT, 80, 80);
-                Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
-                b2 = scaleBitmap(b2, 36, 36);
-                bitmap = overlayBitmaps(bitmapT,b2);
+                bitmapT  = scaleBitmap(bitmapT,48,48);
+                Bitmap b2 = vectorToBitmap(context, R.mipmap.bg_android);
+                b2  = scaleBitmap(b2,80,80);
+                bitmap = overlayBitmaps(b2,bitmapT);  
             } else {
                 bitmap = bitmapT;
             }
