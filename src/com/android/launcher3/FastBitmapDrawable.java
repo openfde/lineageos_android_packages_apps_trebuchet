@@ -360,6 +360,7 @@ public class FastBitmapDrawable extends Drawable {
                     Drawable icon  = applicationInfo.loadIcon(packageManager);
                     Bitmap bitmap = FileUtils.drawableToBitmap(icon);
                     drawable = new FastBitmapDrawable(bitmap);
+                    drawable.setScale(0.85f);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
