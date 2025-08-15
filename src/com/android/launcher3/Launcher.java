@@ -2356,20 +2356,24 @@ public class Launcher extends StatefulActivity<LauncherState>
             @Override
             public void run() {
                 try{
-                    for (Pair<ItemInfo, View> e : shortcuts) {
-                        ItemInfo item = e.first;
-                        if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
-                            String packageName = "";
-                            if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
-                                packageName = item.getTargetComponent().getPackageName();    
-                            }else{
-                                // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
-                                packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
+                     String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+                    if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
+                        for (Pair<ItemInfo, View> e : shortcuts) {
+                            ItemInfo item = e.first;
+                            if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||  item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT || item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT  ){
+                                String packageName = "";
+                                if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
+                                    packageName = item.getTargetComponent().getPackageName();    
+                                }else{
+                                    // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
+                                    packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
+                                }
+                                FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
+                                //gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
                             }
-                            FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
-                            //gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,packageName);
                         }
                     }
+                    
                 }catch(Exception e){
                     e.printStackTrace();
                 }
@@ -3651,7 +3655,11 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void refreshLinuxApps(Context context){
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-            return addLinuxApps();
+            String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+            if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
+                    return addLinuxApps();
+            }
+            return 0 ;
         }, executorService);
 
         future.thenAccept(result -> {
@@ -3682,25 +3690,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                     if(!isExists){
                         DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName); 
                     }
-                    // if(fName.endsWith(".desktop")) {
-                    //     //如果是.desktop文件开头的则判断是否存在，不存在则直接删除记录
-                    //     isExists = listDeskTopLinux.stream().anyMatch(item -> fName.equals(item.get("FileName").toString()));
-                    //     if(!isExists){
-                    //          DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName); 
-                    //     }
-                    // }else{
-                    //     // //如果是android应用生成的 则判断appWidgetProvider，不存在则删除记录
-                    //     if(mp.get("appWidgetProvider") !=null &&  !"".equals(mp.get("appWidgetProvider").toString())){
-                    //         String appWidgetProvider = mp.get("appWidgetProvider").toString();
-                    //         isExists = listDeskTopLinux.stream().anyMatch(item -> item.get("Path").toString().contains(appWidgetProvider));
-                    //         if(!isExists){
-                    //             DbUtils.deletePackageNameFromDatabase(getModel().getModelDbController(),appWidgetProvider); 
-                    //         }
-                    //     }else{
-                    //         //旧数据则更新appWidgetProvider
-                    //         // DbUtils.updatePakcageNameFromDatabase(getModel().getModelDbController(),fName,)
-                    //     }
-                    // }
                 }
             }
 
@@ -3783,7 +3772,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        addDesktopFiles(countLinuxApp,listIdle);
+                       addDesktopFiles(countLinuxApp, listIdle); // 在子线程执行
                     }
                 }, 5* 100);
                

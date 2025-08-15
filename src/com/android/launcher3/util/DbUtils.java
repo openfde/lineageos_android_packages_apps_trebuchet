@@ -313,60 +313,94 @@ public class DbUtils {
 
     public static void updateTitleFromDatabase(ModelDbController dbController,String titleOld,String titleNew){
         Log.i(TAG, "updateTitleFromDatabase is titleOld: "+titleOld + " ,titleNew:  "+titleNew);
-        String selection = "title = ?";
-        String[] selectionArgs = {titleOld};
 
-        ContentValues values = new ContentValues();
-        values.put("title",titleNew);
-        
-        int res = dbController.update(LauncherSettings.Favorites.TABLE_NAME, values,selection, selectionArgs);
-        // int res = context.getContentResolver().update(LauncherSettings.Favorites.CONTENT_URI, values,selection, selectionArgs);
-        Log.i(TAG, "updateTitleFromDatabase is res: "+res);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String selection = "title = ?";
+                String[] selectionArgs = {titleOld};
+
+                ContentValues values = new ContentValues();
+                values.put("title",titleNew);
+                
+                int res = dbController.update(LauncherSettings.Favorites.TABLE_NAME, values,selection, selectionArgs);
+                // int res = context.getContentResolver().update(LauncherSettings.Favorites.CONTENT_URI, values,selection, selectionArgs);
+                Log.i(TAG, "updateTitleFromDatabase is res: "+res);
+            }
+        }).start();
     }
 
 
     public static void updatePakcageNameFromDatabase(ModelDbController dbController,String title,String packageName){
         Log.i(TAG, "updateTitleFromDatabase is title: "+title + " ,packageName:  "+packageName);
-        String selection = "itemType = ? AND title = ?";
-        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION),title};
 
-        ContentValues values = new ContentValues();
-        values.put("appWidgetProvider",packageName);
-        
-        int res = dbController.update(LauncherSettings.Favorites.TABLE_NAME, values,selection, selectionArgs);
-        // int res = context.getContentResolver().update(LauncherSettings.Favorites.CONTENT_URI, values,selection, selectionArgs);
-        Log.i(TAG, "updateTitleFromDatabase is res: "+res);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String selection = "itemType = ? AND title = ?";
+                String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION),title};
+
+                ContentValues values = new ContentValues();
+                values.put("appWidgetProvider",packageName);
+                
+                int res = dbController.update(LauncherSettings.Favorites.TABLE_NAME, values,selection, selectionArgs);
+                // int res = context.getContentResolver().update(LauncherSettings.Favorites.CONTENT_URI, values,selection, selectionArgs);
+                Log.i(TAG, "updateTitleFromDatabase is res: "+res);
+            }
+        }).start();
     }
 
     public static void deleteAllAndroidAppFromDatabase(ModelDbController dbController){
-        String selection = "itemType = ?";
-        String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
-        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
-        Log.i(TAG, "deleteAllAndroidAppFromDatabase is res: "+res);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String selection = "itemType = ?";
+                String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
+                int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+                Log.i(TAG, "deleteAllAndroidAppFromDatabase is res: "+res);
+            }
+        }).start();
     }
 
     public static void deleteTitleFromDatabase(ModelDbController dbController,String title){
         Log.i(TAG, "deleteTitleFromDatabase is title: "+title );
-        String selection = "title = ?";
-        String[] selectionArgs = {title};
-        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
-        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+        new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String selection = "title = ?";
+                    String[] selectionArgs = {title};
+                    int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+                    Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+                }
+            }).start();
+       
     }
 
     public static void deletePackageNameFromDatabase(ModelDbController dbController,String appWidgetProvider){
         Log.i(TAG, "deleteTitleFromDatabase is appWidgetProvider: "+appWidgetProvider );
-        String selection = "appWidgetProvider = ? AND itemType = ?";
-        String[] selectionArgs = {appWidgetProvider,String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
-        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
-        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+  
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String selection = "appWidgetProvider = ? AND itemType = ?";
+                String[] selectionArgs = {appWidgetProvider,String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
+                int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+                Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+            }
+        }).start();
     }
 
     public static void deleteByFileNameFromDatabase(ModelDbController dbController,String fileName){
         Log.i(TAG, "deleteTitleFromDatabase is fileName: "+fileName );
-        String selection = "appWidgetProvider = ?";
-        String[] selectionArgs = {fileName};
-        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
-        Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String selection = "appWidgetProvider = ?";
+                String[] selectionArgs = {fileName};
+                int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+                Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+            }
+        }).start();
     }
     
     public static List<Map<String,Object>> queryDesktopFileInDatabase(ModelDbController dbController,String fileName){

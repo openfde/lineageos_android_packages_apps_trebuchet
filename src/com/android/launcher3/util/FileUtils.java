@@ -125,7 +125,9 @@ public class FileUtils {
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
 
-    public static boolean isOpenLinuxApp = true ;
+    public static final String FDE_APP_FUSION = "fde.app_fusion";
+
+    public static final String OPEN_APP_FUSION = "1";
 
 public static String getRootDir(){
     return "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir() ;
@@ -440,7 +442,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         if (drawable instanceof AdaptiveIconDrawable) {
             AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
             bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
-            bitmapT = scaleBitmap(bitmapT, 64, 64);
+            //bitmapT = scaleBitmap(bitmapT, 80, 80);
             Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
             b2 = scaleBitmap(b2, 36, 36);
             bitmap = overlayBitmaps(bitmapT,b2);
@@ -448,7 +450,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             if (drawable instanceof BitmapDrawable) {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 bitmapT = bitmapDrawable.getBitmap();
-                bitmapT = scaleBitmap(bitmapT, 64, 64);
+                //bitmapT = scaleBitmap(bitmapT, 80, 80);
                 Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
                 b2 = scaleBitmap(b2, 36, 36);
                 bitmap = overlayBitmaps(bitmapT,b2);
@@ -505,6 +507,10 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
    
     public static void createLinuxDesktopFile(String title ,String packageName){
         createDesktopDir(PATH_ID_DESKTOP);
+        String shareDesktopStr = getSystemProperty(FDE_APP_FUSION,"1");
+        if("0".equals(shareDesktopStr)){
+            return ;
+        }
         try{    
             Log.i(TAG,"createLinuxDesktopFile title:  "+title + ",packageName: "+packageName);
             // String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
@@ -736,51 +742,6 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
 
         return bitmap;
-    }
-
-    public static String findLinuxIconPath(String fileName){
-        String absoluteIcon = "/volumes"+"/"+FileUtils.getLinuxUUID()+fileName ;
-        File file = new File(absoluteIcon);
-        if(file.exists()){
-            return absoluteIcon;
-        }else {
-            absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/kylin-software-center/data/icons/"+fileName;
-            file = new File(absoluteIcon);
-            if(file.exists()){
-                return absoluteIcon;
-            }else{
-                absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/128x128/apps/"+fileName;
-                file = new File(absoluteIcon);
-                if(file.exists()){
-                    return absoluteIcon;
-                }else{
-                    absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/hicolor/scalable/apps/"+fileName;
-                    file = new File(absoluteIcon);
-                    if(file.exists()){
-                        return absoluteIcon;
-                    }else{
-                        absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/ukui-icon-theme-default/32x32/apps/"+fileName;                        file = new File(absoluteIcon);
-                        file = new File(absoluteIcon);
-                        if(file.exists()){
-                            return absoluteIcon;
-                        }else{
-                            absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/hicolor/256x256/apps/"+fileName;                        file = new File(absoluteIcon);
-                            file = new File(absoluteIcon);
-                            if(file.exists()){
-                                return absoluteIcon;
-                            }else{
-                                absoluteIcon =  "/volumes"+"/"+FileUtils.getLinuxUUID()+"/usr/share/icons/Vintage/apps/32/"+fileName;                        file = new File(absoluteIcon);
-                                file = new File(absoluteIcon);
-                                if(file.exists()){
-                                    return absoluteIcon;
-                                }
-                                return null ;
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public static  File[] getAllDesktopFiles(){

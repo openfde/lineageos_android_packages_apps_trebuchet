@@ -505,12 +505,14 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.bg_linux);
             String appTitle = info.title.toString();
-            Log.i(TAG,"bellaLauncher linux applyIconAndLabel  appTitle: "+appTitle);
+            Log.i(TAG,"bellaLauncher linux applyIconAndLabel1  appTitle: "+appTitle);
             Map<String,Object> map = Launcher.getDesktopMap(appTitle);
-            Log.i(TAG,"bellaLauncher linux applyIconAndLabel  map: "+map);
+            Log.i(TAG,"bellaLauncher linux applyIconAndLabel2  map: "+map);
+            String name = "";
             if(map !=null && !map.isEmpty()){
                try{
-                String name = map.get("Name").toString().replaceAll(" ", "_");
+                name = map.get("Name").toString().replaceAll(" ", "_");
+                Log.i(TAG,"bellaLauncher linux applyIconAndLabel3  name: "+name);
                 String exec = map.get("Path").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
                 int lastIndex = exec.lastIndexOf('/');
                 String key = name ;
@@ -541,6 +543,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                }
             }
             Bitmap b2 = FileUtils.vectorToBitmap(getContext(), R.mipmap.flag_linux);
+            if("Photoshop".equals(name) || name.contains("CAD")){
+                b2 = FileUtils.vectorToBitmap(getContext(), R.mipmap.flag_windows);
+            }
             b2  = FileUtils.scaleBitmap(b2,36,36);
             if(bitmap != null ){
                 bitmap  = FileUtils.scaleBitmap(bitmap,64,64);
