@@ -56,7 +56,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-
+import org.greenrobot.eventbus.EventBus;
+import com.android.launcher3.model.data.MessageEvent;
+import com.android.launcher3.util.FileUtils;
 /**
  * Handles updates due to changes in package manager (app installed/updated/removed)
  * or when a user availability changes.
@@ -132,6 +134,7 @@ public class PackageUpdatedTask extends BaseModelUpdateTask {
                 for (int i = 0; i < N; i++) {
                     FileLog.d(TAG, "Removing app icon" + packages[i]);
                     iconCache.removeIconsForPkg(packages[i], mUser);
+                    EventBus.getDefault().post(new MessageEvent(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+packages[i]+"_fde.desktop"));
                 }
                 // Fall through
             }
