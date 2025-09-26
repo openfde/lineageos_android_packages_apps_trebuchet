@@ -32,6 +32,8 @@ import android.view.View;
 import com.android.launcher3.Flags;
 import com.android.launcher3.R;
 import com.android.launcher3.logging.FileLog;
+import android.util.Log;
+import com.android.launcher3.Launcher;
 
 /**
  * A helper class to draw background of a focused item.
@@ -187,7 +189,26 @@ public abstract class ItemFocusIndicatorHelper<T> implements AnimatorUpdateListe
         return true;
     }
 
+    public void cleanFocus(){
+        Log.w(LOG,"Launcher------cleanFocus ");
+        setAlpha(0);
+        mLastFocusedItem = null;
+        endCurrentAnimation();
+        mCurrentAnimation = ObjectAnimator.ofPropertyValuesHolder(this,
+                PropertyValuesHolder.ofFloat(ALPHA, 0));
+        mCurrentAnimation.addListener(new ViewSetListener(null, false));
+
+          // invalidate once
+        invalidateDirty();
+        mLastFocusedItem =  null;
+    }
+
     protected void changeFocus(T item, boolean hasFocus) {
+        if(!Launcher.isTopResumedActivity){
+            Log.w(LOG,"Launcher------changeFocus return");
+            return;
+        }
+
         if (hasFocus) {
             endCurrentAnimation();
 

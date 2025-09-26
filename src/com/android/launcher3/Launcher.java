@@ -325,7 +325,7 @@ import android.graphics.Point;
 import android.app.ActivityManager;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
-
+import android.view.ViewTreeObserver;
 /**
  * Default launcher application.
  */
@@ -347,6 +347,8 @@ public class Launcher extends StatefulActivity<LauncherState>
     static final boolean DEBUG_STRICT_MODE = false;
 
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
+
+    public static boolean isTopResumedActivity = true;
 
     /**
      * IntentStarter uses request codes starting with this. This must be greater than all activity
@@ -669,6 +671,26 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     protected ModelCallbacks createModelCallbacks() {
         return new ModelCallbacks(this);
+    }
+
+     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        Log.w(TAG,"onWindowFocusChanged "+hasFocus);
+        if(mFocusHandler != null && !hasFocus){
+            mFocusHandler.cleanFocus();
+        }
+
+    }
+
+     @Override
+    public void onTopResumedActivityChanged(boolean isTopResumedActivity) {
+        super.onTopResumedActivityChanged(isTopResumedActivity);
+        Log.w(TAG,"onTopResumedActivityChanged "+isTopResumedActivity);
+        this.isTopResumedActivity = isTopResumedActivity ;
+        if(mFocusHandler != null && !isTopResumedActivity){
+            mFocusHandler.cleanFocus();
+        }
     }
 
     /**

@@ -93,7 +93,9 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
         boolean handleLongPress = canHandleLongPress();
         if (action == ACTION_DOWN) {
             // Check if we can handle long press.
-            
+            view.setFocusableInTouchMode(true);
+            view.requestFocus();
+
             mLauncher.hidePopWindowList();
             if (handleLongPress) {
                 // Check if the event is not near the edges

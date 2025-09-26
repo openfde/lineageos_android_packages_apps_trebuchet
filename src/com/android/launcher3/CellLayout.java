@@ -84,6 +84,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
+import com.android.launcher3.util.FileUtils;
+import com.android.launcher3.util.StringUtils;
+import android.util.DisplayMetrics;
 
 public class CellLayout extends ViewGroup {
     private static final String TAG = "CellLayout";
@@ -972,14 +975,18 @@ public class CellLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        // int screenHeightDp = getContext().getResources().getConfiguration().screenHeightDp;
         int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize =  960;//MeasureSpec.getSize(heightMeasureSpec);
+        int heightSize = metrics.heightPixels - 120;//MeasureSpec.getSize(heightMeasureSpec);
         int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());
-        int childHeightSize = 940;//heightSize - (getPaddingTop() + getPaddingBottom());
+        int childHeightSize = heightSize - (getPaddingTop() + getPaddingBottom());
+        // int hs = MeasureSpec.getSize(heightMeasureSpec);
+        // int chs = hs - (getPaddingTop() + getPaddingBottom());
 
-//        Log.w(TAG, "onMeasure widthSize : "+widthSize + ",heightSize "+heightSize + ", childWidthSize: "+childWidthSize + " ,childHeightSize "+childHeightSize);
+        // Log.w(TAG, "onMeasure hs : "+hs + ",chs "+chs + ", metrics.heightPixels: "+ metrics.heightPixels + " ,screenHeightDp "+screenHeightDp + ", widthSize: "+widthSize + " ,childWidthSize: "+childWidthSize);
         if (mFixedCellWidth < 0 || mFixedCellHeight < 0) {
             int cw = DeviceProfile.calculateCellWidth(childWidthSize, mBorderSpace.x,
                     mCountX);
