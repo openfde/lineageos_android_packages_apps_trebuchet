@@ -1255,7 +1255,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         // same as before.
         mDisableRelayout = mIcon != null;
 
-        icon.setBounds(0, 0, 60, 60);
+        icon.setBounds(0, 0, mIconSize, mIconSize);
 
         updateIcon(icon);
 
