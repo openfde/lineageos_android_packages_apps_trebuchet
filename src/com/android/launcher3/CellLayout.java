@@ -980,13 +980,13 @@ public class CellLayout extends ViewGroup {
         int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = metrics.heightPixels - 120;//MeasureSpec.getSize(heightMeasureSpec);
+        int heightSize = metrics.heightPixels - 20;//MeasureSpec.getSize(heightMeasureSpec);
         int childWidthSize = widthSize - (getPaddingLeft() + getPaddingRight());
         int childHeightSize = heightSize - (getPaddingTop() + getPaddingBottom());
         // int hs = MeasureSpec.getSize(heightMeasureSpec);
         // int chs = hs - (getPaddingTop() + getPaddingBottom());
 
-        // Log.w(TAG, "onMeasure hs : "+hs + ",chs "+chs + ", metrics.heightPixels: "+ metrics.heightPixels + " ,screenHeightDp "+screenHeightDp + ", widthSize: "+widthSize + " ,childWidthSize: "+childWidthSize);
+        //  Log.w(TAG, "onMeasure hs : "+hs + ",chs "+chs + ", metrics.density: "+ metrics.density +", metrics.densityDpi: "+ metrics.densityDpi + " ,screenHeightDp "+screenHeightDp + ", widthSize: "+widthSize + " ,childWidthSize: "+childWidthSize);
         if (mFixedCellWidth < 0 || mFixedCellHeight < 0) {
             int cw = DeviceProfile.calculateCellWidth(childWidthSize, mBorderSpace.x,
                     mCountX);
