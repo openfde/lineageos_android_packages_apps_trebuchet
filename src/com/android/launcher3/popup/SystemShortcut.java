@@ -58,7 +58,9 @@ import android.content.DialogInterface;
 import com.android.launcher3.touch.ItemClickHandler;
 import android.view.Window;
 import android.view.WindowManager;
-
+import com.android.launcher3.popup.PopupContainerWithArrow;
+import android.view.Display;
+import android.view.WindowManager;
 /**
  * Represents a system shortcut for a given app. The shortcut should have a label and icon, and an
  * onClickListener that depends on the item that the shortcut services.
@@ -311,14 +313,15 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         @Override
         public void onClick(View view) {
             dismissTaskMenuView(mTarget);
-            AlertDialog alertDialog = new AlertDialog.Builder(view.getContext())
+            Log.w(" PopupContainerWithArrow--SystemShortcut"," x: "+PopupContainerWithArrow.x  + ",y "+PopupContainerWithArrow.y);
+            Launcher launcher = Launcher.getLauncher(view.getContext());
+            AlertDialog alertDialog = new AlertDialog.Builder(view.getContext(),R.style.RoundedAlertDialog)
             .setTitle(R.string.desktop_tips)
             .setMessage(R.string.desktop_delete_tips)
             .setNegativeButton(R.string.desktop_cancel, null)
             .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
-                    Launcher launcher = Launcher.getLauncher(view.getContext());
                     if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
                         launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
                     }else {
@@ -335,14 +338,20 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                     launcher.removeItem(mOriginalView, mItemInfo,true);
                 }
             }).create();
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION);
 
+            alertDialog.show();
             Window window = alertDialog.getWindow();
+            WindowManager m = launcher.getWindowManager();
+            Display d = m.getDefaultDisplay();
             if (window != null) {
                 WindowManager.LayoutParams params = window.getAttributes();
-                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                window.setLayout(450, 180);
+                params.x = (int) (PopupContainerWithArrow.x - d.getWidth()/2);
+                params.y = (int ) (PopupContainerWithArrow.y - d.getHeight()/2);
                 window.setAttributes(params);
             }
-            alertDialog.show();
+            
         }
     }
 

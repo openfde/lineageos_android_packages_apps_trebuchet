@@ -484,4 +484,10 @@
         <item name="android:layout_marginHorizontal">15dp</item>
     </style>
 
+    <style name="RoundedAlertDialog"  parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="dialogCornerRadius">8dp</item>
+        <item name="colorAccent">#318BF3</item>
+
+    </style>
+
 </resources>

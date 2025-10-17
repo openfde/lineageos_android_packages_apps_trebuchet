@@ -101,6 +101,9 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
 
     private static final String TAG = "PopupContainerWithArrow";
 
+    public static float x ;
+    public static float y ;
+
     public PopupContainerWithArrow(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mStartDragThreshold = getResources().getDimensionPixelSize(
@@ -161,6 +164,8 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
     @Override
     public boolean onControllerInterceptTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            x = ev.getX();
+            y = ev.getY();
             BaseDragLayer dl = getPopupContainer();
             if (!dl.isEventOverView(this, ev)) {
                 // TODO: add WW log if want to log if tap closed deep shortcut container.
@@ -209,7 +214,7 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
                 .map(s -> s.getShortcut(launcher, item, icon))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        Log.i(TAG,"showForIcon..............systemShortcuts  "+systemShortcuts.size());
+        Log.i(TAG,"showForIcon..............systemShortcuts  "+systemShortcuts.size() + ",x: "+x + ",y: "+y);
         container = (PopupContainerWithArrow) launcher.getLayoutInflater().inflate(
                 R.layout.popup_container, launcher.getDragLayer(), false);
         container.configureForLauncher(launcher, item);
@@ -615,12 +620,16 @@ public class PopupContainerWithArrow<T extends Context & ActivityContext>
         public boolean onTouch(View v, MotionEvent ev) {
             // Touched a shortcut, update where it was touched so we can drag from there on
             // long click.
+            x = ev.getX();
+            y = ev.getY();
             switch (ev.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+          
                 case MotionEvent.ACTION_MOVE:
                     mIconLastTouchPos.set((int) ev.getX(), (int) ev.getY());
                     break;
             }
+
             return false;
         }
 
