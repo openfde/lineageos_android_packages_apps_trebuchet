@@ -338,7 +338,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                     launcher.removeItem(mOriginalView, mItemInfo,true);
                 }
             }).create();
-            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION);
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
 
             alertDialog.show();
             Window window = alertDialog.getWindow();
@@ -346,7 +346,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             Display d = m.getDefaultDisplay();
             if (window != null) {
                 WindowManager.LayoutParams params = window.getAttributes();
-                window.setLayout(450, 180);
+                window.setLayout(320, 180);
                 params.x = (int) (PopupContainerWithArrow.x - d.getWidth()/2);
                 params.y = (int ) (PopupContainerWithArrow.y - d.getHeight()/2);
                 window.setAttributes(params);
