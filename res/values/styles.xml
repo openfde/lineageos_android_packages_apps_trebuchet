@@ -487,7 +487,7 @@
     <style name="RoundedAlertDialog"  parent="Theme.MaterialComponents.DayNight.Dialog">
         <item name="dialogCornerRadius">8dp</item>
         <item name="colorAccent">#318BF3</item>
-
+        <item name="android:background">#F9FAFC</item>
     </style>
 
 </resources>
