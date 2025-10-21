@@ -58,6 +58,9 @@ import com.android.launcher3.views.BaseDragLayer;
 
 import java.util.Arrays;
 
+import android.view.WindowManager;
+import android.graphics.PixelFormat;
+
 /**
  * A container for shortcuts to deep links and notifications associated with an app.
  *
@@ -207,6 +210,16 @@ public abstract class ArrowPopup<T extends Context & ActivityContext>
      */
     public <R extends View> R inflateAndAdd(int resId, ViewGroup container, int index) {
         View view = mInflater.inflate(resId, container, false);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        WindowManager.LayoutParams.WRAP_CONTENT,  
+        WindowManager.LayoutParams.WRAP_CONTENT,  
+        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY ,
+        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |           
+        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |         
+        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |        
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,         
+        PixelFormat.TRANSLUCENT                                   
+    );
         container.addView(view, index);
         return (R) view;
     }

@@ -90,6 +90,14 @@ import java.util.Map;
 import com.android.launcher3.keyboard.ViewGroupFocusHelper;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.view.Display;
+import android.view.WindowManager;
+import android.view.LayoutInflater;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.view.KeyEvent;
+import androidx.annotation.Nullable;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -418,13 +426,62 @@ public class ItemClickHandler {
    }
 
    public static void renameFiletoClipboard(Launcher launcher,ItemInfo item){
-    if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY){
-    //    launcher.gotoDocApp(FileUtils.RENAME_DIR,item.title.toString());
-    }else{
-    //    launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString());
+
+    // launcher.renameFile(item.title.toString());  
+
+    View customView = LayoutInflater.from(launcher).inflate(R.layout.custom_input_dialog_layout, null);
+    EditText editText = customView.findViewById(R.id.editText);
+    editText.setText(item.title.toString());
+    String text = editText.getText().toString();
+    int separatorIndex = text.lastIndexOf(".");
+    editText.requestFocus();
+    editText.setSelection(0,
+            (separatorIndex == -1 ) ? text.length() : separatorIndex);
+    editText.setOnEditorActionListener(
+                new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(
+                            TextView view, int actionId, @Nullable KeyEvent event) {
+                        if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
+                                && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                                && event.hasNoModifiers())) {
+                            reNameFileName(editText,launcher,item);
+                        }
+                        return false;
+                    }
+                });
+    AlertDialog alertDialog = new AlertDialog.Builder(launcher,R.style.RoundedAlertDialog)
+    .setTitle(R.string.desktop_rename)
+    .setView(customView)
+    .setNegativeButton(R.string.desktop_cancel, null)
+    .setPositiveButton(R.string.desktop_ok, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialogInterface, int i) {
+            dialogInterface.dismiss();
+            reNameFileName(editText,launcher,item);
+        }
+    }).create();
+
+    alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+    alertDialog.show();
+
+    Window window = alertDialog.getWindow();
+    WindowManager m = launcher.getWindowManager();
+    Display d = m.getDefaultDisplay();
+    if (window != null) {
+        WindowManager.LayoutParams params = window.getAttributes();
+        window.setLayout(450, 200);
+        // params.x = (int) (v.getX() - d.getWidth()/2);
+        // params.y = (int ) (v.getY() - d.getHeight()/2);
+        window.setAttributes(params);
     }
-    launcher.renameFile(item.title.toString());  
 }
+
+    private static void reNameFileName(EditText editText,Launcher launcher,ItemInfo item){
+        String newName = editText.getText().toString().trim();
+        if(!newName.equals("")){
+            launcher.gotoDocApp(FileUtils.RENAME_FILE,item.title.toString()+"###"+newName);
+        }
+    }
 
     public static void startAppShortcutOrInfoActivity(View v, ItemInfo item, Launcher launcher) {
         TestLogging.recordEvent(
@@ -452,7 +509,7 @@ public class ItemClickHandler {
             } else {
                 // 如果没有找到启动 Intent，则提示用户
                 // 可以选择跳转到应用商店
-                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext())
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getContext(),R.style.RoundedAlertDialog)
                 .setTitle(R.string.desktop_tips)
                 .setMessage(R.string.app_not_install)
                 .setNegativeButton(R.string.desktop_cancel, null)
@@ -463,13 +520,19 @@ public class ItemClickHandler {
                     }
                 }).create();
 
+                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+                alertDialog.show();
+
                 Window window = alertDialog.getWindow();
+                WindowManager m = launcher.getWindowManager();
+                Display d = m.getDefaultDisplay();
                 if (window != null) {
                     WindowManager.LayoutParams params = window.getAttributes();
-                    params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                    window.setLayout(320, 180);
+                    params.x = (int) (v.getX() - d.getWidth()/2);
+                    params.y = (int ) (v.getY() - d.getHeight()/2);
                     window.setAttributes(params);
                 }
-                alertDialog.show();
             }
             return ;
         }else if(item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
