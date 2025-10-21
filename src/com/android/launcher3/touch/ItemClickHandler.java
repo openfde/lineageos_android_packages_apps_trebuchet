@@ -431,6 +431,20 @@ public class ItemClickHandler {
 
     View customView = LayoutInflater.from(launcher).inflate(R.layout.custom_input_dialog_layout, null);
     EditText editText = customView.findViewById(R.id.editText);
+    AlertDialog alertDialog = new AlertDialog.Builder(launcher,R.style.RoundedAlertDialog)
+    .setTitle(R.string.desktop_rename)
+    .setView(customView)
+    .setNegativeButton(R.string.desktop_cancel, null)
+    .setPositiveButton(R.string.desktop_ok, new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialogInterface, int i) {
+            dialogInterface.dismiss();
+            reNameFileName(editText,launcher,item);
+        }
+    }).create();
+
+    alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+    alertDialog.show();
+    
     editText.setText(item.title.toString());
     String text = editText.getText().toString();
     int separatorIndex = text.lastIndexOf(".");
@@ -445,24 +459,13 @@ public class ItemClickHandler {
                         if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                                 && event.hasNoModifiers())) {
+                            alertDialog.dismiss();
                             reNameFileName(editText,launcher,item);
                         }
                         return false;
                     }
                 });
-    AlertDialog alertDialog = new AlertDialog.Builder(launcher,R.style.RoundedAlertDialog)
-    .setTitle(R.string.desktop_rename)
-    .setView(customView)
-    .setNegativeButton(R.string.desktop_cancel, null)
-    .setPositiveButton(R.string.desktop_ok, new DialogInterface.OnClickListener() {
-        public void onClick(DialogInterface dialogInterface, int i) {
-            dialogInterface.dismiss();
-            reNameFileName(editText,launcher,item);
-        }
-    }).create();
-
-    alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-    alertDialog.show();
+    
 
     Window window = alertDialog.getWindow();
     WindowManager m = launcher.getWindowManager();
