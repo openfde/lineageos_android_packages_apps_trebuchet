@@ -58,6 +58,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
 
         contentView.findViewById<TextView>(R.id.text_display_settings)?.setOnClickListener({
             val intent = Intent(Settings.ACTION_DISPLAY_SETTINGS)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             launcher.startActivity(intent)
             dismiss()
         })
