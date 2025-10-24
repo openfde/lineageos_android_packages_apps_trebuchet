@@ -434,25 +434,76 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
     }
 
+    public static Bitmap pngToBitmap(Context context, String packageName) {
+    String path = SPUtils.getUserInfo(context,packageName);
+     Log.w(TAG, "pngToBitmap path: " +path + ",packageName "+packageName);
+    try {
+        Bitmap bitmap  = BitmapFactory.decodeFile(path);
+        return bitmap;
+    } catch (Exception e) {
+        Log.e(TAG, "pngToBitmap: " + e.toString());
+        e.printStackTrace();
+    }
+    return null;
+}
+
+    public static void drawableToPng(Context context,String packageName, Drawable drawable) {
+        Log.w(TAG,"drawableToPng packageName： "+packageName);
+        Bitmap bitmapT = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+
+        if (drawable instanceof AdaptiveIconDrawable) {
+            AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
+            bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
+        } else {
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                bitmapT = bitmapDrawable.getBitmap();
+            } 
+        }
+        String filePath =  "/volumes" + "/" + getLinuxUUID() + getLinuxHomeDir() +"/.local/share/icons/"+packageName+"_fde.png";
+        File file = new File(filePath);
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            bitmapT.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            SPUtils.putUserInfo(context,packageName,filePath);
+        } catch (Exception e) {
+            Log.e(TAG,"e: "+e.toString());
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.flush();
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                Log.e(TAG,"e: "+e.toString());
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static void drawableToPng(Context context, Drawable drawable, String filePath) {
         Bitmap bitmapT = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
 
         Bitmap bitmap;
+        int size = 200 ;
         if (drawable instanceof AdaptiveIconDrawable) {
             AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
             bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
-            //bitmapT = scaleBitmap(bitmapT, 80, 80);
-            Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
-            b2 = scaleBitmap(b2, 36, 36);
+            Bitmap b2 = vectorToBitmap(context, R.mipmap.bg_android);
+            bitmapT = scaleBitmap(bitmapT, size, size);
+            b2 = scaleBitmap(b2, size, size);
             bitmap = overlayBitmaps(bitmapT,b2);
         } else {
             if (drawable instanceof BitmapDrawable) {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 bitmapT = bitmapDrawable.getBitmap();
-                //bitmapT = scaleBitmap(bitmapT, 80, 80);
-                Bitmap b2 = vectorToBitmap(context, R.mipmap.flag_android);
-                b2 = scaleBitmap(b2, 36, 36);
+                Bitmap b2 = vectorToBitmap(context, R.mipmap.bg_android);
+                bitmapT = scaleBitmap(bitmapT, size, size);
+                b2 = scaleBitmap(b2, size, size);
                 bitmap = overlayBitmaps(bitmapT,b2);
             } else {
                 bitmap = bitmapT;
@@ -892,12 +943,12 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
 
     public static Bitmap overlayBitmaps(Bitmap bitmap1, Bitmap bitmap2 ) {
         // 创建一个与第一个 Bitmap 相同大小的空白 Bitmap
-        Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth()+bitmap2.getWidth(), bitmap1.getHeight()+bitmap2.getHeight(), bitmap1.getConfig());
+        Bitmap overlayBitmap = Bitmap.createBitmap(bitmap1.getWidth(), bitmap1.getHeight(), bitmap1.getConfig());
         // 创建 Canvas，将第一个 Bitmap 作为底图
         Canvas canvas = new Canvas(overlayBitmap);
-        canvas.drawBitmap(bitmap1, 0, 0, null);  // 将 bitmap1 绘制到 canvas 上
+        canvas.drawBitmap(bitmap1, 0,0, null);  // 将 bitmap1 绘制到 canvas 上
         // 将第二个 Bitmap 绘制到 Canvas 上，叠加在第一个 Bitmap 上
-        canvas.drawBitmap(bitmap2, 48,42, null);  // 将 bitmap2 绘制到 canvas 上
+        canvas.drawBitmap(bitmap2, 0,0, null);  // 将 bitmap2 绘制到 canvas 上
         // 将叠加后的 Bitmap 设置到 ImageView
         return overlayBitmap;
     }

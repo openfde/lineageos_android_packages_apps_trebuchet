@@ -326,6 +326,8 @@ import android.app.ActivityManager;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
 import android.view.ViewTreeObserver;
+import android.content.pm.ApplicationInfo;
+import android.graphics.drawable.Drawable;
 /**
  * Default launcher application.
  */
@@ -3738,6 +3740,16 @@ public class Launcher extends StatefulActivity<LauncherState>
                         if(listApps != null){
                             //1、Linux端拷贝的应用 title是带.desktop的
                             found = listApps.stream().anyMatch(item -> fileName.equals(StringUtils.ToString(item.get("title"))));
+                            
+                            String filePath =  "/volumes" + "/" + FileUtils.getLinuxUUID() + FileUtils.getLinuxHomeDir() +"/.local/share/icons/"+packageName+"_fde.png";
+                            File file = new File(filePath);
+                            if(!file.exists()){
+                                PackageManager packageManager = getPackageManager();
+                                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+                                Drawable icon  = applicationInfo.loadIcon(packageManager);
+                                FileUtils.drawableToPng(this,packageName,icon);
+                            }
+                         
                             // if(!found){
                             //     //2、android端自己生成的title是应用名,则根据appWidgetProvider字段去匹配且itemType=0包名
                             //     final String  fName = packageName;
@@ -3754,9 +3766,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                             Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found );
                         } 
                     }
-                  
-                   
-                    
+                     
                     if(!found){
                         WorkspaceItemInfo info = new WorkspaceItemInfo();
                         //Point point = FileUtils.findNextFreePoint(this);
@@ -3784,7 +3794,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                         info.cellY = listIdle.get(countLinuxApp).y;
                         info.cellX = listIdle.get(countLinuxApp).x;
                         Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id);
-                     
+                        
                         // index++;
                         countLinuxApp++;
                         insertOrUpdateFavorites(info);
@@ -4002,6 +4012,8 @@ public class Launcher extends StatefulActivity<LauncherState>
                 }
             );
             // 
+        // }else if("requestFocus".equals(method)){
+        //     mOverviewPanel.requestFocus();
         }else{
             gotoDocApp(method,message);
         }

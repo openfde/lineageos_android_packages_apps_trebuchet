@@ -493,12 +493,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             iconDrawable = new FastBitmapDrawable(bitmap);
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP){
             try {
-                String packageName = info.appWidgetProvider.toString();
-                PackageManager packageManager = getContext().getPackageManager();
-                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-                Drawable icon  = applicationInfo.loadIcon(packageManager);
-                bitmap = FileUtils.drawableToBitmap(icon);
-                iconDrawable = new FastBitmapDrawable(bitmap);
+                 String packageName = info.appWidgetProvider.toString();
+                 bitmap = FileUtils.pngToBitmap(getContext(),packageName);
+                 if(bitmap !=null){
+                    iconDrawable = new FastBitmapDrawable(bitmap);
+                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
