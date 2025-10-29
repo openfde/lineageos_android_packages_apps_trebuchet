@@ -490,7 +490,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         FileUtils.createDesktopDir(FileUtils.PATH_ID_DESKTOP);
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/"); 
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.openfde/pic/"); 
-        FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.local/share/icons/"); 
+        FileUtils.createDesktopDir(FileUtils.getIconPath()); 
 
         bindService();
 
@@ -3741,7 +3741,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                             //1、Linux端拷贝的应用 title是带.desktop的
                             found = listApps.stream().anyMatch(item -> fileName.equals(StringUtils.ToString(item.get("title"))));
                             
-                            String filePath =  "/volumes" + "/" + FileUtils.getLinuxUUID() + FileUtils.getLinuxHomeDir() +"/.local/share/icons/"+packageName+"_fde.png";
+                            String filePath =  FileUtils.getIconPath()+packageName+"_fde.png";
                             File file = new File(filePath);
                             if(!file.exists()){
                                 PackageManager packageManager = getPackageManager();

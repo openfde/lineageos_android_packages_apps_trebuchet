@@ -496,6 +496,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                  String packageName = info.appWidgetProvider.toString();
                  bitmap = FileUtils.pngToBitmap(getContext(),packageName);
                  if(bitmap !=null){
+                    bitmap = FileUtils.getRoundedCornerBitmap(bitmap,16);
                     iconDrawable = new FastBitmapDrawable(bitmap);
                  }
             } catch (Exception e) {
@@ -537,6 +538,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                         bitmap = BitmapFactory.decodeFile(icon); 
                     }    
                 }
+                bitmap = FileUtils.getRoundedCornerBitmap(bitmap,16);
                }catch(Exception e){
                   e.printStackTrace();
                }

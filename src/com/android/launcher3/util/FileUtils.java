@@ -76,6 +76,9 @@ import android.content.pm.LauncherApps;
 import android.os.UserHandle;
 import android.os.UserManager;
 import com.android.launcher3.R;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -391,7 +394,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
 
     public static void createAllAndroidIconToLinux(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
-        String rootPath = "/volumes" + "/" + getLinuxUUID() + getLinuxHomeDir() + "/.local/share/icons/";
+        String rootPath = getIconPath();
 
 
         if ("".equals(packageName)) {
@@ -455,13 +458,15 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         if (drawable instanceof AdaptiveIconDrawable) {
             AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) drawable;
             bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
+            bitmapT = getRoundedCornerBitmap(bitmapT,16);
         } else {
             if (drawable instanceof BitmapDrawable) {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 bitmapT = bitmapDrawable.getBitmap();
+                bitmapT = getRoundedCornerBitmap(bitmapT,16);
             } 
         }
-        String filePath =  "/volumes" + "/" + getLinuxUUID() + getLinuxHomeDir() +"/.local/share/icons/"+packageName+"_fde.png";
+        String filePath =  getIconPath()+packageName+"_fde.png";
         File file = new File(filePath);
         FileOutputStream outputStream = null;
         try {
@@ -484,6 +489,28 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
     }
 
+    /**
+     * bitmap to round corner bitmap
+     */
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float roundPx) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        
+        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        return output;
+    }
+
     public static void drawableToPng(Context context, Drawable drawable, String filePath) {
         Bitmap bitmapT = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
@@ -495,6 +522,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             bitmapT = adaptiveIconToBitmap(adaptiveIconDrawable);
             Bitmap b2 = vectorToBitmap(context, R.mipmap.bg_android);
             bitmapT = scaleBitmap(bitmapT, size, size);
+            bitmapT = getRoundedCornerBitmap(bitmapT,16);
             b2 = scaleBitmap(b2, size, size);
             bitmap = overlayBitmaps(bitmapT,b2);
         } else {
@@ -503,6 +531,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
                 bitmapT = bitmapDrawable.getBitmap();
                 Bitmap b2 = vectorToBitmap(context, R.mipmap.bg_android);
                 bitmapT = scaleBitmap(bitmapT, size, size);
+                bitmapT = getRoundedCornerBitmap(bitmapT,16);
                 b2 = scaleBitmap(b2, size, size);
                 bitmap = overlayBitmaps(bitmapT,b2);
             } else {
@@ -555,6 +584,10 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
         return listApps;
     }
+
+    public static String getIconPath(){
+       return  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/" ;
+    }
    
     public static void createLinuxDesktopFile(String title ,String packageName){
         createDesktopDir(PATH_ID_DESKTOP);
@@ -579,7 +612,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             }
             Path desktopFilePath = Paths.get(pathDesktop);
 
-            String picPath = "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/"+packageName+".png" ;
+            String picPath = getIconPath()+packageName+".png" ;
             File filePic = new File(picPath);
             String homeDir = getLinuxHomeDir();
             String linuxPath = homeDir+"/.local/share/icons/"+packageName+".png";
