@@ -128,10 +128,10 @@ public class ItemClickHandler {
             v.setFocusableInTouchMode(true);
             v.requestFocus();
         }
-     
+        String toolType = FileUtils.getSystemProperty("touch_tool_type","");
         long currentTime = System.currentTimeMillis();
         long subTime = currentTime - lastClickTime;
-        if (subTime  < DOUBLE_CLICK_TIME_DELTA || hasFocus) {
+        if ((subTime  < DOUBLE_CLICK_TIME_DELTA) ||( hasFocus && toolType.contains("KEY")) ) {
             //double click   
             v.setFocusableInTouchMode(false);
             v.clearFocus();

@@ -659,6 +659,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // ignore events if they happen in padding area
+        FileUtils.setSystemProperty("touch_tool_type","MOUSE");
         if (event.getAction() == MotionEvent.ACTION_DOWN
                 && shouldIgnoreTouchDown(event.getX(), event.getY())) {
             return false;
@@ -710,6 +711,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         // Unlike touch events, keypress event propagate pressed state change immediately,
         // without waiting for onClickHandler to execute. Disable pressed state changes here
         // to avoid flickering.
+        FileUtils.setSystemProperty("touch_tool_type","KEY"+keyCode);
         mIgnorePressedStateChange = true;
         boolean result = super.onKeyUp(keyCode, event);
         mIgnorePressedStateChange = false;
