@@ -79,6 +79,8 @@ import com.android.launcher3.R;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import org.greenrobot.eventbus.EventBus;
+import com.android.launcher3.model.data.MessageEvent;
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -97,6 +99,8 @@ public class FileUtils {
     public static final String DELETE_FILE = "DELETE_FILE";
 
     public static final String REMOVE_APP = "REMOVE_APP";
+
+    public static final String RELOAD_APP = "RELOAD_APP";
 
     public static final String NEW_DIR = "NEW_DIR";
 
@@ -123,6 +127,10 @@ public class FileUtils {
     public static final String DIR_INFO = "DIR_INFO";
 
     public static final String FILE_INFO = "FILE_INFO";
+
+    public static final String LOAD_DESKTOP_STATUS = "finish_desktop";
+
+    public static final String FINISH_LOAD_DESKTOP = "1";
 
     public static final String OP_CREATE_LINUX_ICON = "OP_CREATE_LINUX_ICON";
 
@@ -439,10 +447,8 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
 
     public static Bitmap pngToBitmap(Context context, String packageName) {
     String path = SPUtils.getUserInfo(context,packageName);
-     Log.w(TAG, "pngToBitmap path: " +path + ",packageName "+packageName);
     try {
-        Bitmap bitmap  = BitmapFactory.decodeFile(path);
-        return bitmap;
+        return BitmapFactory.decodeFile(path);
     } catch (Exception e) {
         Log.e(TAG, "pngToBitmap: " + e.toString());
         e.printStackTrace();
@@ -589,7 +595,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
        return  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/.local/share/icons/" ;
     }
    
-    public static void createLinuxDesktopFile(String title ,String packageName){
+    public static void createLinuxDesktopFile(Context context , String title ,String packageName){
         createDesktopDir(PATH_ID_DESKTOP);
         String shareDesktopStr = getSystemProperty(FDE_APP_FUSION,"1");
         if("0".equals(shareDesktopStr)){
@@ -597,23 +603,20 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         }
         try{    
             Log.i(TAG,"createLinuxDesktopFile title:  "+title + ",packageName: "+packageName);
-            // String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
-            // File ff = new File(documentId);
-            // if(!ff.exists()){
-            //     documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
-            // }
             String documentId = getAllDesktopPath();
-            //String md5 = getMD5(packageName);
             String pathDesktop = documentId+""+ packageName+"_fde.desktop";
+            String picPath = getIconPath()+packageName+".png" ;
             File file = new File(pathDesktop);
+            String path = SPUtils.getUserInfo(context,packageName);
+            if("".equals(path)){
+                SPUtils.putUserInfo(context,packageName, getIconPath()+packageName+"_fde.png");
+                EventBus.getDefault().post(new MessageEvent(RELOAD_APP, packageName));
+            }   
             if(file.exists()){
-                Log.i(TAG,"pathDesktop is exists :  "+pathDesktop);
+                Log.i(TAG,"pathDesktop is exists :  "+pathDesktop + ",picPath "+picPath);
                 return ;
             }
-            Path desktopFilePath = Paths.get(pathDesktop);
-
-            String picPath = getIconPath()+packageName+".png" ;
-            File filePic = new File(picPath);
+            Path desktopFilePath = Paths.get(pathDesktop);        
             String homeDir = getLinuxHomeDir();
             String linuxPath = homeDir+"/.local/share/icons/"+packageName+".png";
             Log.i(TAG,"homeDir :  "+homeDir + ",linuxPath: "+linuxPath);

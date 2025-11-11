@@ -60,7 +60,6 @@ class ModelLauncherCallbacks(private var taskExecutor: Consumer<ModelUpdateTask>
 
     override fun onPackageRemoved(packageName: String, user: UserHandle) {
         FileLog.d(TAG, "package removed received $packageName")
-        // String fileName = packageName+"_fde.desktop" ;
         EventBus.getDefault().post(MessageEvent(FileUtils.REMOVE_APP, packageName));
         taskExecutor.accept(PackageUpdatedTask(OP_REMOVE, user, packageName))
     }

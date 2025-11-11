@@ -205,7 +205,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
                 if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
                     FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
-                    FileUtils.createLinuxDesktopFile(itemInfo.title.toString(),packageName);
+                    FileUtils.createLinuxDesktopFile(app.getContext(),itemInfo.title.toString(),packageName);
                 }else{
                     getModelWriter().addItemToDatabase(itemInfo,
                                 LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,

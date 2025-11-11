@@ -292,16 +292,7 @@ public class ModelWriter {
         String packageName = item.getTargetComponent() != null
             ? item.getTargetComponent().getPackageName() : null;
         Log.w(TAG, "Adding item info to workspace addItemToDatabase packageName : "+packageName + ",item "+item);   
-        // if("com.android.launcher3".equals(packageName) || "com.termux.x11".equals(packageName) || "com.android.documentsui".equals(packageName)){
-        //     item.appWidgetProvider = "";
-        // } else{
-        //     String pathDesktop = packageName ;//+"_fde.desktop";
-        //     item.appWidgetProvider = pathDesktop ;
-        // }
 
-        // if(item.itemType != LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT && item.itemType != LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY && item.itemType != LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-        //     return ;
-        // }
     
         updateItemInfoProps(item, container, screenId, cellX, cellY);
         Log.d(TAG, "addDesktopFiles: addItemToDatabase 111 "+item);
