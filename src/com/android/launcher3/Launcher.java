@@ -3620,17 +3620,14 @@ public class Launcher extends StatefulActivity<LauncherState>
                         // Log.d(TAG, "refreshDesktopFiles: listIcons is exists  "+files.length  + ",fname "+f.getName());
                     }     
                 }
-                FileUtils.setSystemProperty(FileUtils.LOAD_DESKTOP_STATUS,FileUtils.FINISH_LOAD_DESKTOP);
                 return 1;
             }else{
                 Log.d(TAG, "bindItems: files is null  " );
-                FileUtils.setSystemProperty(FileUtils.LOAD_DESKTOP_STATUS,FileUtils.FINISH_LOAD_DESKTOP);
                 return 0;
             }
         }catch(Exception e){
             e.printStackTrace();
         }
-        FileUtils.setSystemProperty(FileUtils.LOAD_DESKTOP_STATUS,FileUtils.FINISH_LOAD_DESKTOP);
         return 0;
     }
 

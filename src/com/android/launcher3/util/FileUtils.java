@@ -128,10 +128,6 @@ public class FileUtils {
 
     public static final String FILE_INFO = "FILE_INFO";
 
-    public static final String LOAD_DESKTOP_STATUS = "finish_desktop";
-
-    public static final String FINISH_LOAD_DESKTOP = "1";
-
     public static final String OP_CREATE_LINUX_ICON = "OP_CREATE_LINUX_ICON";
 
     public static final String OP_CREATE_ANDROID_ICON = "OP_CREATE_ANDROID_ICON";
