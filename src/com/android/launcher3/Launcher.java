@@ -295,6 +295,7 @@ import com.android.launcher3.util.FileUtils;
 import com.android.launcher3.util.DbUtils;
 import com.android.launcher3.util.NetUtils;
 import com.android.launcher3.util.StringUtils;
+import com.android.launcher3.util.SPUtils;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.io.File;
@@ -2404,51 +2405,6 @@ public class Launcher extends StatefulActivity<LauncherState>
             }
         }).start();
 
-       
-
-        // Handler handler = new Handler(Looper.getMainLooper());
-        // handler.postDelayed(() -> {
-        //     new Thread(() -> {
-        //         try {
-        //             Log.i(TAG, "bella_insert createLinuxDesktopFile shortcuts size: "+shortcuts.size());
-        //           //  List<String> listMd5 = new ArrayList<>();
-        //             for (Pair<ItemInfo, View> e : shortcuts) {
-        //                 ItemInfo item = e.first;
-        //                 Log.i(TAG, "bella_insert createLinuxDesktopFile item: "+item);
-        //                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION ||
-        //                     item.itemType == LauncherSettings.Favorites.ITEM_TYPE_SHORTCUT ||
-        //                     item.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT) {
-        //                     ContentValues initialValues = new ContentValues();
-        //                     initialValues.put("title", item.title.toString());
-        //                     String packageName = "";
-        //                     if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
-        //                         packageName = item.getTargetComponent().getPackageName();    
-        //                     }else{
-        //                         // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
-        //                         packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
-        //                     }
-        //                     Log.i(TAG, "bella_insert createLinuxDesktopFile packageName: "+packageName);
-        //                     if (packageName != null) {
-        //                         if(!"com.fde.x11".equals(packageName)){
-        //                             initialValues.put("packageName", packageName);
-        //                             initialValues.put("itemType", item.itemType);
-        //                             FileUtils.createLinuxDesktopFile(initialValues);
-        //                             //String md5 = FileUtils.getMD5(packageName);
-        //                             //listMd5.add(md5);
-        //                         }
-        //                         // Log.i(TAG, "bella_insert packageName " + packageName);
-        //                     }
-                           
-        //                 } else if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP) {
-        //                     // Handle Linux app item type if needed
-        //                 }
-        //             }
-        
-        //         } catch (Exception e) {
-        //             e.printStackTrace();
-        //         }
-        //     }).start();
-        // }, 10 * 1000);
     }
 
     /**
@@ -3354,7 +3310,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                                 }else if("UPDATE_DESKTOP".equals(method) || "DELETE_FILE".equals(method)){
                                     if(params == null || "".equals(params) ){
                                        //not refresh     
-                                       // }else if(params.endsWith("_fde.desktop")){
                                     }else if(params.endsWith(".desktop")){
                                         try{
                                             String[] arrFileName = params.split("###");
@@ -3763,14 +3718,14 @@ public class Launcher extends StatefulActivity<LauncherState>
                     }else{
                         if(listApps != null){
                             found = listApps.stream().anyMatch(item -> fileName.equals(item.get("title").toString()));
-                            Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found );
+                            Log.d(TAG, "refreshDesktopFiles-addLinuxApps: fileName: "+fileName + ",found "+found  + ",IsAndroidApp： "+IsAndroidApp);
                         } 
                     }
                      
                     if(!found){
                         WorkspaceItemInfo info = new WorkspaceItemInfo();
                         //Point point = FileUtils.findNextFreePoint(this);
-                        info.mComponentName = new ComponentName("com.termux.x11","com.termux.x11.AppListActivity");;
+                        
                         info.title = fileName;
                         info.container = -100;
                         info.screenId = 0;
@@ -3784,16 +3739,18 @@ public class Launcher extends StatefulActivity<LauncherState>
                         // int sY = newY%numRows ;
                         // int sX = newY/numRows + point.x ;
                         if(IsAndroidApp){
+                            info.mComponentName = new ComponentName(packageName,packageName+".MainActivity");
                             info.appWidgetProvider = packageName;
                             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP;
                         }else{
+                            info.mComponentName = new ComponentName("com.termux.x11","com.termux.x11.AppListActivity");
                             info.appWidgetProvider = "";
                             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP;
                         }
                         
                         info.cellY = listIdle.get(countLinuxApp).y;
                         info.cellX = listIdle.get(countLinuxApp).x;
-                        Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id);
+                        Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id + ",IsAndroidApp: "+IsAndroidApp);
                         
                         // index++;
                         countLinuxApp++;
@@ -4011,9 +3968,17 @@ public class Launcher extends StatefulActivity<LauncherState>
                     gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+fileName);
                 }
             );
+            SPUtils.putUserInfo(Launcher.this,message, "");
             // 
         // }else if("requestFocus".equals(method)){
         //     mOverviewPanel.requestFocus();
+        }else if(FileUtils.RELOAD_APP.equals(method)){
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                   refreshLinuxApps(Launcher.this);
+                }
+            }, 1000 * 3);
         }else{
             gotoDocApp(method,message);
         }

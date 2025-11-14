@@ -498,8 +498,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                  if(bitmap !=null){
                     bitmap = FileUtils.getRoundedCornerBitmap(bitmap,16);
                     iconDrawable = new FastBitmapDrawable(bitmap);
+                 }else{
+                    Log.e(TAG,"bellaLauncher applyIconAndLabel  bitmap is null  " );
                  }
             } catch (Exception e) {
+                Log.e(TAG,"bellaLauncher applyIconAndLabel e: "+e.toString() );
                 e.printStackTrace();
             }
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
