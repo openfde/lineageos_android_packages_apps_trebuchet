@@ -388,7 +388,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     private final KeyboardShortcutsDelegate mKeyboardShortcutsDelegate =
             new KeyboardShortcutsDelegate(this);
     IDocAidlInterface idocAidl;
-    private Handler handler = new Handler();        
 
     @Thunk
     Workspace<?> mWorkspace;
@@ -429,6 +428,8 @@ public class Launcher extends StatefulActivity<LauncherState>
     private LauncherAccessibilityDelegate mAccessibilityDelegate;
 
     private PopupDataProvider mPopupDataProvider;
+
+    private List<WorkspaceItemInfo> mNewShortcutItems = new ArrayList<>();
 
     // We only want to get the SharedPreferences once since it does an FS stat each time we get
     // it from the context.
@@ -494,7 +495,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         FileUtils.createDesktopDir(FileUtils.getIconPath()); 
 
         bindService();
-
         mStartupLatencyLogger = createStartupLatencyLogger(
                 sIsNewProcess
                         ? LockedUserState.get(this).isUserUnlockedAtLauncherStartup()
@@ -3268,13 +3268,12 @@ public class Launcher extends StatefulActivity<LauncherState>
             // gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
 
             // gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
-
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    refreshLinuxApps(Launcher.this);
-                }
-            }, 3 * 10);
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshLinuxApps(Launcher.this);
+                    }
+                }, 10 * 5);
                    
             try{
                 idocAidl.register(new IDataChangedCallback.Stub(){
@@ -3522,9 +3521,9 @@ public class Launcher extends StatefulActivity<LauncherState>
         }, executorService);
 
         future.thenAccept(result -> {
-            Log.d(TAG, "result  "+result );
+            Log.d(TAG, "refreshDesktopFiles-result  "+result );
             if(1 == result){
-                getModel().forceReload();
+                // getModel().forceReload();
             }
         });
 
@@ -3550,6 +3549,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                          DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName);   
                     }
                 }
+            }
+
+            if(pos == 0){
+                mNewShortcutItems.clear();
             }
     
             File[] files = FileUtils.getAllDesktopFiles();
@@ -3615,20 +3618,45 @@ public class Launcher extends StatefulActivity<LauncherState>
                             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
                         }
                         index++;
-                        insertOrUpdateFavorites(info);
+                        mNewShortcutItems.add(info);
                     }else{
                         // Log.d(TAG, "refreshDesktopFiles: listIcons is exists  "+files.length  + ",fname "+f.getName());
                     }     
                 }
+                batchInsert();
                 return 1;
             }else{
                 Log.d(TAG, "bindItems: files is null  " );
+                batchInsert();
                 return 0;
             }
         }catch(Exception e){
             e.printStackTrace();
         }
+        batchInsert();
         return 0;
+    }
+
+    private void batchInsert(){
+        Log.w(TAG,"mNewShortcutItems: size : "+mNewShortcutItems.size());
+       
+        for(WorkspaceItemInfo shortcut : mNewShortcutItems){
+            insertOrUpdateFavorites(shortcut);
+        }
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.w(TAG,"mNewShortcutItems : "+mNewShortcutItems.toString());
+                        getModel().forceReload();
+                    }
+                });
+            }
+        }, 100 * 5); 
+         
     }
 
     public void refreshLinuxApps(Context context){
@@ -3644,7 +3672,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         future.thenAccept(result -> {
             Log.w(TAG, "refreshLinuxApps result  "+result );
             if(1 == result){
-                getModel().forceReload();           
+                // getModel().forceReload();           
             }
         });
 
@@ -3653,7 +3681,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     public synchronized int addLinuxApps(){
         try{
-            
+            mNewShortcutItems = new ArrayList<>();
             List<Point> listIdle = FileUtils.getAllIdlePoints(Launcher.this,getModel().getModelDbController());
             Log.w(TAG, "refreshDesktopFiles-listIdle: "+listIdle);
 
@@ -3754,17 +3782,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                         
                         // index++;
                         countLinuxApp++;
-                        insertOrUpdateFavorites(info);
+                        mNewShortcutItems.add(info);
                     }
-                    //Thread.sleep(100);
                 }
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                       addDesktopFiles(countLinuxApp, listIdle); // 在子线程执行
-                    }
-                }, 5* 100);
-               
+                addDesktopFiles(countLinuxApp, listIdle); // 
                 return 1;
             }else{
                 addDesktopFiles(0,null);
@@ -3804,14 +3825,12 @@ public class Launcher extends StatefulActivity<LauncherState>
 
 
     public void bindWorkspace(){
-
-        handler.postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-              //  getModel().forceReload();
-                 getModel().startLoader();
+                getModel().startLoader();
             }
-        }, 1000);
+        }, 1000 * 1);
     }
 
     public void removeView(int x, int y){
@@ -3861,16 +3880,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                 }catch(Exception e){
                     e.printStackTrace();
                 }
-                // getModel().forceReload();
-                // android.os.Process.killProcess(android.os.Process.myPid());
-                // Intent intent = getIntent();
-                // finish();
-                // handler.postDelayed(new Runnable() {
-                //     @Override
-                //     public void run() {
-                //         startActivity(intent);
-                //     }
-                // }, 1000);
             }
         });
     }

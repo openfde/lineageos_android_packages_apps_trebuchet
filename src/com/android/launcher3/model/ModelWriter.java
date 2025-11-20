@@ -302,21 +302,20 @@ public class ModelWriter {
 
         ModelVerifier verifier = new ModelVerifier();
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        Log.d(TAG, "addDesktopFiles: addItemToDatabase 2222 "+item);
         newModelTask(() -> {
             // Write the item on background thread, as some properties might have been updated in
             // the background.
-            Log.d(TAG, "addDesktopFiles: addItemToDatabase 3333 "+item);
             final ContentWriter writer = new ContentWriter(mContext);
             item.onAddToDatabase(writer);
             writer.put(Favorites._ID, item.id);
 
-            Log.d(TAG, "addDesktopFiles: addItemToDatabase 4444 "+item);
+            Log.d(TAG, "addDesktopFiles: addItemToDatabase 444 "+item);
             mModel.getModelDbController().insert(Favorites.TABLE_NAME, writer.getValues(mContext));
             synchronized (mBgDataModel) {
                 checkItemInfoLocked(item.id, item, stackTrace);
                 mBgDataModel.addItem(mContext, item, true);
                 verifier.verifyModel();
+                Log.d(TAG,"mNewShortcutItems...insert..finish");
             }
         }).executeOnModelThread();
     }
@@ -572,8 +571,8 @@ public class ModelWriter {
 
         @Override
         public final void run() {
-            if (mLoadId != mModel.getLastLoadId()) {
-                Log.d(TAG, "Model changed before the task could execute");
+            if (mLoadId != mModel.getLastLoadId() && mLoadId != -1) {
+                Log.d(TAG, "Model changed before the task could execute mLoadId "+mLoadId +",mModel.getLastLoadId() "+mModel.getLastLoadId());
                 return;
             }
             runImpl();
