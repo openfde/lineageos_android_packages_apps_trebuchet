@@ -134,7 +134,7 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
 
        
         contentView.findViewById<TextView>(R.id.text_open_the_terminal)?.setOnClickListener({
-
+            launcher.openLinuxApp(""+"###"+"open_terminal"+"###open###"+"");     
             dismiss()
         })
 

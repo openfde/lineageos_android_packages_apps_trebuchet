@@ -780,4 +780,8 @@ public class LauncherModel implements InstallSessionTracker.Callback {
     public int getLastLoadId() {
         return mLastLoadId;
     }
+
+    public void setLastLoadId(int loadId) {
+        mBgDataModel.lastLoadId = loadId;
+    }
 }
