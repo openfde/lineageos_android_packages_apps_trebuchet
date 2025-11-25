@@ -589,11 +589,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         initDragController();
         mAllAppsController = new AllAppsTransitionController(this);
         mStateManager = new StateManager<>(this, NORMAL);
-        String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
-        if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
-            DbUtils.deleteAllAndroidAppFromDatabase(getModel().getModelDbController());
-        }
-       
+        DbUtils.deleteAllAndroidAppFromDatabase(getModel().getModelDbController());
         setupViews();
         updateDisallowBack();
 
@@ -2320,6 +2316,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         Workspace<?> workspace = mWorkspace;
         int newItemsScreenId = -1;
         int index = 0;
+       
         for (Pair<ItemInfo, View> e : shortcuts) {
              ItemInfo item = e.first;
 
@@ -3495,27 +3492,6 @@ public class Launcher extends StatefulActivity<LauncherState>
        return false ;
     }
 
-  
-
-    public void addDesktopFile(String method,String fileName){
-        Point point = FileUtils.findNextFreePoint(this,getModel().getModelDbController());
-        WorkspaceItemInfo info = new WorkspaceItemInfo();
-        info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;
-        info.title = fileName;
-        info.container = -100;
-        info.screenId = 0;
-        Intent intent = new Intent();
-        intent.setPackage("com.android.launcher3");
-        info.intent = intent;
-        info.cellY = point.y;
-        info.cellX = point.x;
-        if("NEW_FILE".equals(method)){
-            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT;
-        }else{
-            info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY; 
-        }
-        insertOrUpdateFavorites(info);
-    }
 
     public void refreshDesktopFiles(Context context){
         ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -3669,6 +3645,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
                     return addLinuxApps();
             }else{
+                 listDeskTopLinux = NetUtils.getLinuxDesktopApp();
                  addDesktopFiles(0,null);
             }
             return 0 ;
@@ -3801,9 +3778,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         return 0;
     }
 
-    
-
-
     public static Map<String,Object> getDesktopMap(String name ){
         Map<String,Object> mp = null ;
         if (listDeskTopLinux != null) {
@@ -3895,15 +3869,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         Log.i(TAG, "bindItems----rearray :  "+rearray.size());
         for (int i = 0 ; i < rearray.size() ; i++){
             ItemInfo info = rearray.get(i);
-            // if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT|| info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
-            //     String filePath = FileUtils.PATH_ID_DESKTOP+info.title;
-            //     File file = new File(filePath);
-            //     if(!file.exists()){
-
-            //         deleteFavorites(info);
-            //         continue;
-            //     }
-            // }
             rearrayList.add(info);
             getModelWriter().modifyItemInDatabase(info, LauncherSettings.Favorites.CONTAINER_DESKTOP, 0,
                     info.cellX, info.cellY, info.spanX, info.spanY);
@@ -3993,6 +3958,8 @@ public class Launcher extends StatefulActivity<LauncherState>
                    refreshLinuxApps(Launcher.this);
                 }
             }, 1000 * 3);
+        }else if(FileUtils.REFRESH_APP.equals(method)){
+            refresh();
         }else{
             gotoDocApp(method,message);
         }

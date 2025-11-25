@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import com.android.launcher3.util.FileUtils;
+import org.greenrobot.eventbus.EventBus;
+import com.android.launcher3.model.data.MessageEvent;
 /**
  * Task to add auto-created workspace items.
  */
@@ -202,14 +204,17 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 // Save the WorkspaceItemInfo for binding in the workspace
                 addedItemsFinal.add(itemInfo);
 
+                FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
                 String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
                 if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
-                    FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
                     FileUtils.createLinuxDesktopFile(app.getContext(),itemInfo.title.toString(),packageName);
                 }else{
+                    itemInfo.title = packageName+"_fde.desktop";
+                    itemInfo.itemType = LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP;
                     getModelWriter().addItemToDatabase(itemInfo,
                                 LauncherSettings.Favorites.CONTAINER_DESKTOP, screenId,
                                 coords[1], coords[2]);
+                    EventBus.getDefault().post(new MessageEvent(FileUtils.REFRESH_APP, packageName));
                 }
 
                 // log bitmap and label
