@@ -102,6 +102,8 @@ public class FileUtils {
 
     public static final String RELOAD_APP = "RELOAD_APP";
 
+    public static final String REFRESH_APP = "REFRESH_APP";
+
     public static final String NEW_DIR = "NEW_DIR";
 
     public static final String NEW_FILE = "NEW_FILE";
