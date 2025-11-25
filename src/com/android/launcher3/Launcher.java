@@ -589,8 +589,11 @@ public class Launcher extends StatefulActivity<LauncherState>
         initDragController();
         mAllAppsController = new AllAppsTransitionController(this);
         mStateManager = new StateManager<>(this, NORMAL);
-
-        DbUtils.deleteAllAndroidAppFromDatabase(getModel().getModelDbController());
+        String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+        if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
+            DbUtils.deleteAllAndroidAppFromDatabase(getModel().getModelDbController());
+        }
+       
         setupViews();
         updateDisallowBack();
 
@@ -2381,7 +2384,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             @Override
             public void run() {
                 try{
-                     String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+                    String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
                     if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
                         for (Pair<ItemInfo, View> e : shortcuts) {
                             ItemInfo item = e.first;
@@ -3665,6 +3668,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
             if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
                     return addLinuxApps();
+            }else{
+                 addDesktopFiles(0,null);
             }
             return 0 ;
         }, executorService);
