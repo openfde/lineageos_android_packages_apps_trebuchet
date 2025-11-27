@@ -205,9 +205,9 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 addedItemsFinal.add(itemInfo);
 
                 FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
-                String shareDesktopStr = FileUtils.getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
-                if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
-                    FileUtils.createLinuxDesktopFile(app.getContext(),itemInfo.title.toString(),packageName);
+                FileUtils.createLinuxDesktopFile(app.getContext(),itemInfo.title.toString(),packageName);
+                if(FileUtils.isOpenAppFusion()){
+                    
                 }else{
                     itemInfo.title = packageName+"_fde.desktop";
                     itemInfo.itemType = LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP;

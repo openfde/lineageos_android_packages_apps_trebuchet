@@ -12,6 +12,7 @@ import java.nio.file.Files;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 
@@ -84,6 +85,7 @@ import com.android.launcher3.model.data.MessageEvent;
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
+     public static final String PATH_ID_TEMP = "/mnt/sdcard/Documents/.temp/";
     protected static final String TAG = "FileUtils";
 
     public static final String OPEN_DIR = "OPEN_DIR";
@@ -137,14 +139,27 @@ public class FileUtils {
     public static final String FDE_APP_FUSION = "fde.app_fusion";
 
     public static final String OPEN_APP_FUSION = "1";
+    
 
 public static String getRootDir(){
     return "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir() ;
 }    
 
 public static String getRootDesktopDir(){
-    return "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/" ;
+    return getRootDir()+"/Desktop/" ;
 }   
+
+public static String getHideHomePath(){
+    return getRootDir()+"/.openfde/" ;
+}
+
+public static String getHideHomePicPath(){
+    return getHideHomePath() +"/pic/" ;
+}
+
+public static String getHideHomeTempPath(){
+    return getRootDir() +"/文档/.temp/" ;
+}
 
 public static void createDesktopDir(String path){
         File file = new File(path);
@@ -398,6 +413,26 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         return null;  
     }
 
+    public static List<Map<String, Object>> getInstalledAppsList(Context context) {
+        PackageManager packageManager = context.getPackageManager(); // 在Activity中直接使用。如果不在Activity中，请通过Context获取。
+        List<PackageInfo> installedPackages = packageManager.getInstalledPackages(0);
+        
+        List<Map<String, Object>> appList = new ArrayList<>();
+        
+        for (PackageInfo packageInfo : installedPackages) {
+            ApplicationInfo appInfo = packageInfo.applicationInfo;
+            
+            Map<String, Object> appMap = new HashMap<>();
+            
+            String appName = appInfo.loadLabel(packageManager).toString();
+            appMap.put("Name", appName);
+            appMap.put("packageName", packageInfo.packageName);
+            appList.add(appMap);
+        }
+        
+        return appList;
+    }
+
     public static void createAllAndroidIconToLinux(Context context, String packageName) {
         PackageManager packageManager = context.getPackageManager();
         String rootPath = getIconPath();
@@ -595,13 +630,13 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
    
     public static void createLinuxDesktopFile(Context context , String title ,String packageName){
         createDesktopDir(PATH_ID_DESKTOP);
-        String shareDesktopStr = getSystemProperty(FDE_APP_FUSION,"1");
-        if("0".equals(shareDesktopStr)){
-            return ;
+        String documentId = getAllDesktopPath();
+        if(isOpenAppFusion() == false){
+            documentId = getAllDocumentPath()+".temp/";
         }
         try{    
             Log.i(TAG,"createLinuxDesktopFile title:  "+title + ",packageName: "+packageName);
-            String documentId = getAllDesktopPath();
+
             String pathDesktop = documentId+""+ packageName+"_fde.desktop";
             String picPath = getIconPath()+packageName+".png" ;
             File file = new File(pathDesktop);
@@ -837,11 +872,27 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         return files;
     }
 
+    public static File[]getAllIconDesktopFiles(){
+        String documentId =  PATH_ID_TEMP;
+        File parent = new File(documentId);
+        File[] files = parent.listFiles((dir, name) -> name.endsWith("_fde.desktop"));
+        return files;
+    }
+
     public static  String getAllDesktopPath(){
         String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/桌面/";  
         File ff = new File(documentId);
         if(!ff.exists()){
             documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Desktop/";  
+        }
+       return documentId ;
+    }
+
+    public static  String getAllDocumentPath(){
+        String documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/文档/";  
+        File ff = new File(documentId);
+        if(!ff.exists()){
+            documentId =  "/volumes"+"/"+getLinuxUUID()+getLinuxHomeDir()+"/Documents/";  
         }
        return documentId ;
     }
@@ -1108,5 +1159,13 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
 
     public static String getLinuxPrefixPath(){
         return "/volumes"+"/"+FileUtils.getLinuxUUID();
+    }
+
+    public static boolean isOpenAppFusion(){
+        String shareDesktopStr = getSystemProperty(FileUtils.FDE_APP_FUSION,FileUtils.OPEN_APP_FUSION);
+        if(FileUtils.OPEN_APP_FUSION.equals(shareDesktopStr)){
+            return true ;
+        }
+        return false ;
     }
 }
