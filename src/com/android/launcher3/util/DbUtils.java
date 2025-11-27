@@ -377,7 +377,7 @@ public class DbUtils {
     }
 
     public static void deletePackageNameFromDatabase(ModelDbController dbController,String appWidgetProvider){
-        Log.i(TAG, "deleteTitleFromDatabase is appWidgetProvider: "+appWidgetProvider );
+        Log.i(TAG, "deletePackageNameFromDatabase is appWidgetProvider: "+appWidgetProvider );
   
         new Thread(new Runnable() {
             @Override
@@ -385,20 +385,33 @@ public class DbUtils {
                 String selection = "appWidgetProvider = ? AND itemType = ?";
                 String[] selectionArgs = {appWidgetProvider,String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_APPLICATION)};
                 int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
-                Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+                Log.i(TAG, "deletePackageNameFromDatabase is res: "+res);
             }
         }).start();
     }
 
     public static void deleteByFileNameFromDatabase(ModelDbController dbController,String fileName){
-        Log.i(TAG, "deleteTitleFromDatabase is fileName: "+fileName );
+        Log.i(TAG, "deleteByFileNameFromDatabase is fileName: "+fileName );
         new Thread(new Runnable() {
             @Override
             public void run() {
                 String selection = "appWidgetProvider = ?";
                 String[] selectionArgs = {fileName};
                 int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
-                Log.i(TAG, "deleteTitleFromDatabase is res: "+res);
+                Log.i(TAG, "deleteByFileNameFromDatabase is res: "+res);
+            }
+        }).start();
+    }
+
+    public static void deleteAllLinuxAppFromDatabase(ModelDbController dbController){
+        Log.i(TAG, "deleteAllLinuxAppFromDatabase..." );
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String selection = "itemType = ?";
+                String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP)};
+                int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME,selection, selectionArgs);
+                Log.i(TAG, "deleteAllLinuxAppFromDatabase is res: "+res);
             }
         }).start();
     }
