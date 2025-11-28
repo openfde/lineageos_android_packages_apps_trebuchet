@@ -52,7 +52,7 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.TextView;
-
+import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.android.launcher3.BaseActivity;
@@ -98,6 +98,8 @@ public class AddItemActivity extends BaseActivity
     private static final int REQUEST_BIND_APPWIDGET = 1;
     private static final String STATE_EXTRA_WIDGET_ID = "state.widget.id";
 
+    public static String packageName = ""; 
+
     private final PointF mLastTouchPos = new PointF();
 
     private PinItemRequest mRequest;
@@ -118,20 +120,22 @@ public class AddItemActivity extends BaseActivity
 
     private boolean mFinishOnPause = false;
 
+    static final String TAG = "AddItemActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(true){
-            finish();
-            return;
-        }
+        // if(true){
+        //     finish();
+        //     return;
+        // }
 
         mRequest = PinRequestHelper.getPinItemRequest(getIntent());
         if (mRequest == null) {
             finish();
             return;
         }
-
+        Log.w(TAG,"AddItemActivity onCreate ");
         mApp = LauncherAppState.getInstance(this);
         mIdp = mApp.getInvariantDeviceProfile();
 
@@ -149,6 +153,15 @@ public class AddItemActivity extends BaseActivity
         mAccessibilityManager =
                 getApplicationContext().getSystemService(AccessibilityManager.class);
 
+        try{
+            packageName = mRequest.getShortcutInfo().getLabel().toString();
+            Log.w(TAG,"AddItemActivity onCreate getLabel: "+mRequest.getShortcutInfo().getLabel() );
+            Log.w(TAG,"AddItemActivity onCreate getRequestType: "+mRequest.getShortcutInfo().getLongLabel()+ ",getShortLabel: "+mRequest.getShortcutInfo().getShortLabel()  );
+        }catch(Exception e){
+            Log.e(TAG,"AddItemActivity onCreate  Exception: "+e.getMessage());
+        }
+        mSlideInView = findViewById(R.id.add_item_bottom_sheet);
+   
         final PackageItemInfo targetApp;
         switch (mRequest.getRequestType()) {
             case PinItemRequest.REQUEST_TYPE_SHORTCUT:
@@ -172,7 +185,7 @@ public class AddItemActivity extends BaseActivity
             finish();
             return;
         }
-
+        Log.w(TAG,"AddItemActivity onCreate targetApp.packageName: "+targetApp.packageName );
         WidgetCellPreview previewContainer = mWidgetCell.findViewById(
                 R.id.widget_preview_container);
         previewContainer.setOnTouchListener(this);
@@ -192,9 +205,10 @@ public class AddItemActivity extends BaseActivity
         widgetAppName.setText(section == null ? info.loadLabel(getPackageManager())
                 : getString(section.mSectionTitle));
 
-        mSlideInView = findViewById(R.id.add_item_bottom_sheet);
+     
         mSlideInView.addOnCloseListener(this);
         mSlideInView.show();
+        addShortCut();
         setupNavBarColor();
     }
 
@@ -335,12 +349,10 @@ public class AddItemActivity extends BaseActivity
         mSlideInView.close(/* animate= */ true);
     }
 
-    /**
-     * Called when place-automatically button is clicked.
-     */
-    public void onPlaceAutomaticallyClick(View v) {
-        if (mRequest.getRequestType() == PinItemRequest.REQUEST_TYPE_SHORTCUT) {
+    public void addShortCut(){
+         if (mRequest.getRequestType() == PinItemRequest.REQUEST_TYPE_SHORTCUT) {
             ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
+            Log.w(TAG,"AddItemActivity onCreate shortcutInfo: "+shortcutInfo );
             ItemInstallQueue.INSTANCE.get(this).queueItem(shortcutInfo);
             logCommand(LAUNCHER_ADD_EXTERNAL_ITEM_PLACED_AUTOMATICALLY);
             mRequest.accept();
@@ -366,6 +378,13 @@ public class AddItemActivity extends BaseActivity
         // request bind widget
         mAppWidgetHolder.startBindFlow(this, mPendingBindWidgetId,
                 mRequest.getAppWidgetProviderInfo(this), REQUEST_BIND_APPWIDGET);
+    }
+
+    /**
+     * Called when place-automatically button is clicked.
+     */
+    public void onPlaceAutomaticallyClick(View v) {
+       addShortCut();
     }
 
     private void acceptWidget(int widgetId) {

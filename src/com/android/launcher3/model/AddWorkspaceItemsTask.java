@@ -48,6 +48,7 @@ import java.util.Objects;
 import com.android.launcher3.util.FileUtils;
 import org.greenrobot.eventbus.EventBus;
 import com.android.launcher3.model.data.MessageEvent;
+import com.android.launcher3.dragndrop.AddItemActivity;
 /**
  * Task to add auto-created workspace items.
  */
@@ -66,6 +67,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
      */
     public AddWorkspaceItemsTask(@NonNull final List<Pair<ItemInfo, Object>> itemList) {
         this(itemList, new WorkspaceItemSpaceFinder());
+        FileLog.d(LOG, "Adding item info to workspace: 11 itemList:" +itemList); 
     }
 
     /**
@@ -76,6 +78,8 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
             @NonNull final WorkspaceItemSpaceFinder itemSpaceFinder) {
         mItemList = itemList;
         mItemSpaceFinder = itemSpaceFinder;
+
+        FileLog.d(LOG, "Adding item info to workspace: 22 itemList:" +itemList); 
     }
 
     @Override
@@ -97,17 +101,20 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
                     // Short-circuit this logic if the icon exists somewhere on the workspace
                     if (shortcutExists(dataModel, item.getIntent(), item.user)) {
+                         FileLog.d(LOG, "Adding item info to workspace: 111111:");
                         continue;
                     }
 
                     // b/139663018 Short-circuit this logic if the icon is a system app
                     if (PackageManagerHelper.isSystemApp(app.getContext(),
                             Objects.requireNonNull(item.getIntent()))) {
+                                FileLog.d(LOG, "Adding item info to workspace: 2222222:");
                         continue;
                     }
 
                     if (item instanceof ItemInfoWithIcon
                             && ((ItemInfoWithIcon) item).isArchived()) {
+                                FileLog.d(LOG, "Adding item info to workspace: 333333:");
                         continue;
                     }
                 }
@@ -115,6 +122,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 if (item.itemType == LauncherSettings.Favorites.ITEM_TYPE_APPLICATION) {
                     if (item instanceof WorkspaceItemFactory) {
                         item = ((WorkspaceItemFactory) item).makeWorkspaceItem(app.getContext());
+                        FileLog.d(LOG, "Adding item info to workspace:444 item : "+item);
                     }
                 }
                 if (item != null) {
@@ -136,7 +144,10 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 ItemInfo itemInfo;
                 String packageName = item.getTargetComponent() != null
                 ? item.getTargetComponent().getPackageName() : null;
-
+                if (packageName == null) {
+                    packageName  = AddItemActivity.packageName;
+                }
+                FileLog.d(LOG, "Adding item info to workspace: packageName:" + packageName);   
                 if (item instanceof WorkspaceItemInfo || item instanceof FolderInfo ||
                         item instanceof LauncherAppWidgetInfo) {
                     itemInfo = item;
@@ -218,7 +229,7 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 }
 
                 // log bitmap and label
-                FileLog.d(LOG, "Adding item info to workspace: " + itemInfo);
+                FileLog.d(LOG, "Adding item info to workspace: itemInfo: " + itemInfo);
                 
             }
         }

@@ -3577,10 +3577,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                                 Log.w(TAG,"move_name     mapFiles: "+mapFiles + "  ,getName: "+f.getName());
                                 String packageName = fTitle.replaceAll("_fde.desktop", "");
                                 boolean isAppInstalled  = FileUtils.isAppInstalled(Launcher.this,packageName);
-                                if(!isAppInstalled){
-                                    DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),f.getName());    
-                                }
                                 if(!FileUtils.isOpenAppFusion()){
+                                    if(!isAppInstalled){
+                                        DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),f.getName());    
+                                    }
                                     //if close app_fusion move android desktop to hide dir
                                     if(f.exists()){
                                         if(!isAppInstalled){
@@ -3654,7 +3654,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         int size = mNewShortcutItems.size();
         Log.w(TAG,"mNewShortcutItems: size : "+size);
         if(size == 0){
-            getModel().startLoader();
+            getModel().forceReload();
         }else{
             List<WorkspaceItemInfo> uniqueList = mNewShortcutItems.stream()
                 .collect(Collectors.toMap(WorkspaceItemInfo::getTitle, p -> p, (p1, p2) -> p1))
