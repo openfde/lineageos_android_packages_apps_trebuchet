@@ -289,7 +289,7 @@ public static List<Point> getAllIdlePoints(Context context,ModelDbController dbC
     for(int i = 0 ; i < numColumns ; i++){ 
         for(int j = 0 ; j < numRows ; j++ ){
             Point point = new Point(i,j);
-            if(listExists ==null ||  !listExists.contains(point) ){
+            if(listExists == null ||  !listExists.contains(point) ){
                 list.add(point);
             }
         }
