@@ -131,5 +131,11 @@
         launcher:y="5"
         launcher:packageName="com.android.vending"
         launcher:className="com.android.vending.AssetBrowserActivity"/>
-
+ 
+    <favorite
+        launcher:packageName="com.tencent.android.qqdownloader"
+        launcher:className="com.tencent.assistantv2.activity.MainActivity"
+        launcher:screen="0"
+        launcher:x="8"
+        launcher:y="0" />  
 </favorites>
