@@ -168,4 +168,10 @@
         launcher:x="3"
         launcher:y="-1" />
 
+    <favorite
+        launcher:packageName="com.tencent.android.qqdownloader"
+        launcher:className="com.tencent.assistantv2.activity.MainActivity"
+        launcher:screen="0"
+        launcher:x="8"
+        launcher:y="0" />  
 </favorites>
