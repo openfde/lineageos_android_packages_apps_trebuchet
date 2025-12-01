@@ -670,7 +670,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         View popupView = LayoutInflater.from(this).inflate(R.layout.popup_layout, null);
         newOptionsPopupWindow = new NewOptionsPopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,this);
         newOptionsPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-
     }
 
     protected ModelCallbacks createModelCallbacks() {
@@ -3269,6 +3268,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             // gotoDocApp(FileUtils.OP_CREATE_ANDROID_ICON,"");
 
             // gotoDocApp(FileUtils.OP_CREATE_LINUX_ICON,"");
+            initFde();
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -3542,12 +3542,10 @@ public class Launcher extends StatefulActivity<LauncherState>
             if(pos == 0){
                 mNewShortcutItems.clear();
             }
-    
+            int index = pos;
             File[] files = FileUtils.getAllDesktopFiles();
             if(files !=null){
                 Arrays.sort(files, (f1, f2) -> Long.compare(f1.lastModified(), f2.lastModified()));
-                int index = pos;
-       
                 for(File f : files){
                     String fTitle = f.getName().toLowerCase() ;
                     //如果被android应用被卸载了则删除desktop文件,但新版本去掉此逻辑
@@ -3675,7 +3673,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                         }
                     });
                 }
-            }, 100 * 5); 
+            }, ON_ACTIVITY_RESULT_ANIMATION_DELAY); 
         } 
     }
 
@@ -4036,12 +4034,69 @@ public class Launcher extends StatefulActivity<LauncherState>
                 public void run() {
                    refreshLinuxApps(Launcher.this);
                 }
-            }, 1000 * 3);
+            }, ON_ACTIVITY_RESULT_ANIMATION_DELAY * 6);
         }else if(FileUtils.REFRESH_APP.equals(method)){
             refresh();
+        }else if(FileUtils.INSERT_APP.equals(method)){
+            //if app_fusion close 
+            String packageName = message.split("###")[0];
+            addShortCut(packageName);
         }else{
             gotoDocApp(method,message);
         }
+    }
+
+    private void initFde(){
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                   if("0".equals(FileUtils.getSystemProperty(FileUtils.FDE_INIT_DONE, "0"))){
+                        String packageName = getString(R.string.download_package_name);
+                        FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
+                        FileUtils.createLinuxDesktopFile(Launcher.this,getString(R.string.download_name),packageName);
+                        if(FileUtils.isOpenAppFusion()){
+                            
+                        }else{
+                            addShortCut(packageName);  
+                        }
+                        FileUtils.setSystemProperty(FileUtils.FDE_INIT_DONE, "1");
+                    }
+                }
+            }, ON_ACTIVITY_RESULT_ANIMATION_DELAY * 30);
+         
+    }
+
+    private void addShortCut(String packageName ){
+        new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String fileName = packageName + "_fde.desktop";
+                    Log.w(TAG,"addShortCut packageName : "+packageName + ",fileName "+fileName);
+                    List<Map<String,Object>> list = DbUtils.queryItemsFromDatabase(getModel().getModelDbController(),fileName);
+                    if(list != null){
+                        return ;
+                    }
+                    List<Point> listIdle = FileUtils.getAllIdlePoints(Launcher.this,getModel().getModelDbController());
+                    WorkspaceItemInfo info = new WorkspaceItemInfo();      
+                    info.title = fileName;
+                    info.container = -100;
+                    info.screenId = 0;
+                    Intent intent = new Intent();
+                    intent.putExtra("App", fileName);
+                    intent.putExtra("Path", "");
+                    intent.putExtra("packageName", packageName);
+                    intent.setPackage(getPackageName());
+                    info.intent = intent;
+                    info.mComponentName = new ComponentName(packageName,packageName+".MainActivity");
+                    info.appWidgetProvider = packageName;
+                    info.itemType = LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP;
+                    info.cellY = listIdle.get(0).y;
+                    info.cellX = listIdle.get(0).x;
+                    insertOrUpdateFavorites(info);
+                    Log.w(TAG,"addShortCut packageName insertOrUpdateFavorites finish "+info);
+                    EventBus.getDefault().post(new MessageEvent(FileUtils.REFRESH_APP, packageName));
+                }
+            }).start();
     }
     
 }

@@ -515,6 +515,8 @@
     <string name="theme_light">"Light"</string>
     <string name="sort_by_name">"Arrange by Name"</string>
     <string name="sort_by_type">"Arrange by Type"</string>
+    <string name="download_package_name">"com.tencent.android.qqdownloader"</string>
+    <string name="download_name">"应用宝"</string>
 
     <string-array name="theme_options">
         <item>Dark</item>
