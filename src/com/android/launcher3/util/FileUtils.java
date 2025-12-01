@@ -61,8 +61,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.BitmapFactory;
 import android.widget.TextView;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.PictureDrawable;
+
+
 import android.graphics.Picture;
 import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
@@ -71,7 +71,19 @@ import com.android.launcher3.svg.SVG;
 import android.webkit.MimeTypeMap;
 import com.android.launcher3.model.ModelDbController;
 import android.app.ActivityManager;
+
 import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.PictureDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.VectorDrawable;
+import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.AnimationDrawable;
+
+
+
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.os.UserHandle;
@@ -103,6 +115,8 @@ public class FileUtils {
     public static final String REMOVE_APP = "REMOVE_APP";
 
     public static final String RELOAD_APP = "RELOAD_APP";
+
+    public static final String INSERT_APP = "INSERT_APP";
 
     public static final String REFRESH_APP = "REFRESH_APP";
 
@@ -139,6 +153,8 @@ public class FileUtils {
     public static final String FDE_APP_FUSION = "fde.app_fusion";
 
     public static final String OPEN_APP_FUSION = "1";
+
+    public static final String FDE_INIT_DONE = "persist.fde.init.done";
     
 
 public static String getRootDir(){
@@ -503,6 +519,19 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 bitmapT = bitmapDrawable.getBitmap();
                 bitmapT = getRoundedCornerBitmap(bitmapT,16);
+            }else if(drawable instanceof VectorDrawable){
+                bitmapT = vectorDrawableToBitmap(drawable);
+                bitmapT = getRoundedCornerBitmap(bitmapT,16);
+            }else{
+                if(drawable instanceof PictureDrawable){
+                }else if(drawable instanceof GradientDrawable){
+                }else if(drawable instanceof ShapeDrawable){
+                }else if(drawable instanceof ColorDrawable){
+                }else if(drawable instanceof PaintDrawable){
+                }else if(drawable instanceof AnimationDrawable){
+                }else{
+                    Log.w(TAG,"drawableToPng drawable is other "+packageName);
+                }
             } 
         }
         String filePath =  getIconPath()+packageName+"_fde.png";
@@ -833,6 +862,20 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
         } catch (PackageManager.NameNotFoundException e) {
             return false; // app not install
         }
+    }
+
+    public static Bitmap vectorDrawableToBitmap(Drawable  drawable) {
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        if (width <= 0 || height <= 0) {
+            width = 80;
+            height = 80;
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, width, height);
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     public static Bitmap adaptiveIconToBitmap(AdaptiveIconDrawable adaptiveIconDrawable) {
