@@ -80,6 +80,9 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
     protected final ItemInfo mItemInfo;
     protected final View mOriginalView;
 
+    private static final int WINDOW_DELETE_WIDTH  = 320;
+    private static final int WINDOW_DELETE_HEIGHT  = 180;
+
     public SystemShortcut(int iconResId, int labelResId, T target, ItemInfo itemInfo,
             View originalView) {
         mIconResId = iconResId;
@@ -347,7 +350,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             Display d = m.getDefaultDisplay();
             if (window != null) {
                 WindowManager.LayoutParams params = window.getAttributes();
-                window.setLayout((int)(320*scale), (int)(180*scale));
+                window.setLayout((int)(WINDOW_DELETE_WIDTH*scale), (int)(WINDOW_DELETE_HEIGHT*scale));
                 params.x = (int) (PopupContainerWithArrow.x - d.getWidth()/2);
                 params.y = (int ) (PopupContainerWithArrow.y - d.getHeight()/2);
                 window.setAttributes(params);
