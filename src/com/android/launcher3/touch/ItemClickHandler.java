@@ -113,6 +113,13 @@ public class ItemClickHandler {
     private static final long DOUBLE_CLICK_TIME_DELTA = 400; // 
     private static long lastClickTime = 0; 
 
+    private static final int WINDOW_DELETE_WIDTH  = 320;
+    private static final int WINDOW_DELETE_HEIGHT  = 180;
+
+    private static final int WINDOW_RENAME_WIDTH  = 450;
+    private static final int WINDOW_RENAME_HEIGHT  = 200;
+
+
     private static void onClick(View v) {
         // Make sure that rogue clicks don't get through while allapps is launching, or after the
         // view has detached (it's possible for this to happen if the view is removed mid touch).
@@ -470,9 +477,10 @@ public class ItemClickHandler {
     Window window = alertDialog.getWindow();
     WindowManager m = launcher.getWindowManager();
     Display d = m.getDefaultDisplay();
+    float scale = FileUtils.getDpiScale(launcher);
     if (window != null) {
         WindowManager.LayoutParams params = window.getAttributes();
-        window.setLayout(450, 200);
+        window.setLayout((int)(WINDOW_RENAME_WIDTH*scale), (int)(WINDOW_RENAME_HEIGHT*scale));
         // params.x = (int) (v.getX() - d.getWidth()/2);
         // params.y = (int ) (v.getY() - d.getHeight()/2);
         window.setAttributes(params);
@@ -528,10 +536,11 @@ public class ItemClickHandler {
 
                 Window window = alertDialog.getWindow();
                 WindowManager m = launcher.getWindowManager();
+                float scale = FileUtils.getDpiScale(launcher);
                 Display d = m.getDefaultDisplay();
                 if (window != null) {
                     WindowManager.LayoutParams params = window.getAttributes();
-                    window.setLayout(320, 180);
+                    window.setLayout((int)(WINDOW_DELETE_WIDTH*scale), (int)(WINDOW_DELETE_HEIGHT*scale));
                     params.x = (int) (v.getX() - d.getWidth()/2);
                     params.y = (int ) (v.getY() - d.getHeight()/2);
                     window.setAttributes(params);
