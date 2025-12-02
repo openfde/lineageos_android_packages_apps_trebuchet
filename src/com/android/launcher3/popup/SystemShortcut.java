@@ -315,9 +315,12 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             dismissTaskMenuView(mTarget);
             Log.w(" PopupContainerWithArrow--SystemShortcut"," x: "+PopupContainerWithArrow.x  + ",y "+PopupContainerWithArrow.y);
             Launcher launcher = Launcher.getLauncher(view.getContext());
+            View customView = LayoutInflater.from(launcher).inflate(R.layout.custom_delete_dialog_layout, null);
+            TextView txtContent = customView.findViewById(R.id.txtContent);
+            txtContent.setText(R.string.desktop_delete_tips);
             AlertDialog alertDialog = new AlertDialog.Builder(view.getContext(),R.style.RoundedAlertDialog)
             .setTitle(R.string.desktop_tips)
-            .setMessage(R.string.desktop_delete_tips)
+            .setView(customView)
             .setNegativeButton(R.string.desktop_cancel, null)
             .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -343,10 +346,12 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             alertDialog.show();
             Window window = alertDialog.getWindow();
             WindowManager m = launcher.getWindowManager();
+            float scale = FileUtils.getDpiScale(launcher);
+            Log.w("TAG","scale "+scale);
             Display d = m.getDefaultDisplay();
             if (window != null) {
                 WindowManager.LayoutParams params = window.getAttributes();
-                window.setLayout(320, 180);
+                window.setLayout((int)(320*scale), (int)(180*scale));
                 params.x = (int) (PopupContainerWithArrow.x - d.getWidth()/2);
                 params.y = (int ) (PopupContainerWithArrow.y - d.getHeight()/2);
                 window.setAttributes(params);

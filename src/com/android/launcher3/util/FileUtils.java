@@ -93,6 +93,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import org.greenrobot.eventbus.EventBus;
+import android.util.DisplayMetrics;
 import com.android.launcher3.model.data.MessageEvent;
 
 public class FileUtils {
@@ -1210,5 +1211,10 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             return true ;
         }
         return false ;
+    }
+
+    public static float getDpiScale(Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return metrics.density;
     }
 }

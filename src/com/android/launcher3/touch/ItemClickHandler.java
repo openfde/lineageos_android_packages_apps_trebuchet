@@ -469,10 +469,11 @@ public class ItemClickHandler {
 
     Window window = alertDialog.getWindow();
     WindowManager m = launcher.getWindowManager();
+    float scale = FileUtils.getDpiScale(launcher);
     Display d = m.getDefaultDisplay();
     if (window != null) {
         WindowManager.LayoutParams params = window.getAttributes();
-        window.setLayout(450, 200);
+        window.setLayout((int)(450*scale), (int)(200*scale));
         // params.x = (int) (v.getX() - d.getWidth()/2);
         // params.y = (int ) (v.getY() - d.getHeight()/2);
         window.setAttributes(params);
@@ -512,9 +513,12 @@ public class ItemClickHandler {
             } else {
                 // 如果没有找到启动 Intent，则提示用户
                 // 可以选择跳转到应用商店
+                View customView = LayoutInflater.from(launcher).inflate(R.layout.custom_delete_dialog_layout, null);
+                TextView txtContent = customView.findViewById(R.id.txtContent);
+                txtContent.setText(R.string.app_not_install);
                 AlertDialog alertDialog = new AlertDialog.Builder(v.getContext(),R.style.RoundedAlertDialog)
                 .setTitle(R.string.desktop_tips)
-                .setMessage(R.string.app_not_install)
+                .setView(customView)
                 .setNegativeButton(R.string.desktop_cancel, null)
                 .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -528,10 +532,11 @@ public class ItemClickHandler {
 
                 Window window = alertDialog.getWindow();
                 WindowManager m = launcher.getWindowManager();
+                float scale = FileUtils.getDpiScale(launcher);
                 Display d = m.getDefaultDisplay();
                 if (window != null) {
                     WindowManager.LayoutParams params = window.getAttributes();
-                    window.setLayout(320, 180);
+                    window.setLayout((int)(320*scale), (int)(180*scale));
                     params.x = (int) (v.getX() - d.getWidth()/2);
                     params.y = (int ) (v.getY() - d.getHeight()/2);
                     window.setAttributes(params);
