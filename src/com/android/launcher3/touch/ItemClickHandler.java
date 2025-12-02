@@ -470,9 +470,10 @@ public class ItemClickHandler {
     Window window = alertDialog.getWindow();
     WindowManager m = launcher.getWindowManager();
     Display d = m.getDefaultDisplay();
+    float scale = FileUtils.getDpiScale(launcher);
     if (window != null) {
         WindowManager.LayoutParams params = window.getAttributes();
-        window.setLayout(450, 200);
+        window.setLayout((int)(450*scale), (int)(200*scale));
         // params.x = (int) (v.getX() - d.getWidth()/2);
         // params.y = (int ) (v.getY() - d.getHeight()/2);
         window.setAttributes(params);
@@ -528,10 +529,11 @@ public class ItemClickHandler {
 
                 Window window = alertDialog.getWindow();
                 WindowManager m = launcher.getWindowManager();
+                float scale = FileUtils.getDpiScale(launcher);
                 Display d = m.getDefaultDisplay();
                 if (window != null) {
                     WindowManager.LayoutParams params = window.getAttributes();
-                    window.setLayout(320, 180);
+                    window.setLayout((int)(320*scale), (int)(180*scale));
                     params.x = (int) (v.getX() - d.getWidth()/2);
                     params.y = (int ) (v.getY() - d.getHeight()/2);
                     window.setAttributes(params);

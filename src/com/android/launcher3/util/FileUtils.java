@@ -94,6 +94,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import org.greenrobot.eventbus.EventBus;
 import com.android.launcher3.model.data.MessageEvent;
+import android.util.DisplayMetrics;
 
 public class FileUtils {
     public static final String PATH_ID_DESKTOP = "/mnt/sdcard/Desktop/";
@@ -1210,5 +1211,10 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             return true ;
         }
         return false ;
+    }
+
+    public static float getDpiScale(Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return metrics.density;
     }
 }

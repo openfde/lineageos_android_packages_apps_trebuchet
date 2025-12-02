@@ -343,10 +343,11 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             alertDialog.show();
             Window window = alertDialog.getWindow();
             WindowManager m = launcher.getWindowManager();
+            float scale = FileUtils.getDpiScale(launcher);
             Display d = m.getDefaultDisplay();
             if (window != null) {
                 WindowManager.LayoutParams params = window.getAttributes();
-                window.setLayout(320, 180);
+                window.setLayout((int)(320*scale), (int)(180*scale));
                 params.x = (int) (PopupContainerWithArrow.x - d.getWidth()/2);
                 params.y = (int ) (PopupContainerWithArrow.y - d.getHeight()/2);
                 window.setAttributes(params);
