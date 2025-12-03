@@ -3889,6 +3889,10 @@ public class Launcher extends StatefulActivity<LauncherState>
         }, 100 * 1);
     }
 
+    public void bindForceWorkspace(){
+         getModel().forceReload();
+    }
+
     public void removeView(int x, int y){
         try{
             mWorkspace.removeWorkspaceItem(mWorkspace.getScreenWithId(0).getChildAt(x, y));

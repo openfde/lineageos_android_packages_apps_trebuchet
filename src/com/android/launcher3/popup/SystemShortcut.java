@@ -339,6 +339,7 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
                     
                     dismissTaskMenuView(mTarget);
                     launcher.removeItem(mOriginalView, mItemInfo,true);
+                    launcher.bindForceWorkspace();
                 }
             }).create();
             alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
