@@ -471,7 +471,14 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
                     if (!file.exists() && !path.contains(" ")) {
                         drawableToPng(context, icon, path);
                     }
-                    // }
+
+                    String filePath =  PATH_ID_DESKTOP + md5+"_fde.png";
+                    File fa = new File(filePath);
+                    if(!fa.exists()){
+                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(md5, 0);
+                        Drawable ic  = applicationInfo.loadIcon(packageManager);
+                        drawableToPng(context,md5,ic);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -488,6 +495,14 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
                 File file = new File(path);
                 if (!file.exists() && !path.contains(" ")) {
                     drawableToPng(context, icon, path);
+                }
+
+                String filePath =  PATH_ID_DESKTOP + md5+"_fde.png";
+                File fa = new File(filePath);
+                if(!fa.exists()){
+                    ApplicationInfo applicationInfo = packageManager.getApplicationInfo(md5, 0);
+                    Drawable ic  = applicationInfo.loadIcon(packageManager);
+                    drawableToPng(context,md5,ic);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
