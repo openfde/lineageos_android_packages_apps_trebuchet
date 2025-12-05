@@ -303,30 +303,33 @@ public class AutoInstallsLayout {
     }
 
     protected int addShortcut(String title, Intent intent, int type) {
-        // int id = mCallback.generateNewItemId();
-        // mValues.put(Favorites.INTENT, intent.toUri(0));
-        // mValues.put(Favorites.TITLE, title);
-        // mValues.put(Favorites.ITEM_TYPE, type);
-        // mValues.put(Favorites.SPANX, 1);
-        // mValues.put(Favorites.SPANY, 1);
-        // mValues.put(Favorites._ID, id);
+        if(true){
+            // Do not allow packaged applications to automatically create shortcuts after installation  
+            return -1;
+        }
+        int id = mCallback.generateNewItemId();
+        mValues.put(Favorites.INTENT, intent.toUri(0));
+        mValues.put(Favorites.TITLE, title);
+        mValues.put(Favorites.ITEM_TYPE, type);
+        mValues.put(Favorites.SPANX, 1);
+        mValues.put(Favorites.SPANY, 1);
+        mValues.put(Favorites._ID, id);
 
-        // if (type == ITEM_TYPE_APPLICATION) {
-        //     ComponentName cn = intent.getComponent();
-        //     if (cn != null && mActivityOverride.containsKey(cn.getPackageName())) {
-        //         LauncherActivityInfo replacementInfo = mActivityOverride.get(cn.getPackageName());
-        //         mValues.put(Favorites.PROFILE_ID, UserCache.INSTANCE.get(mContext)
-        //                 .getSerialNumberForUser(replacementInfo.getUser()));
-        //         mValues.put(Favorites.INTENT, AppInfo.makeLaunchIntent(replacementInfo).toUri(0));
-        //     }
-        // }
+        if (type == ITEM_TYPE_APPLICATION) {
+            ComponentName cn = intent.getComponent();
+            if (cn != null && mActivityOverride.containsKey(cn.getPackageName())) {
+                LauncherActivityInfo replacementInfo = mActivityOverride.get(cn.getPackageName());
+                mValues.put(Favorites.PROFILE_ID, UserCache.INSTANCE.get(mContext)
+                        .getSerialNumberForUser(replacementInfo.getUser()));
+                mValues.put(Favorites.INTENT, AppInfo.makeLaunchIntent(replacementInfo).toUri(0));
+            }
+        }
 
-        // if (mCallback.insertAndCheck(mDb, mValues) < 0) {
-        //     return -1;
-        // } else {
-        //     return id;
-        // }
-        return -1;
+        if (mCallback.insertAndCheck(mDb, mValues) < 0) {
+            return -1;
+        } else {
+            return id;
+        }
     }
 
     protected ArrayMap<String, TagParser> getFolderElementsMap() {
