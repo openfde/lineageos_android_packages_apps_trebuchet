@@ -303,6 +303,10 @@ public class AutoInstallsLayout {
     }
 
     protected int addShortcut(String title, Intent intent, int type) {
+        if(true){
+            // Do not allow packaged applications to automatically create shortcuts after installation  
+            return -1;
+        }
         int id = mCallback.generateNewItemId();
         mValues.put(Favorites.INTENT, intent.toUri(0));
         mValues.put(Favorites.TITLE, title);
