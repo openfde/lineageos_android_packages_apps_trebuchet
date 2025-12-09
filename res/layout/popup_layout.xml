@@ -5,7 +5,35 @@
     android:background="@drawable/bg_desktop_menu"
     android:orientation="vertical">
 
-    <RelativeLayout
+ 
+    <TextView
+        android:id="@+id/text_display_settings"
+        style="@style/popWindowTextStyle"
+        android:text="@string/display_settings" />
+
+    <TextView
+        android:id="@+id/text_display_properties"
+        style="@style/popWindowTextStyle"
+        android:visibility="gone"
+        android:text="@string/display_properties" />
+
+
+    <TextView
+        android:id="@+id/text_change_wallpaper"
+        style="@style/popWindowTextStyle"
+        android:text="@string/change_wallpaper" />
+
+
+    
+
+    <TextView
+        android:id="@+id/text_refresh"
+        style="@style/popWindowTextStyle"
+        android:text="@string/refresh" />    
+
+    <View style="@style/popWindowLineStyle" />
+
+       <RelativeLayout
         android:id="@+id/layout_new"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
@@ -24,32 +52,6 @@
 
     </RelativeLayout>
 
-
-    <View style="@style/popWindowLineStyle" />
-
-    <TextView
-        android:id="@+id/text_refresh"
-        style="@style/popWindowTextStyle"
-        
-        android:text="@string/refresh" />
-
-    <TextView
-        android:id="@+id/text_display_properties"
-        style="@style/popWindowTextStyle"
-        android:visibility="gone"
-        android:text="@string/display_properties" />
-
-
-    <TextView
-        android:id="@+id/text_change_wallpaper"
-        style="@style/popWindowTextStyle"
-        android:text="@string/change_wallpaper" />
-
-
-    <TextView
-        android:id="@+id/text_display_settings"
-        style="@style/popWindowTextStyle"
-        android:text="@string/display_settings" />
 
     <View style="@style/popWindowLineStyle" />
 

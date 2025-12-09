@@ -679,7 +679,6 @@ public class Launcher extends StatefulActivity<LauncherState>
      @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        Log.w(TAG,"onWindowFocusChanged "+hasFocus);
         if(mFocusHandler != null && !hasFocus){
             mFocusHandler.cleanFocus();
         }
@@ -689,7 +688,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      @Override
     public void onTopResumedActivityChanged(boolean isTopResumedActivity) {
         super.onTopResumedActivityChanged(isTopResumedActivity);
-        Log.w(TAG,"onTopResumedActivityChanged "+isTopResumedActivity);
+        Log.d(TAG,"onTopResumedActivityChanged "+isTopResumedActivity);
         this.isTopResumedActivity = isTopResumedActivity ;
         if(mFocusHandler != null && !isTopResumedActivity){
             mFocusHandler.cleanFocus();
@@ -1701,7 +1700,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         boolean isActionMain = Intent.ACTION_MAIN.equals(intent.getAction());
         boolean internalStateHandled = ACTIVITY_TRACKER.handleNewIntent(this);
 
-        Log.w(TAG,"onNewIntent getAction "+intent.getAction());
         if (isActionMain) {
             if (!internalStateHandled) {
                 // In all these cases, only animate if we're already on home
@@ -2390,7 +2388,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                                 if(item.getTargetComponent() != null && item.getTargetComponent().getPackageName() !=null){
                                     packageName = item.getTargetComponent().getPackageName();    
                                 }else{
-                                    // Log.i(TAG,"bindItems mComponentName: "+item.getTargetComponent());
                                     packageName = FileUtils.getPackageNameByAppName(Launcher.this,item.title.toString());
                                 }
                                 FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
@@ -3257,7 +3254,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         Intent mIntent = new Intent();
         mIntent.setComponent(new ComponentName("com.android.documentsui", "com.android.documentsui.IpcService"));
         boolean bindFlag = bindService(mIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        Log.i(TAG," bindService bindFlag: "+bindFlag);
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -3438,7 +3434,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             File file = new File(path);
             Uri uri = FileProvider.getUriForFile(Launcher.this,ImageActionUtils.AUTHORITY,file);
             String mimeType = FileUtils.getMimeType(file);
-            Log.i(TAG,"basicIpcMethon.....path "+path + ",mimeType "+mimeType + ",uri "+uri);
+            Log.d(TAG,"basicIpcMethon.....path "+path + ",mimeType "+mimeType + ",uri "+uri);
             if (mimeType == null) {
                 if (params.contains(".txt") || params.contains(".json")  || params.contains(".md")) {
                     intent.setDataAndType(uri, "text/plain");
@@ -3527,7 +3523,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             }
             // List<Map<String,Object>>  listDesktopFileOrDir = DbUtils.queryDesktopFileInDatabase(Launcher.this,f.getName());
             if(listTexts !=null){
-                Log.d(TAG, "refreshDesktopFiles  size  "+listTexts.size() + ",listTexts: "+listTexts + ",pos : "+pos);
+                // Log.d(TAG, "refreshDesktopFiles  size  "+listTexts.size() + ",listTexts: "+listTexts + ",pos : "+pos);
                 for(Map<String,Object> mp : listTexts){
                     String fName = mp.get("title").toString();
                     File f = new File(documentId + fName);
@@ -3572,7 +3568,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                          try{
                             if(fTitle.contains("_fde.desktop")){ 
                                 Map<String,Object> mapFiles =  FileUtils.getLinuxContentString(f.getName());
-                                Log.w(TAG,"move_name     mapFiles: "+mapFiles + "  ,getName: "+f.getName());
                                 String packageName = fTitle.replaceAll("_fde.desktop", "");
                                 boolean isAppInstalled  = FileUtils.isAppInstalled(Launcher.this,packageName);
                                 if(!FileUtils.isOpenAppFusion()){
@@ -3600,7 +3595,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                     boolean found = false ;
                     if(listTexts != null){
                         found = listTexts.stream().anyMatch(item -> f.getName().equals(item.get("title").toString()));
-                        Log.d(TAG, "refreshDesktopFiles: fname: "+f.getName() + ",found "+found  + ",listTexts size "+listTexts.size());
                     } 
                     
                     if(!found){
@@ -3614,15 +3608,10 @@ public class Launcher extends StatefulActivity<LauncherState>
                         Intent intent = new Intent();
                         intent.setPackage("com.android.launcher3");
                         info.intent = intent;
-                        // int newY = y + index ;
-                        // int sY = newY%numRows ;
-                        // int sX = newY/numRows + point.x ;
-        
-                        // info.cellY = sY;
-                        // info.cellX = sX;
+
                         info.cellY = listIdle.get(index).y;
                         info.cellX = listIdle.get(index).x;
-                        Log.w(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName() + ",info.id "+info.id);
+                        // Log.w(TAG, "refreshDesktopFiles: files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title + ",f.getName() "+f.getName() + ",info.id "+info.id);
                         if(f.isDirectory()){
                             info.itemType = LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY;
                         }else{
@@ -3650,7 +3639,6 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     private void batchInsert(){
         int size = mNewShortcutItems.size();
-        Log.w(TAG,"mNewShortcutItems: size : "+size);
         if(size == 0){
             getModel().forceReload();
         }else{
@@ -3668,7 +3656,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.w(TAG,"uniqueList : "+uniqueList.toString());
                             getModel().forceReload();
                         }
                     });
@@ -3686,11 +3673,9 @@ public class Launcher extends StatefulActivity<LauncherState>
                     if(files !=null){
                          for(File f : files){
                             String name = f.getName();
-                            Log.w(TAG,"move_name : "+name);
                             File fi2 = new File(FileUtils.PATH_ID_DESKTOP +f.getName());
                             if(f.exists()){
                                 boolean isSuccess = f.renameTo(fi2);
-                                Log.w(TAG,"move_name f is move success! isSuccess "+isSuccess);
                             }else{
                                 Log.e(TAG,"move_name f is not exists");
                             }
@@ -3710,7 +3695,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         }, executorService);
 
         future.thenAccept(result -> {
-            Log.w(TAG, "refreshLinuxApps result  "+result );
+            Log.d(TAG, "refreshLinuxApps result  "+result );
             if(1 == result){
                 // getModel().forceReload();           
             }
@@ -3723,7 +3708,6 @@ public class Launcher extends StatefulActivity<LauncherState>
         try{
             mNewShortcutItems = new ArrayList<>();
             List<Point> listIdle = FileUtils.getAllIdlePoints(Launcher.this,getModel().getModelDbController());
-            Log.w(TAG, "refreshDesktopFiles-listIdle: "+listIdle);
 
             listDeskTopLinux = NetUtils.getLinuxDesktopApp();
             //所有桌面Linux应用,android应用
@@ -3821,14 +3805,13 @@ public class Launcher extends StatefulActivity<LauncherState>
                         
                         info.cellY = listIdle.get(countLinuxApp).y;
                         info.cellX = listIdle.get(countLinuxApp).x;
-                        Log.w(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id + ",IsAndroidApp: "+IsAndroidApp + ",countLinuxApp "+countLinuxApp);
+                        Log.d(TAG, "refreshDesktopFiles: addLinuxApps files info.cellX  "+info.cellX + " ,info.cellY: "+info.cellY + " ,info.title: "+info.title  + ",info.id "+info.id + ",IsAndroidApp: "+IsAndroidApp + ",countLinuxApp "+countLinuxApp);
                         
                         // index++;
                         countLinuxApp++;
                         mNewShortcutItems.add(info);
                     }
                 }
-                Log.w(TAG, "refreshDesktopFiles: addLinuxApps countLinuxApp "+countLinuxApp + ", size "+mNewShortcutItems.size());
                 addDesktopFiles(countLinuxApp, listIdle); // 
                 return 1;
             }else{
@@ -3947,7 +3930,6 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void rearray(Context context,String type){
         List<ItemInfo> rearray = getModel().rearray(context,type);
         List<ItemInfo> rearrayList = new ArrayList<>();
-        Log.i(TAG, "bindItems----rearray :  "+rearray.size());
         for (int i = 0 ; i < rearray.size() ; i++){
             ItemInfo info = rearray.get(i);
             rearrayList.add(info);
@@ -4015,7 +3997,7 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void onMessageEvent(MessageEvent event) {
         String method = event.getMethod();
         String message = event.getMessage() ;
-        Log.i(TAG,"1 onMessageEvent message "+message + ",method "+method);
+        Log.d(TAG," onMessageEvent message "+message + ",method "+method);
 
         if(FileUtils.REMOVE_APP.equals(method)){
             //如果是卸载则删除所有
@@ -4075,7 +4057,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                 @Override
                 public void run() {
                     String fileName = packageName + "_fde.desktop";
-                    Log.w(TAG,"addShortCut packageName : "+packageName + ",fileName "+fileName);
                     List<Map<String,Object>> list = DbUtils.queryItemsFromDatabase(getModel().getModelDbController(),fileName);
                     if(list != null){
                         return ;
@@ -4097,7 +4078,6 @@ public class Launcher extends StatefulActivity<LauncherState>
                     info.cellY = listIdle.get(0).y;
                     info.cellX = listIdle.get(0).x;
                     insertOrUpdateFavorites(info);
-                    Log.w(TAG,"addShortCut packageName insertOrUpdateFavorites finish "+info);
                     EventBus.getDefault().post(new MessageEvent(FileUtils.REFRESH_APP, packageName));
                 }
             }).start();

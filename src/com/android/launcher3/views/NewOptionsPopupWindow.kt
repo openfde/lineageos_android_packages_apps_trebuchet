@@ -68,6 +68,18 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
             false
         }
 
+        contentView.findViewById<TextView>(R.id.text_refresh)?.setOnHoverListener { v :View, event: MotionEvent ->
+            when (event.action) {
+                MotionEvent.ACTION_HOVER_ENTER -> {
+                    true
+                }
+                MotionEvent.ACTION_HOVER_EXIT -> {
+                    true
+                }
+                else -> false
+            }
+        }
+
         contentView.findViewById<RelativeLayout>(R.id.layout_system_theme)?.setOnClickListener({
             showPopupWindow(R.array.theme_options,it)
         })
@@ -161,7 +173,8 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
 
         if (v != null && !launcher.isDestroyed && !launcher.isFinishing) {
             popupChildWindow?.elevation = 6f;
-            popupChildWindow?.showAsDropDown(v, 164, -30, Gravity.NO_GRAVITY)
+            val scale = FileUtils.getDpiScale(launcher);
+            popupChildWindow?.showAsDropDown(v, (164*scale).toInt(), -30, Gravity.NO_GRAVITY)
         }
     }
 
