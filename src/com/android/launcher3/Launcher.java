@@ -4001,16 +4001,23 @@ public class Launcher extends StatefulActivity<LauncherState>
 
         if(FileUtils.REMOVE_APP.equals(method)){
             //如果是卸载则删除所有
-            List<Map<String, Object>> result = listDeskTopLinux.stream()
-            .filter(map -> map.get("Path").toString().contains(message))
-            .collect(Collectors.toList());
-             result.forEach(
-                map ->{
-                    String fileName = map.get("FileName").toString();
-                    gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+fileName);
-                }
-            );
-            SPUtils.putUserInfo(Launcher.this,message, "");
+            if(FileUtils.isOpenAppFusion()){
+               List<Map<String, Object>> result = listDeskTopLinux.stream()
+                .filter(map -> map.get("Path").toString().contains(message))
+                .collect(Collectors.toList());
+                result.forEach(
+                    map ->{
+                        String fileName = map.get("FileName").toString();
+                        gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+fileName);
+                    }
+                );
+                SPUtils.putUserInfo(Launcher.this,message, "");     
+            }else{
+                String fileName = message + "_fde.desktop";
+                DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fileName);
+                getModel().forceReload();
+            }
+            
             // 
         // }else if("requestFocus".equals(method)){
         //     mOverviewPanel.requestFocus();
