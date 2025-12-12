@@ -4015,6 +4015,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             }else{
                 String fileName = message + "_fde.desktop";
                 DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fileName);
+                gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_TEMP+""+fileName);
                 getModel().forceReload();
             }
             
