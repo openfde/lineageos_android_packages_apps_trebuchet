@@ -527,7 +527,12 @@ public class ItemClickHandler {
                 .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
-                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+item.title); 
+                         if(FileUtils.isOpenAppFusion()){
+                            launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+item.title); 
+                         }else{
+                            launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_TEMP+""+item.title); 
+                         }
+                        
                     }
                 }).create();
 

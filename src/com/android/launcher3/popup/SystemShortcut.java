@@ -316,7 +316,6 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
         @Override
         public void onClick(View view) {
             dismissTaskMenuView(mTarget);
-            Log.w(" PopupContainerWithArrow--SystemShortcut"," x: "+PopupContainerWithArrow.x  + ",y "+PopupContainerWithArrow.y);
             Launcher launcher = Launcher.getLauncher(view.getContext());
             AlertDialog alertDialog = new AlertDialog.Builder(view.getContext(),R.style.RoundedAlertDialog)
             .setTitle(R.string.desktop_tips)
@@ -325,16 +324,24 @@ public abstract class SystemShortcut<T extends ActivityContext> extends ItemInfo
             .setPositiveButton(R.string.desktop_delete, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
-                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_ANDROID_APP ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
+                    if(mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY || mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT  ||mItemInfo.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
                         launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+mItemInfo.title);
                     }else {
-                        String packageName = "";
+                        String packageName = null;
                         if(mItemInfo.getTargetComponent() != null && mItemInfo.getTargetComponent().getPackageName() !=null){
                             packageName = mItemInfo.getTargetComponent().getPackageName();    
                         }else{
                             packageName = FileUtils.getPackageNameByAppName(view.getContext(),mItemInfo.title.toString());
                         }
-                        launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+""+packageName+"_fde.desktop");
+                        String fileName = mItemInfo.title.toString();
+                        if(packageName != null ){
+                            fileName = packageName+"_fde.desktop";
+                        }
+                        if(FileUtils.isOpenAppFusion()){
+                            launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_DESKTOP+fileName);
+                        }else{
+                            launcher.gotoDocApp(FileUtils.DELETE_FILE,FileUtils.PATH_ID_TEMP+fileName);
+                        }
                     }
                     
                     dismissTaskMenuView(mTarget);
