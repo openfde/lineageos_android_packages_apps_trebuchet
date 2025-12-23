@@ -246,26 +246,27 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
         mDisplay = a.getInteger(R.styleable.BubbleTextView_iconDisplay, DISPLAY_WORKSPACE);
         final int defaultIconSize;
+       
         if (mDisplay == DISPLAY_WORKSPACE) {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, mDeviceProfile.iconTextSizePx);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, mDeviceProfile.iconTextSizePx);
             setCompoundDrawablePadding(mDeviceProfile.iconDrawablePaddingPx);
             defaultIconSize = mDeviceProfile.iconSizePx;
             setCenterVertically(mDeviceProfile.iconCenterVertically);
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         } else if (mDisplay == DISPLAY_ALL_APPS || mDisplay == DISPLAY_PREDICTION_ROW
                 || mDisplay == DISPLAY_SEARCH_RESULT_APP_ROW) {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, mDeviceProfile.allAppsIconTextSizePx);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, mDeviceProfile.iconTextSizePx);
             setCompoundDrawablePadding(mDeviceProfile.allAppsIconDrawablePaddingPx);
             defaultIconSize = mDeviceProfile.allAppsIconSizePx;
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DRAWER_LABELS, true);
             mThemeAllAppsIcons = prefs.getBoolean(KEY_ALLAPPS_THEMED_ICONS, false);
         } else if (mDisplay == DISPLAY_FOLDER) {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, mDeviceProfile.folderChildTextSizePx);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, mDeviceProfile.folderChildTextSizePx);
             setCompoundDrawablePadding(mDeviceProfile.folderChildDrawablePaddingPx);
             defaultIconSize = mDeviceProfile.folderChildIconSizePx;
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         } else if (mDisplay == DISPLAY_SEARCH_RESULT) {
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, mDeviceProfile.allAppsIconTextSizePx);
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, mDeviceProfile.allAppsIconTextSizePx);
             defaultIconSize = getResources().getDimensionPixelSize(R.dimen.search_row_icon_size);
             mShouldShowLabel = prefs.getBoolean(KEY_SHOW_DESKTOP_LABELS, true);
         } else if (mDisplay == DISPLAY_SEARCH_RESULT_SMALL) {
@@ -282,7 +283,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
 
         mIconSize = a.getDimensionPixelSize(R.styleable.BubbleTextView_iconSizeOverride,
-                defaultIconSize);
+                defaultIconSize);    
         a.recycle();
 
         mLongPressHelper = new CheckLongPressHelper(this);
