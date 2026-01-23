@@ -128,7 +128,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private static final int MAX_SEARCH_LOOP_COUNT = 20;
     private static final Character NEW_LINE = '\n';
     private static final String EMPTY = "";
-    private static final float DESKTOP_FONT_SIZE = 14.0f;
+    private static final float DESKTOP_FONT_SIZE = 13.0f;
     private static final StringMatcherUtility.StringMatcher MATCHER =
             StringMatcherUtility.StringMatcher.getInstance();
 

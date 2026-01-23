@@ -56,14 +56,10 @@ class OptionsChildPopupWindow(
             val uiModeManager = launcher.getSystemService(UiModeManager::class.java)
             if(res.getStringArray(R.array.theme_options).get(0).equals(name)){
                 //dark theme
-                Log.w("OptionsChildPopupWindow","set dark theme..........")
                 uiModeManager?.setNightModeActivated(true);
-                Log.w("OptionsChildPopupWindow","set dark theme..........end")
             }else if(res.getStringArray(R.array.theme_options).get(1).equals(name)){
                // light theme
-               Log.w("OptionsChildPopupWindow","set light theme..........")
                uiModeManager?.setNightModeActivated(false);
-               Log.w("OptionsChildPopupWindow","set light theme..........end")
             }else if(res.getStringArray(R.array.sort_options).get(0).equals(name)){
                // sort by name
                launcher.bindWorkspace();   

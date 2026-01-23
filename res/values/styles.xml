@@ -472,6 +472,7 @@
         <item name="android:textColor">#e6000000</item>
         <item name="android:gravity">left|center</item>
         <item name="android:layout_height">32dp</item>
+        <item name="android:background">@color/text_hover_selector</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:paddingLeft">14dp</item>
     </style>
