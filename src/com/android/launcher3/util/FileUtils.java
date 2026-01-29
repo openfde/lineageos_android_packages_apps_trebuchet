@@ -466,7 +466,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
                     String md5 = appInfo.packageName;//getMD5(appInfo.packageName);
 
                     String path = rootPath + md5 + ".png";
-                    Log.i("bella", "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packName: " + appInfo.packageName);
+                    Log.i(TAG, "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packName: " + appInfo.packageName);
                     File file = new File(path);
                     if (!file.exists() && !path.contains(" ")) {
                         drawableToPng(context, icon, path);
@@ -491,7 +491,7 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
                 String md5 = appInfo.packageName;// getMD5(appInfo.packageName);
 
                 String path = rootPath + md5 + ".png";
-                Log.i("bella", "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packageName: " + packageName + ",appName: " + appName);
+                Log.d(TAG, "createAllAndroidIconToLinux md5 : " + md5 + ",path: " + path + ",packageName: " + packageName + ",appName: " + appName);
                 File file = new File(path);
                 if (!file.exists() && !path.contains(" ")) {
                     drawableToPng(context, icon, path);
@@ -659,7 +659,6 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
 
         PackageManager packageManager = context.getPackageManager();
         List<ApplicationInfo> listApps = new ArrayList<>();
-        Log.i("bella", "getAllApp list  size:   " + list.size());
         for (LauncherActivityInfo li : list) {
             String appName = packageManager.getApplicationLabel(li.getApplicationInfo()).toString();
             Drawable icon = packageManager.getApplicationIcon(li.getApplicationInfo());
@@ -911,13 +910,13 @@ public static synchronized Point getMaxPoint(ModelDbController dbController){
             background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             background.draw(canvas);
         } else {
-            Log.i("bella", "createAllAndroidIconToLinux background is null ...  ");
+            Log.d(TAG, "background is null ...  ");
         }
         if (foreground != null) {
             foreground.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             foreground.draw(canvas);
         } else {
-            Log.i("bella", "createAllAndroidIconToLinux  background is null ....  ");
+            Log.d(TAG, "foreground is null ....  ");
         }
 
         return bitmap;

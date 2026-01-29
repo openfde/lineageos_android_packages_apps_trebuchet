@@ -7,6 +7,7 @@ import com.android.launcher3.LauncherSettings;
 import com.android.launcher3.R;
 import android.widget.TextView;
 import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 import com.android.launcher3.util.FileUtils;
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -15,8 +16,14 @@ import com.android.launcher3.Utilities;
 import android.widget.Toast;
 import android.content.Intent;
 import android.provider.Settings;
-import android.view.MotionEvent
-
+import android.graphics.RenderEffect;
+import android.view.MotionEvent;
+import android.graphics.Shader;
+import android.view.ViewParent;
+import android.view.ViewRootImpl;
+import android.graphics.drawable.LayerDrawable;
+import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
+import android.annotation.TargetApi
 
 class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launcher : Launcher) : PopupWindow(contentView, width, height,true) {
     var popupChildWindow: OptionsChildPopupWindow? = null
@@ -25,7 +32,32 @@ class NewOptionsPopupWindow(contentView: View, width: Int, height: Int,val launc
         initView();
     }
 
+    fun setBackgroundBlurRadius(view: View?, radius: Int) {
+        if (view == null) {
+            return
+        }
+        var target : ViewParent ?= view.parent
+        while (target != null){
+            if(target is ViewRootImpl){
+                break
+            }
+            target = target.parent
+        }
+
+        if (target is ViewRootImpl) {
+            val blurDrawable = target.createBackgroundBlurDrawable(radius)
+            blurDrawable.setCornerRadius(12f)
+            val realDrawable = view.background
+            val layerDrawable = LayerDrawable(arrayOf(realDrawable, blurDrawable))
+            view.background = layerDrawable
+            return
+        }
+    }
+
+
     fun initView(){
+
+        setBackgroundBlurRadius(contentView,60);
 
         contentView.findViewById<TextView>(R.id.text_display_properties)?.setOnClickListener({
             launcher.startActivity(
