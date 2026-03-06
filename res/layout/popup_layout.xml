@@ -66,6 +66,7 @@
         <RelativeLayout
             android:id="@+id/layout_system_theme"
             android:layout_width="160dp"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
