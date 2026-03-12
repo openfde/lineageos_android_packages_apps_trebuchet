@@ -2861,8 +2861,15 @@ public class Launcher extends StatefulActivity<LauncherState>
     public void shouldTouchXserver(MotionEvent ev){
         Log.d(TAG, "shouldTouchXserver ev:" + ev);
         if(xServiceBound && mXservice!= null && mXservice.asBinder().isBinderAlive()){
-            //todo 
-            Log.d(TAG, "shouldTouchXserver touch xserver");
+            int action = ev.getAction();
+            int buttonState = ev.getButtonState();
+            float x = ev.getRawX();
+            float y = ev.getRawY();
+            try{
+                mXservice.sendMouseEvent(x, y, buttonState, action == 0, true, 0);
+            }catch(Exception e){
+                Log.e(TAG, "sendMouseEvent fail " + e.getMessage());
+            }
         }
     }
 
