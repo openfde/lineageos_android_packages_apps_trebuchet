@@ -468,6 +468,8 @@ public class Launcher extends StatefulActivity<LauncherState>
     private boolean mIsColdStartupAfterReboot;
 
     private boolean mIsNaturalScrollingEnabled;
+    private boolean xServiceBound = false;
+    private ICmdEntryInterface mXservice = null;
 
     private final SettingsCache.OnChangeListener mNaturalScrollingChangedListener =
             enabled -> mIsNaturalScrollingEnabled = enabled;
@@ -489,6 +491,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         FileUtils.createDesktopDir( "/volumes"+"/"+FileUtils.getLinuxUUID()+FileUtils.getLinuxHomeDir()+"/.local/share/icons/"); 
 
         bindService();
+        bindXserver();
 
         mStartupLatencyLogger = createStartupLatencyLogger(
                 sIsNewProcess
@@ -2854,6 +2857,14 @@ public class Launcher extends StatefulActivity<LauncherState>
                 false);
     }
 
+    public void shouldTouchXserver(MotionEvent ev){
+        Log.d(TAG, "shouldTouchXserver ev:" + ev);
+        if(xServiceBound && mXservice!= null && mXservice.asBinder().isBinderAlive()){
+            //todo 
+            Log.d(TAG, "shouldTouchXserver touch xserver");
+        }
+    }
+
     public void showPopWindowList(float x, float y){
         if(newOptionsPopupWindow.isShowing()){
             newOptionsPopupWindow.dismiss();
@@ -3273,6 +3284,30 @@ public class Launcher extends StatefulActivity<LauncherState>
     //  }
 
     // End of Getters and Setters
+
+    private void bindXserver(){
+        Intent intent = new Intent();
+        intent.setPackage("com.fde.x11");
+        intent.setAction("com.fde.x11.ACTION_X_SERVICE");
+        bindService(intent, mXserviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private ServiceConnection mXserviceConnection  = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mXservice = ICmdEntryInterface.Stub.asInterface(service);
+            xServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mXservice = null;
+            xServiceBound = false;
+        }
+    };
+
+
+
     private void bindService(){
         Intent mIntent = new Intent();
         mIntent.setComponent(new ComponentName("com.android.documentsui", "com.android.documentsui.IpcService"));

@@ -88,6 +88,8 @@ public class WorkspaceTouchListener extends GestureDetector.SimpleOnGestureListe
     @Override
     public boolean onTouch(View view, MotionEvent ev) {
         mGestureDetector.onTouchEvent(ev);
+        Log.w("workspacetouch", "view:" + view + " ev:" + ev);
+        mLauncher.shouldTouchXserver(ev)
 
         int action = ev.getActionMasked();
         boolean handleLongPress = canHandleLongPress();
