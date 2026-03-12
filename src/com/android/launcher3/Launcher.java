@@ -2870,6 +2870,8 @@ public class Launcher extends StatefulActivity<LauncherState>
             }catch(Exception e){
                 Log.e(TAG, "sendMouseEvent fail " + e.getMessage());
             }
+        } else {
+            bindXserver();
         }
     }
 
