@@ -325,6 +325,7 @@ import android.graphics.Point;
 import android.app.ActivityManager;
 import java.nio.file.Paths;
 import java.util.stream.Collectors;
+import com.fde.x11.ICmdEntryInterface;
 
 /**
  * Default launcher application.
