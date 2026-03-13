@@ -2873,7 +2873,7 @@ public class Launcher extends StatefulActivity<LauncherState>
             float x = ev.getRawX();
             float y = ev.getRawY();
             try{
-                if(MotionEvent.ACTION_DOWN){
+                if(action == MotionEvent.ACTION_DOWN){
                     mXservice.sendMouseEvent(x, y, buttonState, true, true, 0);
                     mXservice.sendMouseEvent(x, y, buttonState, false, true, 0);
                 }
