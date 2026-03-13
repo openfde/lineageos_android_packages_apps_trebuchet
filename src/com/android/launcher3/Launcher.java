@@ -2863,10 +2863,20 @@ public class Launcher extends StatefulActivity<LauncherState>
         if(xServiceBound && mXservice!= null && mXservice.asBinder().isBinderAlive()){
             int action = ev.getAction();
             int buttonState = ev.getButtonState();
+            if(buttonState == MotionEvent.BUTTON_PRIMARY){
+                buttonState = 1;
+            } else if(buttonState == MotionEvent.BUTTON_SECONDARY){
+                buttonState = 2;
+            } else if(buttonState == MotionEvent.BUTTON_TERTIARY){
+                buttonState = 3;
+            }
             float x = ev.getRawX();
             float y = ev.getRawY();
             try{
-                mXservice.sendMouseEvent(x, y, buttonState, action == 0, true, 0);
+                if(MotionEvent.ACTION_DOWN){
+                    mXservice.sendMouseEvent(x, y, buttonState, true, true, 0);
+                    mXservice.sendMouseEvent(x, y, buttonState, false, true, 0);
+                }
             }catch(Exception e){
                 Log.e(TAG, "sendMouseEvent fail " + e.getMessage());
             }
