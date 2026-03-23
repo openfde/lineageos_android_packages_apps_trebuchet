@@ -221,9 +221,10 @@ public abstract class DragController<T extends ActivityContext>
                     .start();
         }
         mDragObject.dragView.onDragStart();
-        for (DragListener listener : new ArrayList<>(mListeners)) {
-            listener.onDragStart(mDragObject, mOptions);
-        }
+        
+        // for (DragListener listener : new ArrayList<>(mListeners)) {
+        //     listener.onDragStart(mDragObject, mOptions);
+        // }
     }
 
     protected boolean isItemPinnable() {

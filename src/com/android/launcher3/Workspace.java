@@ -482,7 +482,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         // action for move/add to homescreen.
         // When a accessible drag is started by the folder, we only allow rearranging withing the
         // folder.
-        boolean addNewPage = !(options.isAccessibleDrag && dragObject.dragSource != this);
+        boolean addNewPage =  false;//!(options.isAccessibleDrag && dragObject.dragSource != this);
         if (addNewPage) {
             mDeferRemoveExtraEmptyScreen = false;
             addExtraEmptyScreenOnDrag(dragObject);
@@ -1729,7 +1729,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         if (child instanceof BubbleTextView) {
             BubbleTextView btv = (BubbleTextView) child;
-            if (!dragOptions.isAccessibleDrag) {
+            if (!dragOptions.isAccessibleDrag && CheckLongPressHelper.isMouseRightClick) {
                 dragOptions.preDragCondition = btv.startLongPressAction();
             }
             if (btv.isDisplaySearchResult()) {

@@ -70,7 +70,7 @@ import com.android.launcher3.views.BaseDragLayer;
 /** A custom view for rendering an icon, folder, shortcut or widget during drag-n-drop. */
 public abstract class DragView<T extends Context & ActivityContext> extends FrameLayout {
 
-    public static final int VIEW_ZOOM_DURATION = 150;
+    public static final int VIEW_ZOOM_DURATION = 1;
 
     private final View mContent;
     // The following are only used for rendering mContent directly during drag-n-drop.

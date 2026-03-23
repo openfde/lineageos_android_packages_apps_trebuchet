@@ -42,6 +42,7 @@ public class CheckLongPressHelper {
 
     private boolean mHasPerformedLongPress;
     private boolean mIsInMouseRightClick;
+    public  static boolean  isMouseRightClick = false;
 
     private Runnable mPendingCheckForLongPress;
 
@@ -70,6 +71,7 @@ public class CheckLongPressHelper {
                 // Mouse right click should immediately trigger a long press
                 if (TouchUtil.isMouseRightClickDownOrMove(ev)) {
                     // mIsInMouseRightClick = true;
+                    isMouseRightClick = true;
                     mHasPerformedLongPress = true ;
                     mView.performLongClick();
                     // triggerLongPress();
@@ -134,6 +136,7 @@ public class CheckLongPressHelper {
     public void cancelLongPress() {
         mIsInMouseRightClick = false;
         mHasPerformedLongPress = false;
+        isMouseRightClick = false;
         clearCallbacks();
     }
 
@@ -143,6 +146,7 @@ public class CheckLongPressHelper {
     public boolean hasPerformedLongPress() {
         return mHasPerformedLongPress;
     }
+
 
     private void triggerLongPress() {
         if ((mView.getParent() != null)
