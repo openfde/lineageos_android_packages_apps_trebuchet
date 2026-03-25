@@ -114,7 +114,7 @@ public class ItemClickHandler {
     private static long lastClickTime = 0; 
 
     private static final int WINDOW_DELETE_WIDTH  = 320;
-    private static final int WINDOW_DELETE_HEIGHT  = 180;
+    private static final int WINDOW_DELETE_HEIGHT  = 200;
 
     private static final int WINDOW_RENAME_WIDTH  = 450;
     private static final int WINDOW_RENAME_HEIGHT  = 200;
