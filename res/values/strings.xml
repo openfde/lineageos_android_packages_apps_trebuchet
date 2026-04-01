@@ -496,7 +496,7 @@
     <string name="desktop_new_directory">"New directory"</string>
     <string name="desktop_new_paste">"paste"</string>
     <string name="desktop_tips">"Tips"</string>
-    <string name="app_not_install">"The application is not installed. Do you want to delete this icon? "</string>
+    <string name="app_not_install">"App not installed. Remove this icon? "</string>
     <string name="desktop_delete_tips">"is delete?"</string>
     <string name="desktop_delete">"delete"</string>
     <string name="desktop_cancel">"cancel"</string>
