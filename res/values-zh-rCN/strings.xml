@@ -206,7 +206,7 @@
     <string name="desktop_new_directory">"新建文件夹"</string>
     <string name="desktop_new_paste">"粘贴"</string>
     <string name="desktop_tips">"提示"</string>
-    <string name="app_not_install">"应用未安装,是否删除该图标"</string>
+    <string name="app_not_install">"应用未安装,是否删除图标？"</string>
     <string name="desktop_delete_tips">"是否删除？"</string>
     <string name="desktop_delete">"删除"</string>
     <string name="desktop_cancel">"取消"</string>
