@@ -41,6 +41,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.icu.text.MessageFormat;
@@ -184,6 +185,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private boolean mLayoutHorizontal;
     private final boolean mIsRtl;
     private final int mIconSize;
+
+    private RectF mVisualizeGridRect = new RectF();
+    private Paint mVisualizeGridPaint = new Paint();
 
     @ViewDebug.ExportedProperty(category = "launcher")
     private boolean mHideBadge = false;
@@ -809,6 +813,24 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
      * @param canvas The canvas to draw to.
      */
     protected void drawDotIfNecessary(Canvas canvas) {
+        if (mIcon instanceof FastBitmapDrawable) {
+            float scale = mIcon.getAnimatedScale();
+            if(scale >=1.1f){
+                Rect bounds = mDotParams.iconBounds;
+                Rect iconBounds = new Rect(bounds.right -20, bounds.bottom -24,
+                        bounds.right+100, bounds.bottom+104);
+
+                mVisualizeGridRect.set(iconBounds);
+                mVisualizeGridRect.inset(6, 6);
+                mVisualizeGridPaint.setStyle(Paint.Style.FILL);
+                mVisualizeGridPaint.setColor(0x29000000);
+                canvas.save();
+                canvas.drawRoundRect(mVisualizeGridRect, 8,
+                        8, mVisualizeGridPaint);
+                canvas.restore();
+            }
+        }
+
         if (!mForceHideDot && (hasDot() || mDotParams.scale > 0)) {
             getIconBounds(mDotParams.iconBounds);
             Utilities.scaleRectAboutCenter(mDotParams.iconBounds,

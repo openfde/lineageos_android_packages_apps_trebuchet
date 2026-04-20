@@ -1639,7 +1639,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         View child = cellInfo.cell;
 
         mDragInfo = cellInfo;
-        child.setVisibility(INVISIBLE);
+        // child.setVisibility(INVISIBLE);
 
         if (options.isAccessibleDrag) {
             mDragController.addDragListener(
