@@ -635,16 +635,16 @@ public class CellLayout extends ViewGroup {
                 CellLayoutLayoutParams params = mDragOutlines[i];
                 cellToRect(params.getCellX(), params.getCellY(), params.cellHSpan, params.cellVSpan,
                         mTempOnDrawCellToRect);
-                mVisualizeGridRect.set(mTempOnDrawCellToRect);
-                mVisualizeGridRect.inset(paddingX, paddingY);
+                // mVisualizeGridRect.set(mTempOnDrawCellToRect);
+                // mVisualizeGridRect.inset(paddingX, paddingY);
 
-                // mVisualizeGridPaint.setAlpha(255);
-                mVisualizeGridRect.left -= 16;
-                mVisualizeGridRect.right += 16;
-                mVisualizeGridRect.top -= 32;
-                mVisualizeGridRect.bottom -= 32;
-                mVisualizeGridPaint.setStyle(Paint.Style.FILL);
-                mVisualizeGridPaint.setColor(0x29000000);
+                // // mVisualizeGridPaint.setAlpha(255);
+                // mVisualizeGridRect.left -= 16;
+                // mVisualizeGridRect.right += 16;
+                // mVisualizeGridRect.top -= 32;
+                // mVisualizeGridRect.bottom -= 32;
+                // mVisualizeGridPaint.setStyle(Paint.Style.FILL);
+                // mVisualizeGridPaint.setColor(0x29000000);
                 // mVisualizeGridPaint.setColor(Color.argb((int) (alpha),
                 //         Color.red(mGridColor), Color.green(mGridColor), Color.blue(mGridColor)));
 
