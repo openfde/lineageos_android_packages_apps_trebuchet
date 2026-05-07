@@ -50,6 +50,7 @@
         android:fullBackupContent="@xml/backupscheme"
         android:hardwareAccelerated="true"
         android:debuggable="true"
+        android:directBootAware="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/derived_app_name"
         android:theme="@style/AppTheme"
@@ -76,7 +77,6 @@
             android:resumeWhilePausing="true"
             android:taskAffinity=""
             android:exported="true"
-            android:directBootAware="true"
             android:enabled="true">
             <intent-filter android:priority="-1001">
                 <action android:name="android.intent.action.MAIN" />
