@@ -76,8 +76,9 @@
             android:resumeWhilePausing="true"
             android:taskAffinity=""
             android:exported="true"
+            android:directBootAware="true"
             android:enabled="true">
-            <intent-filter>
+            <intent-filter android:priority="-1001">
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SHOW_WORK_APPS" />
                 <category android:name="android.intent.category.HOME" />
