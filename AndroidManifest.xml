@@ -78,7 +78,7 @@
             android:taskAffinity=""
             android:exported="true"
             android:enabled="true">
-            <intent-filter android:priority="-900">
+            <intent-filter android:priority="-1100">
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.SHOW_WORK_APPS" />
                 <category android:name="android.intent.category.HOME" />
