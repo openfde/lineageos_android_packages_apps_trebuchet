@@ -35,6 +35,7 @@ import com.android.launcher3.Flags;
 import com.android.launcher3.Utilities;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.model.data.ItemInfo;
+import com.android.launcher3.touch.ItemClickHandler;
 import com.android.launcher3.model.data.ItemInfoWithIcon;
 import com.android.launcher3.model.data.WorkspaceItemInfo;
 import com.android.launcher3.util.TouchController;
@@ -43,6 +44,9 @@ import com.android.launcher3.views.ActivityContext;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Predicate;
+import android.util.Log;
+import android.os.Handler;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Class for initiating a drag within a view or across multiple views.
@@ -97,7 +101,8 @@ public abstract class DragController<T extends ActivityContext>
     protected boolean mIsInPreDrag;
 
     private final int DRAG_VIEW_SCALE_DURATION_MS = 500;
-
+    private  float lastX = 0 ;
+    private  float lastY = 0 ;
     /**
      * Interface to receive notifications when a drag starts or stops
      */
@@ -221,7 +226,10 @@ public abstract class DragController<T extends ActivityContext>
                     .start();
         }
         mDragObject.dragView.onDragStart();
-        
+        if(mDragObject !=null && mDragObject.dragView !=null){
+            lastX = mDragObject.dragView.getX();
+            lastY = mDragObject.dragView.getY();
+        }
         // for (DragListener listener : new ArrayList<>(mListeners)) {
         //     listener.onDragStart(mDragObject, mOptions);
         // }
@@ -300,10 +308,15 @@ public abstract class DragController<T extends ActivityContext>
     protected void endDrag() {
         if (isDragging()) {
             mDragDriver = null;
-            boolean isDeferred = false;
+            AtomicBoolean isDeferred = new AtomicBoolean(false);
             if (mDragObject.dragView != null) {
-                isDeferred = mDragObject.deferDragViewCleanupPostAnimation;
-                if (!isDeferred) {
+                View v = mDragObject.dragView;
+                v.setTag(mDragObject.dragInfo);
+                if(lastX == mDragObject.dragView.getX() || lastY == mDragObject.dragView.getY()){
+                   ItemClickHandler.INSTANCE.onClick(v);
+                }
+                isDeferred.set(mDragObject.deferDragViewCleanupPostAnimation);
+                if (!isDeferred.get()) {
                     mDragObject.dragView.remove();
                 } else if (mIsInPreDrag) {
                     animateDragViewToOriginalPosition(null, null, -1);
@@ -312,7 +325,7 @@ public abstract class DragController<T extends ActivityContext>
                 mDragObject.dragView = null;
             }
             // Only end the drag if we are not deferred
-            if (!isDeferred) {
+            if (!isDeferred.get()) {
                 callOnDragEnd();
             }
         }

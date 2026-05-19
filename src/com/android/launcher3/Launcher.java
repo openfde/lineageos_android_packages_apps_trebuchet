@@ -355,6 +355,9 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     public static boolean isTopResumedActivity = true;
 
+    private final Object mFdeInitLock = new Object();
+
+
     /**
      * IntentStarter uses request codes starting with this. This must be greater than all activity
      * request codes used internally.
@@ -479,6 +482,9 @@ public class Launcher extends StatefulActivity<LauncherState>
     private boolean mIsNaturalScrollingEnabled;
     private boolean xServiceBound = false;
     private ICmdEntryInterface mXservice = null;
+
+    private static long lastClickTime = 0;
+    public static long subTime = 0;
 
     private final SettingsCache.OnChangeListener mNaturalScrollingChangedListener =
             enabled -> mIsNaturalScrollingEnabled = enabled;
@@ -685,6 +691,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
+        Log.d(TAG,"onWindowFocusChanged "+hasFocus);
         if(mFocusHandler != null && !hasFocus){
             mFocusHandler.cleanFocus();
         }
@@ -2136,9 +2143,12 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        long currentTime = System.currentTimeMillis();
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mTouchInProgress = true;
+                subTime = currentTime - lastClickTime;
+                lastClickTime = currentTime;
                 break;
             case MotionEvent.ACTION_UP:
                 mLastTouchUpTime = SystemClock.uptimeMillis();
@@ -3694,29 +3704,31 @@ public class Launcher extends StatefulActivity<LauncherState>
     }
 
     private void batchInsert(){
-        int size = mNewShortcutItems.size();
-        if(size == 0){
-            getModel().forceReload();
-        }else{
-            List<WorkspaceItemInfo> uniqueList = mNewShortcutItems.stream()
-                .collect(Collectors.toMap(WorkspaceItemInfo::getTitle, p -> p, (p1, p2) -> p1))
-                .values().stream().collect(Collectors.toList());
+        synchronized (mFdeInitLock) {
+            int size = mNewShortcutItems.size();
+            if(size == 0){
+                getModel().forceReload();
+            }else{
+                List<WorkspaceItemInfo> uniqueList = mNewShortcutItems.stream()
+                    .collect(Collectors.toMap(WorkspaceItemInfo::getTitle, p -> p, (p1, p2) -> p1))
+                    .values().stream().collect(Collectors.toList());
 
-            for(WorkspaceItemInfo shortcut : uniqueList){
-                insertOrUpdateFavorites(shortcut);
-            }
-
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            getModel().forceReload();
-                        }
-                    });
+                for(WorkspaceItemInfo shortcut : uniqueList){
+                    insertOrUpdateFavorites(shortcut);
                 }
-            }, ON_ACTIVITY_RESULT_ANIMATION_DELAY);
+
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                getModel().forceReload();
+                            }
+                        });
+                    }
+                }, ON_ACTIVITY_RESULT_ANIMATION_DELAY);
+            }
         }
     }
 
@@ -4112,7 +4124,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                         FileUtils.setSystemProperty(FileUtils.FDE_INIT_DONE, "1");
                     }
                 }
-            }, ON_ACTIVITY_RESULT_ANIMATION_DELAY * 30);
+            }, ON_ACTIVITY_RESULT_ANIMATION_DELAY * 20);
 
     }
 
