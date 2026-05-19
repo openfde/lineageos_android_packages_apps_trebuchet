@@ -299,6 +299,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setEllipsize(TruncateAt.END);
         setAccessibilityDelegate(mActivity.getAccessibilityDelegate());
         setTextAlpha(1f);
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, 12.f);
     }
 
     @Override
@@ -338,7 +339,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setAlpha(1);
         setScaleY(1);
         setTranslationY(0);
-        setMaxLines(1);
+        setMaxLines(2);
         setVisibility(VISIBLE);
     }
 
@@ -671,6 +672,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     public boolean onTouchEvent(MotionEvent event) {
         // ignore events if they happen in padding area
         FileUtils.setSystemProperty("touch_tool_type","MOUSE");
+        clearFocus();
+        setFocusableInTouchMode(true);
+        requestFocus();
         if (event.getAction() == MotionEvent.ACTION_DOWN
                 && shouldIgnoreTouchDown(event.getX(), event.getY())) {
             return false;
@@ -679,7 +683,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             super.onTouchEvent(event);
             mLongPressHelper.onTouchEvent(event);
             // Keep receiving the rest of the events
-            return true;
+            return super.onTouchEvent(event);
         } else {
             return super.onTouchEvent(event);
         }
@@ -816,18 +820,18 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         if (mIcon instanceof FastBitmapDrawable) {
             float scale = mIcon.getAnimatedScale();
             if(scale >=1.1f){
-                Rect bounds = mDotParams.iconBounds;
-                Rect iconBounds = new Rect(bounds.right -20, bounds.bottom -24,
-                        bounds.right+100, bounds.bottom+104);
+                // Rect bounds = mDotParams.iconBounds;
+                // Rect iconBounds = new Rect(bounds.right -20, bounds.bottom -24,
+                //         bounds.right+100, bounds.bottom+104);
 
-                mVisualizeGridRect.set(iconBounds);
-                mVisualizeGridRect.inset(6, 6);
-                mVisualizeGridPaint.setStyle(Paint.Style.FILL);
-                mVisualizeGridPaint.setColor(0x29000000);
-                canvas.save();
-                canvas.drawRoundRect(mVisualizeGridRect, 8,
-                        8, mVisualizeGridPaint);
-                canvas.restore();
+                // mVisualizeGridRect.set(iconBounds);
+                // mVisualizeGridRect.inset(6, 6);
+                // mVisualizeGridPaint.setStyle(Paint.Style.FILL);
+                // mVisualizeGridPaint.setColor(0x29000000);
+                // canvas.save();
+                // canvas.drawRoundRect(mVisualizeGridRect, 8,
+                //         8, mVisualizeGridPaint);
+                // canvas.restore();
             }
         }
 
@@ -945,8 +949,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     setSingleLine(false);
                     setMaxLines(2);
                 } else {
-                    setSingleLine(true);
-                    setMaxLines(1);
+                    setSingleLine(false);
+                    setMaxLines(2);
                 }
             }
         }

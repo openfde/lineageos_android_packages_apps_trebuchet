@@ -98,6 +98,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.view.KeyEvent;
 import androidx.annotation.Nullable;
+import android.os.Handler;
 /**
  * Class for handling clicks on workspace and all-apps items
  */
@@ -138,43 +139,47 @@ public class ItemClickHandler {
         String toolType = FileUtils.getSystemProperty("touch_tool_type","");
         long currentTime = System.currentTimeMillis();
         long subTime = currentTime - lastClickTime;
-        if ((subTime  < DOUBLE_CLICK_TIME_DELTA) ||( hasFocus && toolType.contains("KEY")) ) {
-            //double click   
-            v.setFocusableInTouchMode(false);
-            v.clearFocus();
-        }else{
-            lastClickTime = currentTime;
-            return ;
-        }
+        final Handler handler = v.getHandler();
+        handler.postDelayed(() -> {
+            if ((Launcher.subTime  < DOUBLE_CLICK_TIME_DELTA) ||( hasFocus && toolType.contains("KEY")) ) {
+                //double click   
+                v.setFocusableInTouchMode(false);
+                v.clearFocus();
+            }else{
+                lastClickTime = currentTime;
+                return ;
+            }
 
-        Object tag = v.getTag();
-        if (tag instanceof WorkspaceItemInfo) {
-            onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
-        } else if (tag instanceof FolderInfo) {
-            if (v instanceof FolderIcon) {
-                onClickFolderIcon(v);
-            } else if (v instanceof AppPairIcon) {
-                onClickAppPairIcon(v);
+            Object tag = v.getTag();
+            if (tag instanceof WorkspaceItemInfo) {
+                onClickAppShortcut(v, (WorkspaceItemInfo) tag, launcher);
+            } else if (tag instanceof FolderInfo) {
+                if (v instanceof FolderIcon) {
+                    onClickFolderIcon(v);
+                } else if (v instanceof AppPairIcon) {
+                    onClickAppPairIcon(v);
+                }
+            } else if (tag instanceof AppInfo) {
+                startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher);
+            } else if (tag instanceof LauncherAppWidgetInfo) {
+                if (v instanceof PendingAppWidgetHostView) {
+                    onClickPendingWidget((PendingAppWidgetHostView) v, launcher);
+                }
+            } else if (tag instanceof ItemClickProxy) {
+                ((ItemClickProxy) tag).onItemClicked(v);
+            } else if (tag instanceof PendingAddShortcutInfo) {
+                CharSequence msg = Utilities.wrapForTts(
+                        launcher.getText(R.string.long_press_shortcut_to_add),
+                        launcher.getString(R.string.long_accessible_way_to_add_shortcut));
+                Snackbar.show(launcher, msg, null);
+            } else if (tag instanceof PendingAddWidgetInfo) {
+                CharSequence msg = Utilities.wrapForTts(
+                        launcher.getText(R.string.long_press_widget_to_add),
+                        launcher.getString(R.string.long_accessible_way_to_add));
+                Snackbar.show(launcher, msg, null);
             }
-        } else if (tag instanceof AppInfo) {
-            startAppShortcutOrInfoActivity(v, (AppInfo) tag, launcher);
-        } else if (tag instanceof LauncherAppWidgetInfo) {
-            if (v instanceof PendingAppWidgetHostView) {
-                onClickPendingWidget((PendingAppWidgetHostView) v, launcher);
-            }
-        } else if (tag instanceof ItemClickProxy) {
-            ((ItemClickProxy) tag).onItemClicked(v);
-        } else if (tag instanceof PendingAddShortcutInfo) {
-            CharSequence msg = Utilities.wrapForTts(
-                    launcher.getText(R.string.long_press_shortcut_to_add),
-                    launcher.getString(R.string.long_accessible_way_to_add_shortcut));
-            Snackbar.show(launcher, msg, null);
-        } else if (tag instanceof PendingAddWidgetInfo) {
-            CharSequence msg = Utilities.wrapForTts(
-                    launcher.getText(R.string.long_press_widget_to_add),
-                    launcher.getString(R.string.long_accessible_way_to_add));
-            Snackbar.show(launcher, msg, null);
-        }
+        }, DOUBLE_CLICK_TIME_DELTA/2);
+        
     }
 
     /**

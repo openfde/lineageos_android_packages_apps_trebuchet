@@ -91,10 +91,10 @@ public class CheckLongPressHelper {
                     break;
                 }
 
-                postCheckForLongPress();
-                if (isStylusButtonPressed(ev)) {
+                // postCheckForLongPress();
+                // if (isStylusButtonPressed(ev)) {
                     triggerLongPress();
-                }
+                // }
                 break;
             }
             case MotionEvent.ACTION_CANCEL:
