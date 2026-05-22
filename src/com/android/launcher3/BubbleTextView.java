@@ -299,7 +299,6 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setEllipsize(TruncateAt.END);
         setAccessibilityDelegate(mActivity.getAccessibilityDelegate());
         setTextAlpha(1f);
-        setTextSize(TypedValue.COMPLEX_UNIT_PX, 12.f);
     }
 
     @Override
