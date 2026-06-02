@@ -312,7 +312,8 @@ public abstract class DragController<T extends ActivityContext>
             if (mDragObject.dragView != null) {
                 View v = mDragObject.dragView;
                 v.setTag(mDragObject.dragInfo);
-                if(lastX == mDragObject.dragView.getX() || lastY == mDragObject.dragView.getY()){
+                Log.d("DragController", "endDrag:  lastX  " +lastX  + " ,lastY  "+lastY + ", mDragObject.dragView.getX() "+mDragObject.dragView.getX());
+                if(Math.abs(lastX - mDragObject.dragView.getX()) < 3.0f || Math.abs(lastY - mDragObject.dragView.getY()) < 3.0f ){
                    ItemClickHandler.INSTANCE.onClick(v);
                 }
                 isDeferred.set(mDragObject.deferDragViewCleanupPostAnimation);

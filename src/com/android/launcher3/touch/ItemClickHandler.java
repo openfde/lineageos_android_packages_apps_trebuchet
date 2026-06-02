@@ -137,8 +137,10 @@ public class ItemClickHandler {
             v.requestFocus();
         }
         String toolType = FileUtils.getSystemProperty("touch_tool_type","");
+
         long currentTime = System.currentTimeMillis();
         long subTime = currentTime - lastClickTime;
+        Log.d(TAG,"onClick  toolType  "+toolType + ",Launcher.subTime  "+Launcher.subTime );
         final Handler handler = v.getHandler();
         handler.postDelayed(() -> {
             if ((Launcher.subTime  < DOUBLE_CLICK_TIME_DELTA) ||( hasFocus && toolType.contains("KEY")) ) {
