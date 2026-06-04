@@ -107,7 +107,7 @@ import android.view.WindowManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-
+import android.text.Layout;
 /**
  * TextView that draws a bubble behind the text. We cannot use a LineBackgroundSpan
  * because we want to make the bubble taller than the text and TextView's clip is
@@ -237,7 +237,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         super(context, attrs, defStyle);
         mActivity = ActivityContext.lookupContext(context);
         FastBitmapDrawable.setFlagHoverEnabled(enableCursorHoverStates());
-        //setGravity(Gravity.CENTER);
+        setGravity(Gravity.CENTER);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.BubbleTextView, defStyle, 0);
@@ -299,6 +299,35 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         setEllipsize(TruncateAt.END);
         setAccessibilityDelegate(mActivity.getAccessibilityDelegate());
         setTextAlpha(1f);
+        setSingleLine(false);
+        setMaxLines(2);
+
+        this.post(() -> {
+            int lineCount = getLineCount();
+            Layout layout = getLayout();
+            if (layout == null) {
+                return;
+            }
+            boolean isEllipsized = layout.getEllipsisCount(lineCount-1) > 0;
+            if(isEllipsized){
+                TextPaint paint = getPaint();
+                float width = getWidth()- getPaddingLeft() - getPaddingRight();
+                String displayText = getText().toString();
+                int total = displayText.length();
+                int endX = total - displayText.lastIndexOf(".") +1 ;
+                int count = paint.breakText(displayText,true, width, null );
+                String strStart = displayText.substring(0,count);
+                String strEnd = displayText.substring(count,count+2)+"..."+displayText.substring(total-endX,total);
+                if(!getText().equals(strStart+ strEnd)){
+                    setText(strStart+ strEnd);
+                }
+                
+            }    
+        });
+    }
+
+    private void setTextContent(String content){
+         setText(content);
     }
 
     @Override
@@ -505,7 +534,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     bitmap = FileUtils.getRoundedCornerBitmap(bitmap,16);
                     iconDrawable = new FastBitmapDrawable(bitmap);
                  }else{
-                    Log.e(TAG,"bellaLauncher applyIconAndLabel  bitmap is null  " );
+                    // Log.e(TAG,"bellaLauncher applyIconAndLabel  bitmap is null  " );
                  }
             } catch (Exception e) {
                 Log.e(TAG,"bellaLauncher applyIconAndLabel e: "+e.toString() );
@@ -514,14 +543,14 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         }else if(info.itemType == LauncherSettings.Favorites.ITEM_TYPE_LINUX_APP){
             bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.mipmap.bg_linux);
             String appTitle = info.title.toString();
-            Log.i(TAG,"bellaLauncher linux applyIconAndLabel1  appTitle: "+appTitle);
+            // Log.i(TAG,"bellaLauncher linux applyIconAndLabel1  appTitle: "+appTitle);
             Map<String,Object> map = Launcher.getDesktopMap(appTitle);
-            Log.i(TAG,"bellaLauncher linux applyIconAndLabel2  map: "+map);
+            // Log.i(TAG,"bellaLauncher linux applyIconAndLabel2  map: "+map);
             String name = "";
             if(map !=null && !map.isEmpty()){
                try{
                 name = map.get("Name").toString().replaceAll(" ", "_");
-                Log.i(TAG,"bellaLauncher linux applyIconAndLabel3  name: "+name);
+                // Log.i(TAG,"bellaLauncher linux applyIconAndLabel3  name: "+name);
                 String exec = map.get("Path").toString().replaceAll(" %F", "").replaceAll(" %u", "").replaceAll(" %U", "").replaceAll(" ", "");
                 int lastIndex = exec.lastIndexOf('/');
                 String key = name ;
@@ -533,14 +562,14 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                 String IconPath = map.get("IconPath").toString();
                 //String IconPath = FileUtils.getSystemProperty(key ,"-1");
 
-                Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key  );
+                // Log.i("bella","FastBitmapDrawable_name : "+name  + " , IconPath "+IconPath + ",key "+key  );
         
                 if("-1".equals(IconPath) ){
 
                 }else{
                     String icon = "/volumes"+"/"+FileUtils.getLinuxUUID() + IconPath;
                     File f = new File(icon);
-                    Log.i("bella","FastBitmapDrawable exists : "+f.exists() + ",icon "+icon);
+                    // Log.i("bella","FastBitmapDrawable exists : "+f.exists() + ",icon "+icon);
                     if(IconPath.contains(".svg") ){
                         bitmap = FileUtils.svgToBitmap(FileUtils.loadSvgFromAssets(getContext(),icon));
                     }else{
@@ -608,11 +637,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     if (appMap != null) {
                         setAppName(label.toString(), appMap);
                     } else {
-                        setText(label);
+                        setTextContent(label.toString());
                     }
                                 
                 }else{
-                    setText(label);
+                    setTextContent(label.toString());
                 }
             }
         }
@@ -626,10 +655,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private void setAppName(String label, Map<String, Object> appMap) {
         String appName = appMap != null && appMap.get("Name") != null ? appMap.get("Name").toString() : label;
         if (isCurrentLanguageEnglish()) {
-            setText(appName);
+            setTextContent(appName);
         } else {
             String chineseName = appMap != null && appMap.get("ZhName") != null ? appMap.get("ZhName").toString() : null;
-            setText(chineseName != null ? chineseName : appName);
+            setTextContent(chineseName != null ? chineseName : appName);
         }
     }
 
@@ -922,8 +951,8 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             Paint.FontMetrics fm = getPaint().getFontMetrics();
             int cellHeightPx = mIconSize + getCompoundDrawablePadding() +
                     (int) Math.ceil(fm.bottom - fm.top);
-            setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
-                    getPaddingBottom());
+            // setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
+            //         getPaddingBottom());
         }
         // Only apply two line for all_apps and device search only if necessary.
         if (shouldUseTwoLine() && (mLastOriginalText != null)) {
@@ -1278,6 +1307,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         return mEnableIconUpdateAnimation;
     }
 
+    int dpToPx(int dp) {
+        return (int) (dp * getContext().getResources().getDisplayMetrics().density + 0.5f);
+    }
+
     protected void applyCompoundDrawables(Drawable icon) {
         if (icon == null) {
             // Icon can be null when we use the BubbleTextView for text only.
@@ -1288,9 +1321,10 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         // same as before.
         mDisableRelayout = mIcon != null;
 
-        icon.setBounds(0, 0, mIconSize, mIconSize);
-
+        int h = dpToPx(10);//mDeviceProfile.cellHeightPx/2;
+        icon.setBounds(0, h, mIconSize,mIconSize+h);
         updateIcon(icon);
+
 
         // If the current icon is a placeholder color, animate its update.
         if (mIcon != null

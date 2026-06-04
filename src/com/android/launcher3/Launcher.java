@@ -330,7 +330,7 @@ import android.view.ViewTreeObserver;
 import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import com.fde.x11.ICmdEntryInterface;
-
+import android.database.ContentObserver;
 /**
  * Default launcher application.
  */
@@ -682,7 +682,18 @@ public class Launcher extends StatefulActivity<LauncherState>
         View popupView = LayoutInflater.from(this).inflate(R.layout.popup_layout, null);
         newOptionsPopupWindow = new NewOptionsPopupWindow(popupView, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,this);
         newOptionsPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+
+
+        getContentResolver().registerContentObserver(Settings.System.getUriFor("dock_scale"), false, mDockObserver);
     }
+
+     private ContentObserver mDockObserver = new ContentObserver(
+            new Handler(Looper.getMainLooper())) {
+        @Override
+        public void onChange(boolean selfChange) {
+            refresh();
+        }
+    };
 
     protected ModelCallbacks createModelCallbacks() {
         return new ModelCallbacks(this);
@@ -1872,6 +1883,7 @@ public class Launcher extends StatefulActivity<LauncherState>
         getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
         mOverlayManager.onActivityDestroyed();
         unbindService(serviceConnection);
+        getContentResolver().unregisterContentObserver(mDockObserver);
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {

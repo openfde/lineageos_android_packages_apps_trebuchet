@@ -134,7 +134,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
+import android.graphics.Color;
+import android.provider.Settings;
 /**
  * The workspace is a wide area with a wallpaper and a finite number of pages.
  * Each page contains a number of icons, folders or widgets the user can
@@ -166,6 +167,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private static final boolean ENFORCE_DRAG_EVENT_ORDER = false;
 
     private static final int ADJACENT_SCREEN_DROP_DURATION = 300;
+
+    private static final int DOCK_HEIGHT = 68;
 
     public static final int DEFAULT_PAGE = 0;
 
@@ -336,8 +339,8 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
 
         Rect padding = grid.workspacePadding;
         //set horizental padding
-        setPadding(30, padding.top, 30, padding.bottom);
-        mInsets.set(insets);
+        // setPadding(30, padding.top, 30, padding.bottom);
+        // mInsets.set(insets);
 
         if (mWorkspaceFadeInAdjacentScreens) {
             // In landscape mode the page spacing is set to the default.
@@ -379,9 +382,14 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
     private void updateCellLayoutMeasures() {
         Rect padding = mLauncher.getDeviceProfile().cellLayoutPaddingPx;
         mWorkspaceScreens.forEach(cellLayout -> {
-            cellLayout.setPadding(padding.left, padding.top, padding.right, padding.bottom);
+            float newVal = Settings.System.getFloat(getContext().getContentResolver(), "dock_scale",1.0f) * DOCK_HEIGHT;
+            cellLayout.setPadding(padding.left, 0, padding.right, dpToPx(Math.round(newVal))  );
             cellLayout.setSpaceBetweenCellLayoutsPx(getPageSpacing() / 4);
         });
+    }
+
+    int dpToPx(int dp) {
+        return (int) (dp * getContext().getResources().getDisplayMetrics().density + 0.5f);
     }
 
     private void updateWorkspaceWidgetsSizes() {

@@ -397,9 +397,10 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
         float iconPixel = iconSize[INDEX_DEFAULT] * density;
         int heightPixels = metrics.heightPixels;
         int widthPixels = metrics.widthPixels;
-        numRows = (int) ((heightPixels * 0.5) / iconPixel);
+        double row = (heightPixels * 0.5) / iconPixel ;
+        numRows = (int)Math.floor(row);
         numColumns = (int) ((widthPixels * 0.5) / iconPixel);
-        Log.w(TAG, "numRows=" + numRows + "  numColumns=" + numColumns);        
+        Log.w(TAG, "initGrid numRows=" + numRows +",row "+row+ ",  numColumns=" + numColumns + ",iconPixel "+iconPixel + ",heightPixels "+heightPixels + ",density "+density);        
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
         dbFile = closestProfile.dbFile;
         defaultLayoutId = closestProfile.defaultLayoutId;
