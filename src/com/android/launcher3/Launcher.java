@@ -865,8 +865,10 @@ public class Launcher extends StatefulActivity<LauncherState>
 
     @Override
     public void onIdpChanged(boolean modelPropertiesChanged) {
-        onHandleConfigurationChanged();
+         DbUtils.deleteAllDataFromDatabaseAsync(getModel().getModelDbController());
+         onHandleConfigurationChanged();
     }
+
 
     @Override
     protected void onHandleConfigurationChanged() {
@@ -882,7 +884,7 @@ public class Launcher extends StatefulActivity<LauncherState>
 
             // Calling onSaveInstanceState ensures that static cache used by listWidgets is
             // initialized properly.
-            onSaveInstanceState(new Bundle());
+            // onSaveInstanceState(new Bundle());
             mModel.rebindCallbacks();
         } finally {
             Trace.endSection();
@@ -3606,7 +3608,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     String fName = mp.get("title").toString();
                     File f = new File(documentId + fName);
                     if(!f.exists()){
-                        Log.d(TAG, "refreshDesktopFiles file not exists fName  "+fName );
+                        // Log.d(TAG, "refreshDesktopFiles file not exists fName  "+fName );
                         // mBgDataModel.removeItem(mContext, item);
                          DbUtils.deleteTitleFromDatabase(getModel().getModelDbController(),fName);   
                     }
@@ -3624,7 +3626,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     String fTitle = f.getName().toLowerCase() ;
                     //如果被android应用被卸载了则删除desktop文件,但新版本去掉此逻辑
                     if(fTitle.contains(".desktop")) {
-                    //     Log.d(TAG, "refreshDesktopFiles: not show this file  ,fname: "+f.getName() );
+                        // Log.d(TAG, "refreshDesktopFiles: not show this file  ,fname: "+f.getName() );
                     //     if(fTitle.contains("_fde.desktop")){
                     //         //如果是android应用
                     //       try{
@@ -3676,7 +3678,7 @@ public class Launcher extends StatefulActivity<LauncherState>
                     } 
                     
                     if(!found){
-                        Log.d(TAG, "refreshDesktopFiles: listIcons is null "+files.length  +" ,fname: "+f.getName());
+                        // Log.d(TAG, "refreshDesktopFiles: listIcons is null "+files.length  +" ,fname: "+f.getName());
                         WorkspaceItemInfo info = new WorkspaceItemInfo();
                       //  Point point = FileUtils.findNextFreePoint(this);
                         info.mComponentName = new ComponentName("com.android.documentsui","com.android.documentsui.LauncherActivity");;

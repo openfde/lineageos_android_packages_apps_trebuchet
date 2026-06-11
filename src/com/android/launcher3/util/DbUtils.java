@@ -204,7 +204,6 @@ public class DbUtils {
     public static synchronized  List<Map<String,Object>> queryDesktopTextFilesFromDatabase(ModelDbController dbController){
         String[] selectionArgs = {String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DIRECTORY),String.valueOf(LauncherSettings.Favorites.ITEM_TYPE_DOCUMENT)};
         String selection = "itemType" + " IN (" + TextUtils.join(",", Collections.nCopies(selectionArgs.length, "?")) + ")";
-        Log.i(TAG, "selection "+selection + ",selectionArgs:  "+selectionArgs);
         List<Map<String,Object>> list = null;
     
         Cursor cursor  =  dbController.query(LauncherSettings.Favorites.TABLE_NAME, null, selection, selectionArgs, null);
@@ -360,6 +359,12 @@ public class DbUtils {
                 Log.i(TAG, "deleteAllAndroidAppFromDatabase is res: "+res);
             }
         }).start();
+    }
+
+
+    public static void deleteAllDataFromDatabaseAsync(ModelDbController dbController) {
+        int res = dbController.delete(LauncherSettings.Favorites.TABLE_NAME, null, null);
+        Log.i(TAG, "deleteAllDataFromDatabase is res: "+res);
     }
 
     public static void deleteTitleFromDatabase(ModelDbController dbController,String title){
