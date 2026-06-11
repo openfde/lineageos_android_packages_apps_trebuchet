@@ -308,10 +308,9 @@ public abstract class BaseLauncherBinder {
 
             // Bind workspace screens
             executeCallbacksTask(c -> c.bindScreens(mOrderedScreenIds), mUiExecutor);
-
             // Load items on the current page.
             bindItemsInChunks(currentWorkspaceItems, ITEMS_CHUNK, mUiExecutor);
-            bindItemsInChunks(currentAppWidgets, 1, mUiExecutor);
+            // bindItemsInChunks(currentAppWidgets, 1, mUiExecutor);
             if (!FeatureFlags.CHANGE_MODEL_DELEGATE_LOADING_ORDER.get()) {
                 mExtraItems.forEach(item ->
                         executeCallbacksTask(c -> c.bindExtraContainerItems(item), mUiExecutor));
@@ -353,7 +352,7 @@ public abstract class BaseLauncherBinder {
                 IntSet currentScreenIds,
                 Executor pendingExecutor) {
             bindItemsInChunks(otherWorkspaceItems, ITEMS_CHUNK, pendingExecutor);
-            bindItemsInChunks(otherAppWidgets, 1, pendingExecutor);
+            // bindItemsInChunks(otherAppWidgets, 1, pendingExecutor);
 
             StringCache cacheClone = mBgDataModel.stringCache.clone();
             executeCallbacksTask(c -> c.bindStringCache(cacheClone), pendingExecutor);

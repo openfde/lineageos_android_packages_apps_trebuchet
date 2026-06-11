@@ -280,56 +280,56 @@ public class LoaderTask implements Runnable {
                     mApp.getModel()::onPackageIconsUpdated);
             logASplit("update icon cache");
 
-            verifyNotStopped();
-            logASplit("save shortcuts in icon cache");
-            updateHandler.updateIcons(allShortcuts, new ShortcutCachingLogic(),
-                    mApp.getModel()::onPackageIconsUpdated);
+            // verifyNotStopped();
+            // logASplit("save shortcuts in icon cache");
+            // updateHandler.updateIcons(allShortcuts, new ShortcutCachingLogic(),
+            //         mApp.getModel()::onPackageIconsUpdated);
 
-            // Take a break
-            waitForIdle();
-            logASplit("step 2 complete");
-            verifyNotStopped();
+            // // Take a break
+            // waitForIdle();
+            // logASplit("step 2 complete");
+            // verifyNotStopped();
 
-            // third step
-            List<ShortcutInfo> allDeepShortcuts = loadDeepShortcuts();
-            logASplit("loadDeepShortcuts");
+            // // third step
+            // List<ShortcutInfo> allDeepShortcuts = loadDeepShortcuts();
+            // logASplit("loadDeepShortcuts");
 
-            verifyNotStopped();
-            mLauncherBinder.bindDeepShortcuts();
-            logASplit("bindDeepShortcuts");
+            // verifyNotStopped();
+            // mLauncherBinder.bindDeepShortcuts();
+            // logASplit("bindDeepShortcuts");
 
-            verifyNotStopped();
-            logASplit("save deep shortcuts in icon cache");
-            updateHandler.updateIcons(allDeepShortcuts,
-                    new ShortcutCachingLogic(), (pkgs, user) -> { });
+            // verifyNotStopped();
+            // logASplit("save deep shortcuts in icon cache");
+            // updateHandler.updateIcons(allDeepShortcuts,
+            //         new ShortcutCachingLogic(), (pkgs, user) -> { });
 
-            // Take a break
-            waitForIdle();
-            logASplit("step 3 complete");
-            verifyNotStopped();
+            // // Take a break
+            // waitForIdle();
+            // logASplit("step 3 complete");
+            // verifyNotStopped();
 
-            // fourth step
-            List<ComponentWithLabelAndIcon> allWidgetsList =
-                    mBgDataModel.widgetsModel.update(mApp, null);
-            logASplit("load widgets");
+            // // fourth step
+            // List<ComponentWithLabelAndIcon> allWidgetsList =
+            //         mBgDataModel.widgetsModel.update(mApp, null);
+            // logASplit("load widgets");
 
-            verifyNotStopped();
-            mLauncherBinder.bindWidgets();
-            logASplit("bindWidgets");
-            verifyNotStopped();
-            LauncherPrefs prefs = LauncherPrefs.get(mApp.getContext());
+            // verifyNotStopped();
+            // mLauncherBinder.bindWidgets();
+            // logASplit("bindWidgets");
+            // verifyNotStopped();
+            // LauncherPrefs prefs = LauncherPrefs.get(mApp.getContext());
 
-            if (SMARTSPACE_AS_A_WIDGET.get() && prefs.get(SHOULD_SHOW_SMARTSPACE)) {
-                mLauncherBinder.bindSmartspaceWidget();
-                // Turn off pref.
-                prefs.putSync(SHOULD_SHOW_SMARTSPACE.to(false));
-                logASplit("bindSmartspaceWidget");
-                verifyNotStopped();
-            } else if (!SMARTSPACE_AS_A_WIDGET.get() && WIDGET_ON_FIRST_SCREEN
-                    && !prefs.get(LauncherPrefs.SHOULD_SHOW_SMARTSPACE)) {
-                // Turn on pref.
-                prefs.putSync(SHOULD_SHOW_SMARTSPACE.to(true));
-            }
+            // if (SMARTSPACE_AS_A_WIDGET.get() && prefs.get(SHOULD_SHOW_SMARTSPACE)) {
+            //     mLauncherBinder.bindSmartspaceWidget();
+            //     // Turn off pref.
+            //     prefs.putSync(SHOULD_SHOW_SMARTSPACE.to(false));
+            //     logASplit("bindSmartspaceWidget");
+            //     verifyNotStopped();
+            // } else if (!SMARTSPACE_AS_A_WIDGET.get() && WIDGET_ON_FIRST_SCREEN
+            //         && !prefs.get(LauncherPrefs.SHOULD_SHOW_SMARTSPACE)) {
+            //     // Turn on pref.
+            //     prefs.putSync(SHOULD_SHOW_SMARTSPACE.to(true));
+            // }
 
             if (FeatureFlags.CHANGE_MODEL_DELEGATE_LOADING_ORDER.get()) {
                 mModelDelegate.loadAndBindOtherItems(mLauncherBinder.mCallbacksList);
@@ -337,13 +337,13 @@ public class LoaderTask implements Runnable {
                 verifyNotStopped();
             }
 
-            updateHandler.updateIcons(allWidgetsList,
-                    new ComponentWithIconCachingLogic(mApp.getContext(), true),
-                    mApp.getModel()::onWidgetLabelsUpdated);
-            logASplit("save widgets in icon cache");
+            // updateHandler.updateIcons(allWidgetsList,
+            //         new ComponentWithIconCachingLogic(mApp.getContext(), true),
+            //         mApp.getModel()::onWidgetLabelsUpdated);
+            // logASplit("save widgets in icon cache");
 
-            // fifth step
-            loadFolderNames();
+            // // fifth step
+            // loadFolderNames();
 
             verifyNotStopped();
             updateHandler.finish();

@@ -75,7 +75,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import android.view.WindowManager;
+import android.view.WindowMetrics;
+import android.graphics.Point;
+import android.graphics.Rect;
 public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener {
 
     public static final String TAG = "IDP";
@@ -391,15 +394,20 @@ public class InvariantDeviceProfile implements OnSharedPreferenceChangeListener 
             @DeviceType int deviceType) {
         iconSize = displayOption.iconSizes;
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        // DisplayMetrics metrics = displayInfo.metrics;
-        GridOption closestProfile = displayOption.grid;
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
+        Rect boundsRect = windowMetrics.getBounds();
         float density = metrics.density;
+        float width = boundsRect.width();
+        float height = boundsRect.height()- (68 * density) ;
+        GridOption closestProfile = displayOption.grid;
         float iconPixel = iconSize[INDEX_DEFAULT] * density;
         int heightPixels = metrics.heightPixels;
         int widthPixels = metrics.widthPixels;
-        numRows = (int) ((heightPixels * 0.5) / iconPixel);
+        double row = (height * 0.5) / iconPixel ;
+        numRows = (int)Math.floor(row);
         numColumns = (int) ((widthPixels * 0.5) / iconPixel);
-        Log.w(TAG, "numRows=" + numRows + "  numColumns=" + numColumns);        
+        Log.w(TAG, "initGrid numRows=" + numRows +",row "+row+ ",  numColumns=" + numColumns + ",iconPixel "+iconPixel+",width: "+width +",height: "+height+"，widthPixels： "+widthPixels +",heightPixels "+heightPixels + ",density "+density);        
         numSearchContainerColumns = closestProfile.numSearchContainerColumns;
         dbFile = closestProfile.dbFile;
         defaultLayoutId = closestProfile.defaultLayoutId;
