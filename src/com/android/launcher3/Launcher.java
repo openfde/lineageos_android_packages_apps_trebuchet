@@ -4128,12 +4128,16 @@ public class Launcher extends StatefulActivity<LauncherState>
                 public void run() {
                    if("0".equals(FileUtils.getSystemProperty(FileUtils.FDE_INIT_DONE, "0"))){
                         String packageName = getString(R.string.download_package_name);
-                        FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
-                        FileUtils.createLinuxDesktopFile(Launcher.this,getString(R.string.download_name),packageName);
-                        if(FileUtils.isOpenAppFusion()){
+                        boolean isAppInstalled  = FileUtils.isAppInstalled(Launcher.this,packageName);
+                        if(isAppInstalled){
+                            FileUtils.createAllAndroidIconToLinux(Launcher.this,packageName);
+                            FileUtils.createLinuxDesktopFile(Launcher.this,getString(R.string.download_name),packageName);
+                            if(FileUtils.isOpenAppFusion()){
 
-                        }else{
-                            addShortCut(packageName);
+                            }else{
+                                addShortCut(packageName);
+                            }
+                           
                         }
                         FileUtils.setSystemProperty(FileUtils.FDE_INIT_DONE, "1");
                     }
