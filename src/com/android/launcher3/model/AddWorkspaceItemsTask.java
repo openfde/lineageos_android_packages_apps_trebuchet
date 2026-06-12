@@ -216,7 +216,12 @@ public class AddWorkspaceItemsTask extends BaseModelUpdateTask {
                 addedItemsFinal.add(itemInfo);
 
                 FileUtils.createAllAndroidIconToLinux(app.getContext(),packageName);
-                FileUtils.createLinuxDesktopFile(app.getContext(),itemInfo.title.toString(),packageName);
+                if(itemInfo !=null && itemInfo.title !=null){
+                     FileUtils.createLinuxDesktopFile(app.getContext(),itemInfo.title.toString(),packageName);
+                }else{
+                    FileUtils.createLinuxDesktopFile(app.getContext(),packageName,packageName);
+                }
+               
                 if(FileUtils.isOpenAppFusion()){
                     
                 }else{
