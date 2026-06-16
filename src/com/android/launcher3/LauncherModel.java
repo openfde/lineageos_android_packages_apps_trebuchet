@@ -394,7 +394,18 @@ public class LauncherModel implements InstallSessionTracker.Callback {
                 if("title".equals(type)){
                     Collections.sort(workspaceItems, (p1, p2) -> p1.title.toString().compareTo(p2.title.toString()));
                 }else if("itemType".equals(type)){
-                    Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.itemType, p2.itemType));
+                    //Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.itemType, p2.itemType));
+                    Collections.sort(workspaceItems, (p1, p2) -> {
+                        int itemTypeCompare = Integer.compare(p1.itemType, p2.itemType);
+                        if (itemTypeCompare != 0) {
+                            return itemTypeCompare;
+                        }
+                        String title1 = p1.title != null ? p1.title.toString() : "";
+                        String title2 = p2.title != null ? p2.title.toString() : "";
+                        String ext1 = getFileExtension(title1);
+                        String ext2 = getFileExtension(title2);
+                        return ext1.compareTo(ext2);
+                    });
                 }else{
                     Collections.sort(workspaceItems, (p1, p2) -> Integer.compare(p1.id, p2.id));
                 }
@@ -414,6 +425,17 @@ public class LauncherModel implements InstallSessionTracker.Callback {
             }
         }
         return null;
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return "";
+        }
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
+            return fileName.substring(lastDotIndex + 1).toLowerCase();
+        }
+        return "";
     }
 
     /**
