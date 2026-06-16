@@ -318,6 +318,7 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
                     int endX = total - displayText.lastIndexOf(".") +1 ;
                     int count = paint.breakText(displayText,true, width, null );
                     String strStart = displayText.substring(0,count);
+                    endX = Math.min(endX, total);
                     String strEnd = displayText.substring(count,count+2)+"..."+displayText.substring(total-endX,total);
                     if(!getText().equals(strStart+ strEnd)){
                         setText(strStart+ strEnd);
