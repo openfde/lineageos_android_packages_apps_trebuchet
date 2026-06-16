@@ -310,16 +310,20 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
             }
             boolean isEllipsized = layout.getEllipsisCount(lineCount-1) > 0;
             if(isEllipsized){
-                TextPaint paint = getPaint();
-                float width = getWidth()- getPaddingLeft() - getPaddingRight();
-                String displayText = getText().toString();
-                int total = displayText.length();
-                int endX = total - displayText.lastIndexOf(".") +1 ;
-                int count = paint.breakText(displayText,true, width, null );
-                String strStart = displayText.substring(0,count);
-                String strEnd = displayText.substring(count,count+2)+"..."+displayText.substring(total-endX,total);
-                if(!getText().equals(strStart+ strEnd)){
-                    setText(strStart+ strEnd);
+                try{
+                    TextPaint paint = getPaint();
+                    float width = getWidth()- getPaddingLeft() - getPaddingRight();
+                    String displayText = getText().toString();
+                    int total = displayText.length();
+                    int endX = total - displayText.lastIndexOf(".") +1 ;
+                    int count = paint.breakText(displayText,true, width, null );
+                    String strStart = displayText.substring(0,count);
+                    String strEnd = displayText.substring(count,count+2)+"..."+displayText.substring(total-endX,total);
+                    if(!getText().equals(strStart+ strEnd)){
+                        setText(strStart+ strEnd);
+                    }
+                }catch(Exception e) {
+                    e.printStackTrace();
                 }
                 
             }    
