@@ -3521,12 +3521,12 @@ public class Launcher extends StatefulActivity<LauncherState>
                 } else {
                     intent.setDataAndType(uri, "application/*");
                 }
-            } else if (mimeType.contains("image")) {
+            }else if (mimeType.contains("image")) {
                 intent.setDataAndType(uri, "image/*");
             }else if(mimeType.contains("text") || mimeType.contains("plain") || mimeType.contains("json")){
                 intent.setDataAndType(uri, "text/plain");
             }else{
-                intent.setDataAndType(uri, "application/*");
+                intent.setDataAndType(uri, mimeType);
             }
             intent.putExtra("docTitle",params);
             int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_SINGLE_TOP;
