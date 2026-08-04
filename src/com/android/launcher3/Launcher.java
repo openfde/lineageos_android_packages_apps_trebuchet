@@ -1861,31 +1861,36 @@ public class Launcher extends StatefulActivity<LauncherState>
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ACTIVITY_TRACKER.onActivityDestroyed(this);
-        EventBus.getDefault().unregister(this);
-        SettingsCache.INSTANCE.get(this).unregister(TOUCHPAD_NATURAL_SCROLLING,
-                mNaturalScrollingChangedListener);
-        ScreenOnTracker.INSTANCE.get(this).removeListener(mScreenOnListener);
-        mWorkspace.removeFolderListeners();
-        PluginManagerWrapper.INSTANCE.get(this).removePluginListener(this);
+        try {
+            ACTIVITY_TRACKER.onActivityDestroyed(this);
+            EventBus.getDefault().unregister(this);
+            SettingsCache.INSTANCE.get(this).unregister(TOUCHPAD_NATURAL_SCROLLING,
+                    mNaturalScrollingChangedListener);
+            ScreenOnTracker.INSTANCE.get(this).removeListener(mScreenOnListener);
+            mWorkspace.removeFolderListeners();
+            PluginManagerWrapper.INSTANCE.get(this).removePluginListener(this);
 
-        mModel.removeCallbacks(this);
-        mRotationHelper.destroy();
+            mModel.removeCallbacks(this);
+            mRotationHelper.destroy();
 
-        mAppWidgetHolder.stopListening();
-        mAppWidgetHolder.destroy();
+            mAppWidgetHolder.stopListening();
+            mAppWidgetHolder.destroy();
 
-        TextKeyListener.getInstance().release();
-        mModelCallbacks.clearPendingBinds();
-        LauncherAppState.getIDP(this).removeOnChangeListener(this);
-        // if Launcher activity is recreated, {@link Window} including {@link ViewTreeObserver}
-        // could be preserved in {@link ActivityThread#scheduleRelaunchActivity(IBinder)} if the
-        // previous activity has not stopped, which could happen when wallpaper detects a color
-        // changes while launcher is still loading.
-        getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
-        mOverlayManager.onActivityDestroyed();
-        unbindService(serviceConnection);
-        getContentResolver().unregisterContentObserver(mDockObserver);
+            TextKeyListener.getInstance().release();
+            mModelCallbacks.clearPendingBinds();
+            LauncherAppState.getIDP(this).removeOnChangeListener(this);
+            // if Launcher activity is recreated, {@link Window} including {@link ViewTreeObserver}
+            // could be preserved in {@link ActivityThread#scheduleRelaunchActivity(IBinder)} if the
+            // previous activity has not stopped, which could happen when wallpaper detects a color
+            // changes while launcher is still loading.
+            getRootView().getViewTreeObserver().removeOnPreDrawListener(mOnInitialBindListener);
+            mOverlayManager.onActivityDestroyed();
+            unbindService(serviceConnection);
+            unbindService(mXserviceConnection);
+            getContentResolver().unregisterContentObserver(mDockObserver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public LauncherAccessibilityDelegate getAccessibilityDelegate() {
