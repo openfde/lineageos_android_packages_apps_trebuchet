@@ -190,7 +190,7 @@ public class LauncherModel implements InstallSessionTracker.Callback {
         for (Callbacks cb : getCallbacks()) {
             cb.preAddApps();
         }
-        enqueueModelUpdateTask(new AddWorkspaceItemsTask(itemList));
+        // enqueueModelUpdateTask(new AddWorkspaceItemsTask(itemList));
     }
 
     @NonNull
